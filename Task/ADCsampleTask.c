@@ -22,8 +22,24 @@ const osThreadAttr_t AdcOutputTask_attributes = {
 };
 
 
+/* ADC输出模式枚举 */
+typedef enum {
+    ADC_OUTPUT_MODE_DEBUG = 0,      // 调试模式 - 原有的详细输出
+    ADC_OUTPUT_MODE_OSCILLOSCOPE,   // 示波器模式 - 带前缀输出波形数据
+    ADC_OUTPUT_MODE_RAW_DATA,       // 原始数据模式 - 不带前缀输出波形数据
+    ADC_OUTPUT_MODE_MAX
+} adc_output_mode_t;
+
 /* 全局ADC系统数据 */
 adc_system_data_t g_adc_system = {0};
+
+/* ADC输出模式控制 */
+// static adc_output_mode_t g_adc_output_mode = ADC_OUTPUT_MODE_DEBUG;
+static adc_output_mode_t g_adc_output_mode = ADC_OUTPUT_MODE_OSCILLOSCOPE;
+
+/* 示波器模式配置 */
+#define OSCILLOSCOPE_BUFFER_DEPTH  1024  // 存储深度
+static uint32_t g_oscilloscope_sample_count = 0;
 
 
 /* ADC通道配置表 */
@@ -175,15 +191,14 @@ void AdcSamplingTask(void *argument)
  * 
  * 功能描述：
  * - 从ADC队列接收采样数据
- * - 格式化输出通道数据和系统状态
- * - 监控系统运行状态
+ * - 根据输出模式选择不同的输出格式
+ * - 支持调试模式和示波器模式
  */
 void AdcOutputTask(void *argument)
 {
     /* USER CODE BEGIN AdcOutputTask */
     adc_system_data_t received_adc_data;
     static uint32_t last_sample_count = 0;
-    static uint8_t status_counter = 0;
     
     printf("[%s] ADC Output Task Started\r\n", osThreadGetName(osThreadGetId()));
     
@@ -196,6 +211,24 @@ void AdcOutputTask(void *argument)
     }
     
     printf("[%s] Ready to receive ADC data from queue\r\n", osThreadGetName(osThreadGetId()));
+    
+    // 输出当前模式
+    const char* mode_str;
+    switch (g_adc_output_mode) {
+        case ADC_OUTPUT_MODE_DEBUG:
+            mode_str = "DEBUG";
+            break;
+        case ADC_OUTPUT_MODE_OSCILLOSCOPE:
+            mode_str = "OSCILLOSCOPE";
+            break;
+        case ADC_OUTPUT_MODE_RAW_DATA:
+            mode_str = "RAW_DATA";
+            break;
+        default:
+            mode_str = "UNKNOWN";
+            break;
+    }
+    printf("[%s] Current output mode: %s\r\n", osThreadGetName(osThreadGetId()), mode_str);
     
     /* Infinite loop */
     for(;;)
@@ -213,46 +246,24 @@ void AdcOutputTask(void *argument)
             if (received_adc_data.total_sample_count != last_sample_count) {
                 last_sample_count = received_adc_data.total_sample_count;
                 
-                // 每100次采样输出一次详细数据
-                if ((received_adc_data.total_sample_count % 100) == 0) {
-                    printf("\r\n=== ADC Sample #%lu ===\r\n", received_adc_data.total_sample_count);
-                    printf("Timestamp: %lu ms\r\n", osKernelGetTickCount());
-                    
-                    for (uint8_t i = 0; i < ADC_CHANNEL_COUNT; i++) {
-                        const adc_channel_data_t *ch_data = &received_adc_data.channels[i];
-                        const char* status_str = ch_data->window_full ? "READY" : "FILLING";
+                // 根据输出模式选择不同的处理方式
+                switch (g_adc_output_mode) {
+                    case ADC_OUTPUT_MODE_DEBUG:
+                        ADC_ProcessDebugOutput(&received_adc_data);
+                        break;
                         
-                        printf("CH%d[%s]: Raw=%5d, Voltage=%6.3fV, Samples=%lu, %s\r\n",
-                               i, 
-                               adc_channel_configs[i].name,
-                               ch_data->raw_average,
-                               ch_data->voltage_average,
-                               ch_data->sample_count,
-                               status_str);
-                    }
-                    
-                    printf("Errors: %d, Active: %s\r\n", 
-                           received_adc_data.error_count,
-                           received_adc_data.sampling_active ? "YES" : "NO");
-                    printf("========================\r\n\n");
-                }
-                
-                // 每1000次采样输出系统状态
-                if ((received_adc_data.total_sample_count % 1000) == 0) {
-                    printf("\r\n=== ADC System Status ===\r\n");
-                    printf("Total Samples: %lu\r\n", received_adc_data.total_sample_count);
-                    printf("Error Count: %d\r\n", received_adc_data.error_count);
-                    printf("Error Rate: %.2f%%\r\n", 
-                           (float)received_adc_data.error_count / received_adc_data.total_sample_count * 100.0f);
-                    printf("Free Heap: %lu bytes\r\n", xPortGetFreeHeapSize());
-                    printf("System Uptime: %lu seconds\r\n", osKernelGetTickCount() / 1000);
-                    
-                    // 检查队列状态
-                    uint32_t queue_count = osMessageQueueGetCount(ADCQueueHandle);
-                    uint32_t queue_space = osMessageQueueGetSpace(ADCQueueHandle);
-                    printf("Queue Status: %lu/%lu (used/total)\r\n", 
-                           queue_count, queue_count + queue_space);
-                    printf("=========================\r\n\n");
+                    case ADC_OUTPUT_MODE_OSCILLOSCOPE:
+                        ADC_ProcessOscilloscopeOutput(&received_adc_data);
+                        break;
+                        
+                    case ADC_OUTPUT_MODE_RAW_DATA:
+                        ADC_ProcessRawDataOutput(&received_adc_data);
+                        break;
+                        
+                    default:
+                        // 默认使用调试模式
+                        ADC_ProcessDebugOutput(&received_adc_data);
+                        break;
                 }
             }
             
@@ -482,4 +493,184 @@ uint32_t ADC_GetChannelHAL(uint8_t channel_index)
         return 0;
     }
     return adc_channel_configs[channel_index].channel;
+}
+
+/**
+ * @brief 处理调试模式输出
+ * @param data ADC系统数据指针
+ * @retval None
+ */
+void ADC_ProcessDebugOutput(const adc_system_data_t *data)
+{
+    // 每100次采样输出一次详细数据
+    if ((data->total_sample_count % 100) == 0) {
+        printf("\r\n=== ADC Sample #%lu ===\r\n", data->total_sample_count);
+        printf("Timestamp: %lu ms\r\n", osKernelGetTickCount());
+        
+        for (uint8_t i = 0; i < ADC_CHANNEL_COUNT; i++) {
+            const adc_channel_data_t *ch_data = &data->channels[i];
+            const char* status_str = ch_data->window_full ? "READY" : "FILLING";
+            
+            printf("CH%d[%s]: Raw=%5d, Voltage=%6.3fV, Samples=%lu, %s\r\n",
+                   i, 
+                   adc_channel_configs[i].name,
+                   ch_data->raw_average,
+                   ch_data->voltage_average,
+                   ch_data->sample_count,
+                   status_str);
+        }
+        
+        printf("Errors: %d, Active: %s\r\n", 
+               data->error_count,
+               data->sampling_active ? "YES" : "NO");
+        printf("========================\r\n\n");
+    }
+    
+    // 每1000次采样输出系统状态
+    if ((data->total_sample_count % 1000) == 0) {
+        printf("\r\n=== ADC System Status ===\r\n");
+        printf("Total Samples: %lu\r\n", data->total_sample_count);
+        printf("Error Count: %d\r\n", data->error_count);
+        printf("Error Rate: %.2f%%\r\n", 
+               (float)data->error_count / data->total_sample_count * 100.0f);
+        printf("Free Heap: %lu bytes\r\n", xPortGetFreeHeapSize());
+        printf("System Uptime: %lu seconds\r\n", osKernelGetTickCount() / 1000);
+        
+        // 检查队列状态
+        uint32_t queue_count = osMessageQueueGetCount(ADCQueueHandle);
+        uint32_t queue_space = osMessageQueueGetSpace(ADCQueueHandle);
+        printf("Queue Status: %lu/%lu (used/total)\r\n", 
+               queue_count, queue_count + queue_space);
+        printf("=========================\r\n\n");
+    }
+}
+
+/**
+ * @brief 处理示波器模式输出
+ * @param data ADC系统数据指针
+ * @retval None
+ */
+void ADC_ProcessOscilloscopeOutput(const adc_system_data_t *data)
+{
+    // 每次都输出电压数据，格式：channels: ch0,ch1,ch2,ch3,ch4,ch5\n
+    printf("channels: ");
+    
+    for (uint8_t i = 0; i < ADC_CHANNEL_COUNT; i++) {
+        const adc_channel_data_t *ch_data = &data->channels[i];
+        printf("%.6f", ch_data->voltage_average);
+        
+        // 添加分隔符，最后一个通道后不加逗号
+        if (i < ADC_CHANNEL_COUNT - 1) {
+            printf(",");
+        }
+    }
+    printf("\n");
+    
+    // 增加示波器采样计数
+    g_oscilloscope_sample_count++;
+    
+    // 每达到存储深度时输出统计信息
+    if (g_oscilloscope_sample_count >= OSCILLOSCOPE_BUFFER_DEPTH) {
+        printf("# Oscilloscope buffer full (%d samples), Total: %lu, Errors: %d\n", 
+               OSCILLOSCOPE_BUFFER_DEPTH, data->total_sample_count, data->error_count);
+        g_oscilloscope_sample_count = 0;
+    }
+}
+
+/**
+ * @brief 处理原始数据模式输出
+ * @param data ADC系统数据指针
+ * @retval None
+ */
+void ADC_ProcessRawDataOutput(const adc_system_data_t *data)
+{
+    // 不带前缀直接输出电压数据，格式：ch0,ch1,ch2,ch3,ch4,ch5\n
+    for (uint8_t i = 0; i < ADC_CHANNEL_COUNT; i++) {
+        const adc_channel_data_t *ch_data = &data->channels[i];
+        printf("%.6f", ch_data->voltage_average);
+        
+        // 添加分隔符，最后一个通道后不加逗号
+        if (i < ADC_CHANNEL_COUNT - 1) {
+            printf(",");
+        }
+    }
+    printf("\n");
+    
+    // 增加示波器采样计数
+    g_oscilloscope_sample_count++;
+    
+    // 每达到存储深度时输出统计信息（带#前缀，避免与图片数据混淆）
+    if (g_oscilloscope_sample_count >= OSCILLOSCOPE_BUFFER_DEPTH) {
+        printf("# Raw data buffer full (%d samples), Total: %lu, Errors: %d\n", 
+               OSCILLOSCOPE_BUFFER_DEPTH, data->total_sample_count, data->error_count);
+        g_oscilloscope_sample_count = 0;
+    }
+}
+
+/**
+ * @brief 设置ADC输出模式
+ * @param mode 输出模式
+ * @retval None
+ */
+void ADC_SetOutputMode(adc_output_mode_t mode)
+{
+    if (mode < ADC_OUTPUT_MODE_MAX) {
+        g_adc_output_mode = mode;
+        g_oscilloscope_sample_count = 0; // 重置示波器计数
+        
+        const char* mode_str;
+        switch (mode) {
+            case ADC_OUTPUT_MODE_DEBUG:
+                mode_str = "DEBUG";
+                break;
+            case ADC_OUTPUT_MODE_OSCILLOSCOPE:
+                mode_str = "OSCILLOSCOPE";
+                break;
+            case ADC_OUTPUT_MODE_RAW_DATA:
+                mode_str = "RAW_DATA";
+                break;
+            default:
+                mode_str = "UNKNOWN";
+                break;
+        }
+        printf("ADC output mode changed to: %s\n", mode_str);
+    }
+}
+
+/**
+ * @brief 获取当前ADC输出模式
+ * @retval adc_output_mode_t 当前输出模式
+ */
+adc_output_mode_t ADC_GetOutputMode(void)
+{
+    return g_adc_output_mode;
+}
+
+/**
+ * @brief 切换到下一个输出模式（用于调试）
+ * @retval None
+ */
+void ADC_SwitchToNextOutputMode(void)
+{
+    adc_output_mode_t next_mode = (g_adc_output_mode + 1) % ADC_OUTPUT_MODE_MAX;
+    ADC_SetOutputMode(next_mode);
+}
+
+/**
+ * @brief 输出当前ADC配置信息
+ * @retval None
+ */
+void ADC_PrintModeInfo(void)
+{
+    printf("\n=== ADC Output Mode Info ===\n");
+    printf("Available modes:\n");
+    printf("  0 - DEBUG: Detailed debug output every 100 samples\n");
+    printf("  1 - OSCILLOSCOPE: Format 'channels: ch0,ch1,ch2,ch3,ch4,ch5\\n'\n");
+    printf("  2 - RAW_DATA: Format 'ch0,ch1,ch2,ch3,ch4,ch5\\n'\n");
+    printf("Current mode: %d (%s)\n", g_adc_output_mode, 
+           g_adc_output_mode == ADC_OUTPUT_MODE_DEBUG ? "DEBUG" : 
+           g_adc_output_mode == ADC_OUTPUT_MODE_OSCILLOSCOPE ? "OSCILLOSCOPE" : "RAW_DATA");
+    printf("Buffer depth: %d samples\n", OSCILLOSCOPE_BUFFER_DEPTH);
+    printf("Channel count: %d\n", ADC_CHANNEL_COUNT);
+    printf("============================\n\n");
 }
