@@ -1,0 +1,12 @@
+finallattackproject\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/list.c
+finallattackproject\list.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdlib.h
+finallattackproject\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+finallattackproject\list.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stddef.h
+finallattackproject\list.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdint.h
+finallattackproject\list.o: ../Core/Inc/FreeRTOSConfig.h
+finallattackproject\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+finallattackproject\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+finallattackproject\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+finallattackproject\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
+finallattackproject\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+finallattackproject\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h

@@ -39,4 +39,17 @@ finallattackproject\main.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_ti
 finallattackproject\main.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim_ex.h
 finallattackproject\main.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h
 finallattackproject\main.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h
+finallattackproject\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h
+finallattackproject\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+finallattackproject\main.o: ../Core/Inc/FreeRTOSConfig.h
+finallattackproject\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+finallattackproject\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+finallattackproject\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+finallattackproject\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
+finallattackproject\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+finallattackproject\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+finallattackproject\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
+finallattackproject\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
 finallattackproject\main.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdio.h
+finallattackproject\main.o: ..\Task\ADCsampleTask.h
+finallattackproject\main.o: D:\KEIL\ARM\ARMCC\Bin\..\include\string.h

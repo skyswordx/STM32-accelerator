@@ -1268,10 +1268,10 @@ ARM Macro Assembler    Page 20
               00000000 
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M7.fp.dp --apcs=
 interwork --depend=finallattackproject\startup_stm32h750xx.d -ofinallattackproj
-ect\startup_stm32h750xx.o -I.\RTE\_FinallAttackProject -ID:\KEIL-PACK\ARM\CMSIS
-\6.1.0\CMSIS\Core\Include --predefine="__MICROLIB SETA 1" --predefine="__UVISIO
-N_VERSION SETA 541" --predefine="STM32H750xx SETA 1" --predefine="_RTE_ SETA 1"
- --list=startup_stm32h750xx.lst startup_stm32h750xx.s
+ect\startup_stm32h750xx.o -I../Core/Inc -I.\RTE\_FinallAttackProject -ID:\KEIL-
+PACK\ARM\CMSIS\6.1.0\CMSIS\Core\Include --predefine="__MICROLIB SETA 1" --prede
+fine="__UVISION_VERSION SETA 541" --predefine="STM32H750xx SETA 1" --predefine=
+"_RTE_ SETA 1" --list=startup_stm32h750xx.lst startup_stm32h750xx.s
 
 
 

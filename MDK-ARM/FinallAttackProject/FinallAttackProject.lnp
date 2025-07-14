@@ -1,6 +1,7 @@
 --cpu Cortex-M7.fp.dp
 "finallattackproject\startup_stm32h750xx.o"
 "finallattackproject\main.o"
+"finallattackproject\freertos.o"
 "finallattackproject\stm32h7xx_it.o"
 "finallattackproject\stm32h7xx_hal_msp.o"
 "finallattackproject\stm32h7xx_hal_timebase_tim.o"
@@ -27,6 +28,17 @@
 "finallattackproject\stm32h7xx_hal_uart.o"
 "finallattackproject\stm32h7xx_hal_uart_ex.o"
 "finallattackproject\system_stm32h7xx.o"
+"finallattackproject\croutine.o"
+"finallattackproject\event_groups.o"
+"finallattackproject\list.o"
+"finallattackproject\queue.o"
+"finallattackproject\stream_buffer.o"
+"finallattackproject\tasks.o"
+"finallattackproject\timers.o"
+"finallattackproject\cmsis_os2.o"
+"finallattackproject\heap_4.o"
+"finallattackproject\port.o"
+"finallattackproject\adcsampletask.o"
 --library_type=microlib --strict --scatter "FinallAttackProject\FinallAttackProject.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
