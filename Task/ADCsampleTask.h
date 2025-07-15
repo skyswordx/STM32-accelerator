@@ -56,8 +56,8 @@ extern adc_system_data_t g_adc_system;
 extern osMessageQueueId_t ADCQueueHandle;
 
 /* 任务函数声明 */
-void AdcSamplingTask(void *argument);
-void AdcOutputTask(void *argument);
+void ADCSamplingTask(void *argument);
+void ADCOutputTask(void *argument);
 
 /* ADC功能函数声明 */
 HAL_StatusTypeDef ADC_InitializeChannels(void);
@@ -71,6 +71,27 @@ void ADC_PrintSystemStatus(void);
 const char* ADC_GetChannelName(uint8_t channel_index);
 uint32_t ADC_GetChannelHAL(uint8_t channel_index);
 
+/* ADC输出模式枚举 */
+typedef enum {
+    ADC_OUTPUT_MODE_DEBUG = 0,      // 调试模式 - 原有的详细输出
+    ADC_OUTPUT_MODE_VOFA,           // VOFA模式 - 带前缀输出波形数据
+    ADC_OUTPUT_MODE_RAW_DATA,       // 原始数据模式 - 不带前缀输出波形数据
+    ADC_OUTPUT_MODE_HMI,            // HMI串口屏模式 - 向串口屏发送指定通道波形
+    ADC_OUTPUT_MODE_MAX
+} adc_output_mode_t;
+
+/* ADC输出处理函数声明 */
+void ADC_ProcessDebugOutput(const adc_system_data_t *data);
+void ADC_ProcessVofaOutput(const adc_system_data_t *data);
+void ADC_ProcessRawDataOutput(const adc_system_data_t *data);
+void ADC_ProcessHMIOutput(const adc_system_data_t *data);
+
+/* ADC输出模式控制函数声明 */
+void ADC_SetOutputMode(adc_output_mode_t mode);
+adc_output_mode_t ADC_GetOutputMode(void);
+void ADC_SwitchToNextOutputMode(void);
+void ADC_PrintModeInfo(void);
+
 /* ADC任务配置 */
 #define ADC_SAMPLING_TASK_STACK_SIZE    512
 #define ADC_OUTPUT_TASK_STACK_SIZE      256
@@ -78,11 +99,11 @@ uint32_t ADC_GetChannelHAL(uint8_t channel_index);
 #define ADC_OUTPUT_TASK_PRIORITY        osPriorityNormal       // 普通优先级输出
 
 /* 任务句柄 */
-extern osThreadId_t AdcSamplingTaskHandle;
-extern osThreadId_t AdcOutputTaskHandle;
+extern osThreadId_t ADCSamplingTaskHandle;
+extern osThreadId_t ADCOutputTaskHandle;
 
 /* 任务属性 */
-extern const osThreadAttr_t AdcSamplingTask_attributes;
-extern const osThreadAttr_t AdcOutputTask_attributes;
+extern const osThreadAttr_t ADCSamplingTask_attributes;
+extern const osThreadAttr_t ADCOutputTask_attributes;
 
 #endif // __ADC_SAMPLE_TASK_H__

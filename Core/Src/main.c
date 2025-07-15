@@ -153,8 +153,8 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
-  AdcSamplingTaskHandle = osThreadNew(AdcSamplingTask, NULL, &AdcSamplingTask_attributes);
-  AdcOutputTaskHandle = osThreadNew(AdcOutputTask, NULL, &AdcOutputTask_attributes);
+  ADCSamplingTaskHandle = osThreadNew(ADCSamplingTask, NULL, &ADCSamplingTask_attributes);
+  ADCOutputTaskHandle = osThreadNew(ADCOutputTask, NULL, &ADCOutputTask_attributes);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */

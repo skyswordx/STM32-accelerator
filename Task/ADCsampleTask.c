@@ -4,42 +4,41 @@
 extern osMessageQueueId_t ADCQueueHandle;
 
 /* ADC任务句柄 */
-osThreadId_t AdcSamplingTaskHandle;
-osThreadId_t AdcOutputTaskHandle;
+osThreadId_t ADCSamplingTaskHandle;
+osThreadId_t ADCOutputTaskHandle;
 
 /* ADC采样任务属性 */
-const osThreadAttr_t AdcSamplingTask_attributes = {
-  .name = "AdcSamplingTask",
+const osThreadAttr_t ADCSamplingTask_attributes = {
+  .name = "ADCSamplingTask",
   .stack_size = ADC_SAMPLING_TASK_STACK_SIZE * 4,  // 转换为字节
   .priority = (osPriority_t) ADC_SAMPLING_TASK_PRIORITY,
 };
 
 /* ADC输出任务属性 */
-const osThreadAttr_t AdcOutputTask_attributes = {
-  .name = "AdcOutputTask",
+const osThreadAttr_t ADCOutputTask_attributes = {
+  .name = "ADCOutputTask",
   .stack_size = ADC_OUTPUT_TASK_STACK_SIZE * 4,    // 转换为字节
   .priority = (osPriority_t) ADC_OUTPUT_TASK_PRIORITY,
 };
 
-
-/* ADC输出模式枚举 */
-typedef enum {
-    ADC_OUTPUT_MODE_DEBUG = 0,      // 调试模式 - 原有的详细输出
-    ADC_OUTPUT_MODE_OSCILLOSCOPE,   // 示波器模式 - 带前缀输出波形数据
-    ADC_OUTPUT_MODE_RAW_DATA,       // 原始数据模式 - 不带前缀输出波形数据
-    ADC_OUTPUT_MODE_MAX
-} adc_output_mode_t;
 
 /* 全局ADC系统数据 */
 adc_system_data_t g_adc_system = {0};
 
 /* ADC输出模式控制 */
 // static adc_output_mode_t g_adc_output_mode = ADC_OUTPUT_MODE_DEBUG;
-static adc_output_mode_t g_adc_output_mode = ADC_OUTPUT_MODE_OSCILLOSCOPE;
+// static adc_output_mode_t g_adc_output_mode = ADC_OUTPUT_MODE_VOFA;
+static adc_output_mode_t g_adc_output_mode = ADC_OUTPUT_MODE_HMI;
 
-/* 示波器模式配置 */
-#define OSCILLOSCOPE_BUFFER_DEPTH  1024  // 存储深度
-static uint32_t g_oscilloscope_sample_count = 0;
+/* VOFA模式配置 */
+#define VOFA_BUFFER_DEPTH  1024  // 存储深度
+static uint32_t g_vofa_sample_count = 0;
+
+/* HMI串口屏模式配置 */
+#define HMI_SELECTED_CHANNEL  0  // 选择发送的通道 (0-5)
+#define HMI_CURVE_ID  "osc"      // 曲线控件ID
+#define HMI_CHANNEL_ID  0       // 曲线通道ID
+static uint32_t g_HMI_sample_count = 0;
 
 
 /* ADC通道配置表 */
@@ -63,9 +62,9 @@ static const adc_channel_config_t adc_channel_configs[ADC_CHANNEL_COUNT] = {
  * - 计算平均值并更新系统数据
  * - 不断刷新队列中的ADC数据
  */
-void AdcSamplingTask(void *argument)
+void ADCSamplingTask(void *argument)
 {
-    /* USER CODE BEGIN AdcSamplingTask */
+    /* USER CODE BEGIN ADCSamplingTask */
     TickType_t last_wake_time;
     const TickType_t sampling_period = pdMS_TO_TICKS(ADC_SAMPLE_PERIOD_MS);
     
@@ -194,7 +193,7 @@ void AdcSamplingTask(void *argument)
  * - 根据输出模式选择不同的输出格式
  * - 支持调试模式和示波器模式
  */
-void AdcOutputTask(void *argument)
+void ADCOutputTask(void *argument)
 {
     /* USER CODE BEGIN AdcOutputTask */
     adc_system_data_t received_adc_data;
@@ -218,11 +217,14 @@ void AdcOutputTask(void *argument)
         case ADC_OUTPUT_MODE_DEBUG:
             mode_str = "DEBUG";
             break;
-        case ADC_OUTPUT_MODE_OSCILLOSCOPE:
-            mode_str = "OSCILLOSCOPE";
+        case ADC_OUTPUT_MODE_VOFA:
+            mode_str = "VOFA";
             break;
         case ADC_OUTPUT_MODE_RAW_DATA:
             mode_str = "RAW_DATA";
+            break;
+        case ADC_OUTPUT_MODE_HMI:
+            mode_str = "HMI";
             break;
         default:
             mode_str = "UNKNOWN";
@@ -252,12 +254,16 @@ void AdcOutputTask(void *argument)
                         ADC_ProcessDebugOutput(&received_adc_data);
                         break;
                         
-                    case ADC_OUTPUT_MODE_OSCILLOSCOPE:
-                        ADC_ProcessOscilloscopeOutput(&received_adc_data);
+                    case ADC_OUTPUT_MODE_VOFA:
+                        ADC_ProcessVofaOutput(&received_adc_data);
                         break;
                         
                     case ADC_OUTPUT_MODE_RAW_DATA:
                         ADC_ProcessRawDataOutput(&received_adc_data);
+                        break;
+                        
+                    case ADC_OUTPUT_MODE_HMI:
+                        ADC_ProcessHMIOutput(&received_adc_data);
                         break;
                         
                     default:
@@ -287,7 +293,7 @@ void AdcOutputTask(void *argument)
         // 更新最后输出时间
         g_adc_system.last_output_time = osKernelGetTickCount();
     }
-    /* USER CODE END AdcOutputTask */
+    /* USER CODE END ADCOutputTask */
 }
 
 /**
@@ -546,11 +552,11 @@ void ADC_ProcessDebugOutput(const adc_system_data_t *data)
 }
 
 /**
- * @brief 处理示波器模式输出
+ * @brief 处理VOFA模式输出
  * @param data ADC系统数据指针
  * @retval None
  */
-void ADC_ProcessOscilloscopeOutput(const adc_system_data_t *data)
+void ADC_ProcessVofaOutput(const adc_system_data_t *data)
 {
     // 每次都输出电压数据，格式：channels: ch0,ch1,ch2,ch3,ch4,ch5\n
     printf("channels: ");
@@ -566,14 +572,14 @@ void ADC_ProcessOscilloscopeOutput(const adc_system_data_t *data)
     }
     printf("\n");
     
-    // 增加示波器采样计数
-    g_oscilloscope_sample_count++;
+    // 增加VOFA采样计数
+    g_vofa_sample_count++;
     
     // 每达到存储深度时输出统计信息
-    if (g_oscilloscope_sample_count >= OSCILLOSCOPE_BUFFER_DEPTH) {
-        printf("# Oscilloscope buffer full (%d samples), Total: %lu, Errors: %d\n", 
-               OSCILLOSCOPE_BUFFER_DEPTH, data->total_sample_count, data->error_count);
-        g_oscilloscope_sample_count = 0;
+    if (g_vofa_sample_count >= VOFA_BUFFER_DEPTH) {
+        printf("# VOFA buffer full (%d samples), Total: %lu, Errors: %d\n", 
+               VOFA_BUFFER_DEPTH, data->total_sample_count, data->error_count);
+        g_vofa_sample_count = 0;
     }
 }
 
@@ -596,14 +602,14 @@ void ADC_ProcessRawDataOutput(const adc_system_data_t *data)
     }
     printf("\n");
     
-    // 增加示波器采样计数
-    g_oscilloscope_sample_count++;
+    // 增加原始数据采样计数
+    g_vofa_sample_count++;
     
     // 每达到存储深度时输出统计信息（带#前缀，避免与图片数据混淆）
-    if (g_oscilloscope_sample_count >= OSCILLOSCOPE_BUFFER_DEPTH) {
+    if (g_vofa_sample_count >= VOFA_BUFFER_DEPTH) {
         printf("# Raw data buffer full (%d samples), Total: %lu, Errors: %d\n", 
-               OSCILLOSCOPE_BUFFER_DEPTH, data->total_sample_count, data->error_count);
-        g_oscilloscope_sample_count = 0;
+               VOFA_BUFFER_DEPTH, data->total_sample_count, data->error_count);
+        g_vofa_sample_count = 0;
     }
 }
 
@@ -616,18 +622,22 @@ void ADC_SetOutputMode(adc_output_mode_t mode)
 {
     if (mode < ADC_OUTPUT_MODE_MAX) {
         g_adc_output_mode = mode;
-        g_oscilloscope_sample_count = 0; // 重置示波器计数
+        g_vofa_sample_count = 0; // 重置VOFA计数
+        g_HMI_sample_count = 0;  // 重置HMI计数
         
         const char* mode_str;
         switch (mode) {
             case ADC_OUTPUT_MODE_DEBUG:
                 mode_str = "DEBUG";
                 break;
-            case ADC_OUTPUT_MODE_OSCILLOSCOPE:
-                mode_str = "OSCILLOSCOPE";
+            case ADC_OUTPUT_MODE_VOFA:
+                mode_str = "VOFA";
                 break;
             case ADC_OUTPUT_MODE_RAW_DATA:
                 mode_str = "RAW_DATA";
+                break;
+            case ADC_OUTPUT_MODE_HMI:
+                mode_str = "HMI";
                 break;
             default:
                 mode_str = "UNKNOWN";
@@ -652,7 +662,7 @@ adc_output_mode_t ADC_GetOutputMode(void)
  */
 void ADC_SwitchToNextOutputMode(void)
 {
-    adc_output_mode_t next_mode = (g_adc_output_mode + 1) % ADC_OUTPUT_MODE_MAX;
+    adc_output_mode_t next_mode = (adc_output_mode_t)((g_adc_output_mode + 1) % ADC_OUTPUT_MODE_MAX);
     ADC_SetOutputMode(next_mode);
 }
 
@@ -665,12 +675,56 @@ void ADC_PrintModeInfo(void)
     printf("\n=== ADC Output Mode Info ===\n");
     printf("Available modes:\n");
     printf("  0 - DEBUG: Detailed debug output every 100 samples\n");
-    printf("  1 - OSCILLOSCOPE: Format 'channels: ch0,ch1,ch2,ch3,ch4,ch5\\n'\n");
+    printf("  1 - VOFA: Format 'channels: ch0,ch1,ch2,ch3,ch4,ch5\\n'\n");
     printf("  2 - RAW_DATA: Format 'ch0,ch1,ch2,ch3,ch4,ch5\\n'\n");
+    printf("  3 - HMI: Send data to HMI display using 'add' command\n");
     printf("Current mode: %d (%s)\n", g_adc_output_mode, 
            g_adc_output_mode == ADC_OUTPUT_MODE_DEBUG ? "DEBUG" : 
-           g_adc_output_mode == ADC_OUTPUT_MODE_OSCILLOSCOPE ? "OSCILLOSCOPE" : "RAW_DATA");
-    printf("Buffer depth: %d samples\n", OSCILLOSCOPE_BUFFER_DEPTH);
+           g_adc_output_mode == ADC_OUTPUT_MODE_VOFA ? "VOFA" : 
+           g_adc_output_mode == ADC_OUTPUT_MODE_RAW_DATA ? "RAW_DATA" : 
+           g_adc_output_mode == ADC_OUTPUT_MODE_HMI ? "HMI" : "UNKNOWN");
+    printf("Buffer depth: %d samples\n", VOFA_BUFFER_DEPTH);
     printf("Channel count: %d\n", ADC_CHANNEL_COUNT);
+    printf("HMI selected channel: %d (%s)\n", HMI_SELECTED_CHANNEL, ADC_GetChannelName(HMI_SELECTED_CHANNEL));
+    printf("HMI curve ID: %s, Channel ID: %d\n", HMI_CURVE_ID, HMI_CHANNEL_ID);
     printf("============================\n\n");
+}
+
+/**
+ * @brief 处理HMI串口屏模式输出
+ * @param data ADC系统数据指针
+ * @retval None
+ */
+void ADC_ProcessHMIOutput(const adc_system_data_t *data)
+{
+    // 检查选择的通道是否有效
+    if (HMI_SELECTED_CHANNEL >= ADC_CHANNEL_COUNT) {
+        return;
+    }
+    
+    const adc_channel_data_t *ch_data = &data->channels[HMI_SELECTED_CHANNEL];
+    
+    // 将电压值转换为8位数据 (0-255)
+    // 假设电压范围是0-3.3V，映射到0-255
+    uint8_t HMI_value = (uint8_t)(ch_data->voltage_average * 255.0f / 3.3f);
+    
+    // 确保值在有效范围内
+    if (HMI_value > 255) {
+        HMI_value = 255;
+    }
+    
+    // 按照HMI协议发送数据到曲线控件
+    // 格式：add 曲线控件ID.id,通道ID,数据值\xff\xff\xff
+    printf("add %s.id,%d,%d\xff\xff\xff", HMI_CURVE_ID, HMI_CHANNEL_ID, HMI_value);
+    
+    // 增加HMI采样计数
+    g_HMI_sample_count++;
+    
+    // 每100个点输出一次统计信息
+    if (g_HMI_sample_count >= 100) {
+        printf("# HMI sent 100 points, Channel: %d(%s), Total: %lu, Errors: %d\n", 
+               HMI_SELECTED_CHANNEL, ADC_GetChannelName(HMI_SELECTED_CHANNEL), 
+               data->total_sample_count, data->error_count);
+        g_HMI_sample_count = 0;
+    }
 }
