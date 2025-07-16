@@ -53,8 +53,5 @@ finallattackproject\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/t
 finallattackproject\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
 finallattackproject\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
 finallattackproject\main.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdio.h
-finallattackproject\main.o: ../Task/ADCsampleTask.h
-finallattackproject\main.o: D:\KEIL\ARM\ARMCC\Bin\..\include\string.h
-finallattackproject\main.o: ../Task/ADCOutputTask.h
 finallattackproject\main.o: ../Drivers/AD9954/AD9954.h
 finallattackproject\main.o: ../Drivers/INA226/INA226.h

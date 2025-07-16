@@ -23,8 +23,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stdio.h"
-#include "ADCsampleTask.h"
-#include "ADCOutputTask.h"
+// #include "ADCsampleTask.h"
+// #include "ADCOutputTask.h"
 #include "AD9954.h"
 #include "INA226.h"
 
@@ -32,7 +32,11 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+/* ADC system data structure for message queue */
+typedef struct {
+  uint16_t adc1_value;
+  uint16_t adc2_value;
+} adc_system_data_t;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -47,6 +51,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
+ADC_HandleTypeDef hadc2;
+DMA_HandleTypeDef hdma_adc1;
 
 I2C_HandleTypeDef hi2c1;
 
@@ -63,16 +69,32 @@ const osThreadAttr_t defaultTask_attributes = {
 };
 /* USER CODE BEGIN PV */
 osMessageQueueId_t ADCQueueHandle;
+
+/* Variables for ADC dual mode DMA testing */
+#define ADC_BUFFER_SIZE 1024
+/* ??Cache??API???DMA????32???? */
+#if defined ( __ICCARM__ )
+#pragma location = 0x38000000
+uint32_t dmabuffer[ADC_BUFFER_SIZE]; // Buffer for DMA transfers
+#elif defined ( __CC_ARM ) || defined(__GNUC__)
+ALIGN_32BYTES(__attribute__((section(".RAM_D3"))) uint32_t dmabuffer[ADC_BUFFER_SIZE]); // Buffer for DMA transfers
+#endif
+uint16_t adc1_data[ADC_BUFFER_SIZE]; // Buffer for ADC1 data
+uint16_t adc2_data[ADC_BUFFER_SIZE]; // Buffer for ADC2 data
+volatile uint8_t adc_conversion_complete = 0; // Flag to indicate conversion complete
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void PeriphCommonClock_Config(void);
 static void MPU_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_SPI1_Init(void);
+static void MX_ADC2_Init(void);
 void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
@@ -93,6 +115,37 @@ int fgetc(FILE * f)
   HAL_UART_Receive(&huart1,&ch, 1, 0xffff);
   return ch;
 }
+
+/**
+  * @brief  ADC conversion complete callback in non-blocking mode
+  * @param  hadc: ADC handle
+  * @retval None
+  */
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+  /* ADC???????? */
+  if(hadc->Instance == ADC1)
+  {
+    /* ???DMA???????D-Cache????? */
+    /* dmabuffer?32????????32????????????????? */
+    SCB_InvalidateDCache_by_Addr((uint32_t*)dmabuffer, ADC_BUFFER_SIZE * sizeof(uint32_t));
+    
+    /* ?????? */
+    for(uint32_t j = 0; j < 10; j++)
+    {
+      /* ??ADC1?ADC2?? */
+      adc1_data[j] = (uint16_t)(dmabuffer[j] & 0xFF);
+      adc2_data[j] = (uint16_t)((dmabuffer[j] >> 16) & 0xFF);
+    }
+    
+    /* ???????? */
+    adc_conversion_complete = 1;
+    
+    /* ?????? */
+    printf("ADC??: ADC1: %u, ADC2: %u\r\n", 
+           (unsigned int)adc1_data[0], (unsigned int)adc2_data[0]);
+  }
+}
 /* USER CODE END 0 */
 
 /**
@@ -109,6 +162,9 @@ int main(void)
   /* MPU Configuration--------------------------------------------------------*/
   MPU_Config();
 
+  /* Enable D-Cache---------------------------------------------------------*/
+  SCB_EnableDCache();
+
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
@@ -121,17 +177,87 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
 
+  /* Configure the peripherals common clocks */
+  PeriphCommonClock_Config();
+
   /* USER CODE BEGIN SysInit */
 
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_ADC1_Init();
   MX_I2C1_Init();
   MX_USART1_UART_Init();
   MX_SPI1_Init();
+  MX_ADC2_Init();
   /* USER CODE BEGIN 2 */
+  
+  AD9954_Init();
+	AD9954_Set_Fre(1000.0);
+	AD9954_Set_Amp(16383);
+	AD9954_Set_Phase(0);
+
+  /* Initialize and setup ADCs for dual mode DMA operation */
+  printf("Starting ADC dual mode DMA test...\r\n");
+  
+  /* Calibrate both ADCs */
+  if (HAL_ADCEx_Calibration_Start(&hadc2, ADC_CALIB_FACTOR_LINEARITY_REGOFFSET, ADC_SINGLE_ENDED) != HAL_OK)
+  {
+    printf("ADC2 calibration error\r\n");
+    Error_Handler();
+  }
+  
+  if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_FACTOR_LINEARITY_REGOFFSET, ADC_SINGLE_ENDED) != HAL_OK)
+  {
+    printf("ADC1 calibration error\r\n");
+    Error_Handler();
+  }
+  
+  printf("ADC calibration complete\r\n");
+
+  /* Print DMA buffer information */
+  printf("DMA buffer address: 0x%08lx, size: %lu bytes\r\n", 
+         (unsigned long)dmabuffer, 
+         (unsigned long)(ADC_BUFFER_SIZE * sizeof(uint32_t)));
+
+  /* ???DMA????????DMA???????????0 */
+  memset(dmabuffer, 0, ADC_BUFFER_SIZE * sizeof(uint32_t));
+  
+  /* ?DMA????????D-Cache???DMA???????????? */
+  SCB_CleanDCache_by_Addr((uint32_t*)dmabuffer, ADC_BUFFER_SIZE * sizeof(uint32_t));
+  
+  /* ??DMA????? */
+  printf("DMA buffer address: 0x%08lx, aligned: %s\r\n", 
+         (unsigned long)dmabuffer, 
+         (((uint32_t)dmabuffer & 0x1F) == 0) ? "yes" : "no");
+
+  /* ????ADC */
+  printf("Starting ADC2...\r\n");
+  if (HAL_ADC_Start(&hadc2) != HAL_OK)
+  {
+    printf("ADC2 start error\r\n");
+    Error_Handler();
+  }
+  printf("ADC2 started successfully\r\n");
+  
+  /* ?????ADC?DMA?? */
+  printf("Starting ADC1 with DMA...\r\n");
+  
+  /* ??DMA???? */
+  uint32_t dma_test_size = 32; // ?????????
+  printf("DMA test size: %lu samples\r\n", (unsigned long)dma_test_size);
+  
+  /* ?????ADC?????DMA?? */
+  HAL_StatusTypeDef status = HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)dmabuffer, dma_test_size);
+  if (status != HAL_OK)
+  {
+    printf("ADC1 multimode DMA start error: %d\r\n", (int)status);
+    Error_Handler();
+  }
+  
+  printf("ADC dual mode DMA started successfully\r\n");
 
   /* USER CODE END 2 */
 
@@ -161,16 +287,13 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
-  ADCSamplingTaskHandle = osThreadNew(ADCSamplingTask, NULL, &ADCSamplingTask_attributes);
-  ADCOutputTaskHandle = osThreadNew(ADCOutputTask, NULL, &ADCOutputTask_attributes);
+  // �? ADC 的多通道采样和输出，不采�?
+  // ADCSamplingTaskHandle = osThreadNew(ADCSamplingTask, NULL, &ADCSamplingTask_attributes);
+  // ADCOutputTaskHandle = osThreadNew(ADCOutputTask, NULL, &ADCOutputTask_attributes);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
-  AD9954_Init();				//初始化控制AD9954需要用到的IO口,及寄存器
-	AD9954_Set_Fre(1000.0);//设置输出频率1000Hz
-	AD9954_Set_Amp(16383);//设置幅度，范围0~16383 （对应幅度约：0~500mv)
-	AD9954_Set_Phase(0);//设置相位，范围0~16383（对应角度：0°~360°)
  
   /* USER CODE END RTOS_EVENTS */
 
@@ -252,6 +375,32 @@ void SystemClock_Config(void)
 }
 
 /**
+  * @brief Peripherals Common Clock Configuration
+  * @retval None
+  */
+void PeriphCommonClock_Config(void)
+{
+  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+
+  /** Initializes the peripherals clock
+  */
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_ADC;
+  PeriphClkInitStruct.PLL2.PLL2M = 4;
+  PeriphClkInitStruct.PLL2.PLL2N = 10;
+  PeriphClkInitStruct.PLL2.PLL2P = 2;
+  PeriphClkInitStruct.PLL2.PLL2Q = 2;
+  PeriphClkInitStruct.PLL2.PLL2R = 2;
+  PeriphClkInitStruct.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_3;
+  PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOMEDIUM;
+  PeriphClkInitStruct.PLL2.PLL2FRACN = 0;
+  PeriphClkInitStruct.AdcClockSelection = RCC_ADCCLKSOURCE_PLL2;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+/**
   * @brief ADC1 Initialization Function
   * @param None
   * @retval None
@@ -276,12 +425,12 @@ static void MX_ADC1_Init(void)
   hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   hadc1.Init.LowPowerAutoWait = DISABLE;
-  hadc1.Init.ContinuousConvMode = DISABLE;
+  hadc1.Init.ContinuousConvMode = ENABLE;
   hadc1.Init.NbrOfConversion = 1;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-  hadc1.Init.ConversionDataManagement = ADC_CONVERSIONDATA_DR;
+  hadc1.Init.ConversionDataManagement = ADC_CONVERSIONDATA_DMA_CIRCULAR;
   hadc1.Init.Overrun = ADC_OVR_DATA_PRESERVED;
   hadc1.Init.LeftBitShift = ADC_LEFTBITSHIFT_NONE;
   hadc1.Init.OversamplingMode = DISABLE;
@@ -291,7 +440,7 @@ static void MX_ADC1_Init(void)
     Error_Handler();
   }
   hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
-  hadc1.Init.Resolution = ADC_RESOLUTION_16B;
+  hadc1.Init.Resolution = ADC_RESOLUTION_8B;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
   {
     Error_Handler();
@@ -299,7 +448,9 @@ static void MX_ADC1_Init(void)
 
   /** Configure the ADC multi-mode
   */
-  multimode.Mode = ADC_MODE_INDEPENDENT;
+  multimode.Mode = ADC_DUALMODE_INTERL;
+  multimode.DualModeData = ADC_DUALMODEDATAFORMAT_8_BITS;
+  multimode.TwoSamplingDelay = ADC_TWOSAMPLINGDELAY_1CYCLE;
   if (HAL_ADCEx_MultiModeConfigChannel(&hadc1, &multimode) != HAL_OK)
   {
     Error_Handler();
@@ -321,6 +472,68 @@ static void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 2 */
 
   /* USER CODE END ADC1_Init 2 */
+
+}
+
+/**
+  * @brief ADC2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_ADC2_Init(void)
+{
+
+  /* USER CODE BEGIN ADC2_Init 0 */
+
+  /* USER CODE END ADC2_Init 0 */
+
+  ADC_ChannelConfTypeDef sConfig = {0};
+
+  /* USER CODE BEGIN ADC2_Init 1 */
+
+  /* USER CODE END ADC2_Init 1 */
+
+  /** Common config
+  */
+  hadc2.Instance = ADC2;
+  hadc2.Init.ScanConvMode = ADC_SCAN_DISABLE;
+  hadc2.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+  hadc2.Init.LowPowerAutoWait = DISABLE;
+  hadc2.Init.ContinuousConvMode = ENABLE;
+  hadc2.Init.NbrOfConversion = 1;
+  hadc2.Init.DiscontinuousConvMode = DISABLE;
+  hadc2.Init.ConversionDataManagement = ADC_CONVERSIONDATA_DMA_CIRCULAR;
+  hadc2.Init.Overrun = ADC_OVR_DATA_PRESERVED;
+  hadc2.Init.LeftBitShift = ADC_LEFTBITSHIFT_NONE;
+  hadc2.Init.OversamplingMode = DISABLE;
+  hadc2.Init.Oversampling.Ratio = 1;
+  if (HAL_ADC_Init(&hadc2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  hadc2.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
+  hadc2.Init.Resolution = ADC_RESOLUTION_8B;
+  if (HAL_ADC_Init(&hadc2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure Regular Channel
+  */
+  sConfig.Channel = ADC_CHANNEL_3;
+  sConfig.Rank = ADC_REGULAR_RANK_1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+  sConfig.SingleDiff = ADC_SINGLE_ENDED;
+  sConfig.OffsetNumber = ADC_OFFSET_NONE;
+  sConfig.Offset = 0;
+  sConfig.OffsetSignedSaturation = DISABLE;
+  if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN ADC2_Init 2 */
+
+  /* USER CODE END ADC2_Init 2 */
 
 }
 
@@ -469,6 +682,22 @@ static void MX_USART1_UART_Init(void)
 }
 
 /**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Stream0_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -543,11 +772,38 @@ static void MX_GPIO_Init(void)
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
+  uint32_t last_check_tick = 0;
+  
   /* Infinite loop */
   for(;;)
   {
-    // printf("Hello FreeRTOS\n");
-    osDelay(1);
+    /* Check if ADC conversion is complete */
+    if(adc_conversion_complete)
+    {
+      /* Reset the flag */
+      adc_conversion_complete = 0;
+      
+      /* Process the ADC data here */
+      /* For example, calculate average of first 10 samples */
+      uint32_t adc1_sum = 0, adc2_sum = 0;
+      for(int i = 0; i < 10; i++)
+      {
+        adc1_sum += adc1_data[i];
+        adc2_sum += adc2_data[i];
+      }
+      
+      /* Print results every second */
+      uint32_t current_tick = osKernelGetTickCount();
+      if(current_tick - last_check_tick >= 1000)
+      {
+        last_check_tick = current_tick;
+        printf("ADC1 Avg: %lu, ADC2 Avg: %lu\r\n", 
+               (unsigned long)(adc1_sum / 10), 
+               (unsigned long)(adc2_sum / 10));
+      }
+    }
+    
+    osDelay(10);  /* Small delay to prevent CPU hogging */
   }
   /* USER CODE END 5 */
 }
@@ -558,25 +814,30 @@ void MPU_Config(void)
 {
   MPU_Region_InitTypeDef MPU_InitStruct = {0};
 
-  /* Disables the MPU */
+  /* ??MPU */
   HAL_MPU_Disable();
 
-  /** Initializes and configures the Region and the memory to be protected
-  */
+  /* ??DMA?????????? */
   MPU_InitStruct.Enable = MPU_REGION_ENABLE;
   MPU_InitStruct.Number = MPU_REGION_NUMBER0;
-  MPU_InitStruct.BaseAddress = 0x0;
-  MPU_InitStruct.Size = MPU_REGION_SIZE_4GB;
-  MPU_InitStruct.SubRegionDisable = 0x87;
+  /* ??????DMA??????????32???? */
+  MPU_InitStruct.BaseAddress = (uint32_t)dmabuffer & ~0x1F;
+  /* ??????????????DMA??? */
+  MPU_InitStruct.Size = MPU_REGION_SIZE_4KB;
+  MPU_InitStruct.SubRegionDisable = 0x00;
   MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;
-  MPU_InitStruct.AccessPermission = MPU_REGION_NO_ACCESS;
-  MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_DISABLE;
-  MPU_InitStruct.IsShareable = MPU_ACCESS_SHAREABLE;
-  MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
+  /* ????????? */
+  MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
+  /* ?????????????? */
   MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
+  MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
+  MPU_InitStruct.IsShareable = MPU_ACCESS_SHAREABLE;
+  /* ???? */
+  MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_ENABLE;
 
   HAL_MPU_ConfigRegion(&MPU_InitStruct);
-  /* Enables the MPU */
+  
+  /* ??MPU */
   HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
 
 }
