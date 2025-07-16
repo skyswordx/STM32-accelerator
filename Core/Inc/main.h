@@ -57,10 +57,28 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define INT_Pin GPIO_PIN_4
-#define INT_GPIO_Port GPIOB
-#define RESET_Pin GPIO_PIN_5
-#define RESET_GPIO_Port GPIOB
+#define AD9954_OSK_Pin GPIO_PIN_13
+#define AD9954_OSK_GPIO_Port GPIOD
+#define S_SDO_Pin GPIO_PIN_14
+#define S_SDO_GPIO_Port GPIOD
+#define PS0_Pin GPIO_PIN_6
+#define PS0_GPIO_Port GPIOC
+#define AD9954_IOSY_Pin GPIO_PIN_7
+#define AD9954_IOSY_GPIO_Port GPIOC
+#define AD9954_PWR_Pin GPIO_PIN_8
+#define AD9954_PWR_GPIO_Port GPIOC
+#define IOUPDATE_Pin GPIO_PIN_9
+#define IOUPDATE_GPIO_Port GPIOC
+#define AD9954_RES_Pin GPIO_PIN_8
+#define AD9954_RES_GPIO_Port GPIOA
+#define S_DIO_Pin GPIO_PIN_9
+#define S_DIO_GPIO_Port GPIOA
+#define S_SCLK_Pin GPIO_PIN_10
+#define S_SCLK_GPIO_Port GPIOA
+#define S_CS_Pin GPIO_PIN_11
+#define S_CS_GPIO_Port GPIOA
+#define PS1_Pin GPIO_PIN_12
+#define PS1_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
 

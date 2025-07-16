@@ -35,6 +35,8 @@ finallattackproject\main.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_i2
 finallattackproject\main.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_i2c_ex.h
 finallattackproject\main.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pwr.h
 finallattackproject\main.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pwr_ex.h
+finallattackproject\main.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_spi.h
+finallattackproject\main.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_spi_ex.h
 finallattackproject\main.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim.h
 finallattackproject\main.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim_ex.h
 finallattackproject\main.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h
@@ -51,5 +53,7 @@ finallattackproject\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/t
 finallattackproject\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
 finallattackproject\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
 finallattackproject\main.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdio.h
-finallattackproject\main.o: ..\Task\ADCsampleTask.h
+finallattackproject\main.o: ../Task/ADCsampleTask.h
 finallattackproject\main.o: D:\KEIL\ARM\ARMCC\Bin\..\include\string.h
+finallattackproject\main.o: ../Drivers/AD9954/AD9954.h
+finallattackproject\main.o: ../Drivers/INA226/INA226.h

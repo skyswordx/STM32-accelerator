@@ -23,6 +23,8 @@
 "finallattackproject\stm32h7xx_hal_i2c.o"
 "finallattackproject\stm32h7xx_hal_i2c_ex.o"
 "finallattackproject\stm32h7xx_hal_exti.o"
+"finallattackproject\stm32h7xx_hal_spi.o"
+"finallattackproject\stm32h7xx_hal_spi_ex.o"
 "finallattackproject\stm32h7xx_hal_tim.o"
 "finallattackproject\stm32h7xx_hal_tim_ex.o"
 "finallattackproject\stm32h7xx_hal_uart.o"
@@ -40,7 +42,7 @@
 "finallattackproject\port.o"
 "finallattackproject\adcsampletask.o"
 "finallattackproject\ina226.o"
-"finallattackproject\ad9554.o"
+"finallattackproject\ad9954.o"
 --library_type=microlib --strict --scatter "FinallAttackProject\FinallAttackProject.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

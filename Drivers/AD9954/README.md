@@ -44,20 +44,20 @@
 
 ### 输出引脚 (Push-Pull Output, GPIO_SPEED_FREQ_HIGH)
 
-- PA2 -> PS1 (User Label: PS1)
-- PA3 -> AD9954_CS (User Label: AD9954_CS)
-- PA4 -> AD9954_SCLK (User Label: AD9954_SCLK)
-- PA5 -> AD9954_SDIO (User Label: AD9954_SDIO)
-- PA6 -> AD9954_RES (User Label: AD9954_RES)
-- PA7 -> IOUPDATE (User Label: IOUPDATE)
-- PB0 -> AD9954_PWR (User Label: AD9954_PWR)
-- PB1 -> AD9954_IOSY (User Label: AD9954_IOSY)
-- PB10 -> PS0 (User Label: PS0)
-- PC0 -> AD9954_OSK (User Label: AD9954_OSK)
+- PA12 -> PS1 (User Label: PS1)
+- PA11 -> S_CS (User Label: S_CS)
+- PA10 -> S_SCLK (User Label: S_SCLK)
+- PA9 -> S_DIO (User Label: S_DIO)
+- PA8 -> AD9954_RES (User Label: AD9954_RES)
+- PC9 -> IOUPDATE (User Label: IOUPDATE)
+- PC8 -> AD9954_PWR (User Label: AD9954_PWR)
+- PC7 -> AD9954_IOSY (User Label: AD9954_IOSY)
+- PC6 -> PS0 (User Label: PS0)
+- PD15 -> AD9954_OSK (User Label: AD9954_OSK)
 
 ### 输入引脚 (Input Pull-Up)
 
-- PA8 -> AD9954_SDO (User Label: AD9954_SDO)
+- PD14 -> S_SDO (User Label: S_SDO)
 
 ## 使用方法
 

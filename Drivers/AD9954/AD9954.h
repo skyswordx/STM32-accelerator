@@ -7,19 +7,19 @@
  * CubeMX GPIO 配置要求：
  * 
  * 输出引脚 (Push-Pull Output, GPIO_SPEED_FREQ_HIGH):
- * - PA2  -> PS1
- * - PA3  -> AD9954_CS
- * - PA4  -> AD9954_SCLK
- * - PA5  -> AD9954_SDIO
- * - PA6  -> AD9954_RES
- * - PA7  -> IOUPDATE
- * - PB0  -> AD9954_PWR
- * - PB1  -> AD9954_IOSY
- * - PB10 -> PS0
- * - PC0  -> AD9954_OSK
+ * - PA12 -> PS1
+ * - PA11 -> S_CS
+ * - PA10 -> S_SCLK
+ * - PA9  -> S_DIO
+ * - PA8  -> AD9954_RES
+ * - PC9  -> IOUPDATE
+ * - PC8  -> AD9954_PWR
+ * - PC7  -> AD9954_IOSY
+ * - PC6  -> PS0
+ * - PD13 -> AD9954_OSK
  * 
  * 输入引脚 (Input Pull-Up):
- * - PA8  -> AD9954_SDO
+ * - PD14 -> S_SDO
  * 
  * 在CubeMX中配置时，请给每个引脚设置对应的User Label
  */
@@ -30,27 +30,27 @@
 #ifdef AD9954_SOFTWARE_SPI
 // GPIO端口定义
 #define AD9954_CS_PORT      GPIOA
-#define AD9954_CS_PIN       GPIO_PIN_3
+#define AD9954_CS_PIN       GPIO_PIN_11
 #define AD9954_SCLK_PORT    GPIOA
-#define AD9954_SCLK_PIN     GPIO_PIN_4
+#define AD9954_SCLK_PIN     GPIO_PIN_10
 #define AD9954_SDIO_PORT    GPIOA
-#define AD9954_SDIO_PIN     GPIO_PIN_5
-#define AD9954_OSK_PORT     GPIOC
-#define AD9954_OSK_PIN      GPIO_PIN_0
+#define AD9954_SDIO_PIN     GPIO_PIN_9
+#define AD9954_OSK_PORT     GPIOD
+#define AD9954_OSK_PIN      GPIO_PIN_13
 #define PS1_PORT            GPIOA
-#define PS1_PIN             GPIO_PIN_2
-#define PS0_PORT            GPIOB
-#define PS0_PIN             GPIO_PIN_10
-#define IOUPDATE_PORT       GPIOA
-#define IOUPDATE_PIN        GPIO_PIN_7
-#define AD9954_SDO_PORT     GPIOA
-#define AD9954_SDO_PIN      GPIO_PIN_8
-#define AD9954_IOSY_PORT    GPIOB
-#define AD9954_IOSY_PIN     GPIO_PIN_1
+#define PS1_PIN             GPIO_PIN_12
+#define PS0_PORT            GPIOC
+#define PS0_PIN             GPIO_PIN_6
+#define IOUPDATE_PORT       GPIOC
+#define IOUPDATE_PIN        GPIO_PIN_9
+#define AD9954_SDO_PORT     GPIOD
+#define AD9954_SDO_PIN      GPIO_PIN_14
+#define AD9954_IOSY_PORT    GPIOC
+#define AD9954_IOSY_PIN     GPIO_PIN_7
 #define AD9954_RES_PORT     GPIOA
-#define AD9954_RES_PIN      GPIO_PIN_6
-#define AD9954_PWR_PORT     GPIOB
-#define AD9954_PWR_PIN      GPIO_PIN_0
+#define AD9954_RES_PIN      GPIO_PIN_8
+#define AD9954_PWR_PORT     GPIOC
+#define AD9954_PWR_PIN      GPIO_PIN_8
 
 // HAL API 宏定义
 #define AD9954_CS(x)        HAL_GPIO_WritePin(AD9954_CS_PORT, AD9954_CS_PIN, (x) ? GPIO_PIN_SET : GPIO_PIN_RESET)
@@ -68,6 +68,7 @@
 
 // 精确延时函数声明
 void delay_us(uint32_t us);
+void delay_us_systick(uint32_t us);
 #endif
 
 
