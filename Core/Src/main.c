@@ -72,13 +72,9 @@ osMessageQueueId_t ADCQueueHandle;
 
 /* Variables for ADC dual mode DMA testing */
 #define ADC_BUFFER_SIZE 1024
-/* ??Cache??API???DMA????32???? */
-#if defined ( __ICCARM__ )
-#pragma location = 0x38000000
-uint32_t dmabuffer[ADC_BUFFER_SIZE]; // Buffer for DMA transfers
-#elif defined ( __CC_ARM ) || defined(__GNUC__)
-ALIGN_32BYTES(__attribute__((section(".RAM_D3"))) uint32_t dmabuffer[ADC_BUFFER_SIZE]); // Buffer for DMA transfers
-#endif
+
+uint32_t dmabuffer[ADC_BUFFER_SIZE]__attribute__((section(".ARM.__at_0x24000000"))); // Buffer for DMA transfers
+
 uint16_t adc1_data[ADC_BUFFER_SIZE]; // Buffer for ADC1 data
 uint16_t adc2_data[ADC_BUFFER_SIZE]; // Buffer for ADC2 data
 volatile uint8_t adc_conversion_complete = 0; // Flag to indicate conversion complete
@@ -126,22 +122,21 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
   /* ADC???????? */
   if(hadc->Instance == ADC1)
   {
-    /* ???DMA???????D-Cache????? */
-    /* dmabuffer?32????????32????????????????? */
+
     SCB_InvalidateDCache_by_Addr((uint32_t*)dmabuffer, ADC_BUFFER_SIZE * sizeof(uint32_t));
     
-    /* ?????? */
+    
     for(uint32_t j = 0; j < 10; j++)
     {
-      /* ??ADC1?ADC2?? */
+
       adc1_data[j] = (uint16_t)(dmabuffer[j] & 0xFF);
       adc2_data[j] = (uint16_t)((dmabuffer[j] >> 16) & 0xFF);
     }
     
-    /* ???????? */
+
     adc_conversion_complete = 1;
     
-    /* ?????? */
+  
     printf("ADC??: ADC1: %u, ADC2: %u\r\n", 
            (unsigned int)adc1_data[0], (unsigned int)adc2_data[0]);
   }
@@ -287,7 +282,7 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
-  // �? ADC 的多通道采样和输出，不采�?
+  // �? ADC 的多通道采样和输出，不采�?
   // ADCSamplingTaskHandle = osThreadNew(ADCSamplingTask, NULL, &ADCSamplingTask_attributes);
   // ADCOutputTaskHandle = osThreadNew(ADCOutputTask, NULL, &ADCOutputTask_attributes);
   /* USER CODE END RTOS_THREADS */
