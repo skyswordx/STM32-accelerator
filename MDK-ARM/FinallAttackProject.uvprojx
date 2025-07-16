@@ -1352,6 +1352,11 @@
               <FileType>1</FileType>
               <FilePath>..\Task\ADCsampleTask.c</FilePath>
             </File>
+            <File>
+              <FileName>ADCOutputTask.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Task\ADCOutputTask.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

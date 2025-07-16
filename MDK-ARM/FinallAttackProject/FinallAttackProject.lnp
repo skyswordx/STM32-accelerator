@@ -41,6 +41,7 @@
 "finallattackproject\heap_4.o"
 "finallattackproject\port.o"
 "finallattackproject\adcsampletask.o"
+"finallattackproject\adcoutputtask.o"
 "finallattackproject\ina226.o"
 "finallattackproject\ad9954.o"
 --library_type=microlib --strict --scatter "FinallAttackProject\FinallAttackProject.sct"
