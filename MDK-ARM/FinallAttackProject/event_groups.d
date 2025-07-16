@@ -1,13 +1,15 @@
-finallattackproject/event_groups.o: \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\event_groups.c \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\include\FreeRTOS.h \
-  ..\Core\Inc\FreeRTOSConfig.h \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\include\projdefs.h \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\include\portable.h \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\include\deprecated_definitions.h \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\portable\RVDS\ARM_CM4F\portmacro.h \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\include\mpu_wrappers.h \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\include\task.h \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\include\list.h \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\include\timers.h \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\include\event_groups.h
+finallattackproject\event_groups.o: ../Middlewares/Third_Party/FreeRTOS/Source/event_groups.c
+finallattackproject\event_groups.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdlib.h
+finallattackproject\event_groups.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+finallattackproject\event_groups.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stddef.h
+finallattackproject\event_groups.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdint.h
+finallattackproject\event_groups.o: ../Core/Inc/FreeRTOSConfig.h
+finallattackproject\event_groups.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+finallattackproject\event_groups.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+finallattackproject\event_groups.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+finallattackproject\event_groups.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
+finallattackproject\event_groups.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+finallattackproject\event_groups.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+finallattackproject\event_groups.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
+finallattackproject\event_groups.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h
+finallattackproject\event_groups.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h

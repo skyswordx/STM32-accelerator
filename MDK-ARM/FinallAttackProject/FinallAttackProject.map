@@ -1607,6 +1607,55 @@ Section Cross References
     adcsampletask.o(.constdata) refers to adcsampletask.o(.conststring) for .conststring
     adcsampletask.o(.constdata) refers to adcsampletask.o(.conststring) for .conststring
     adcsampletask.o(.constdata) refers to adcsampletask.o(.conststring) for .conststring
+    ina226.o(i.INA226_GetBusV) refers to ina226.o(i.INA226_GetBusVReg) for INA226_GetBusVReg
+    ina226.o(i.INA226_GetBusVReg) refers to stm32h7xx_hal_i2c.o(i.HAL_I2C_Master_Transmit) for HAL_I2C_Master_Transmit
+    ina226.o(i.INA226_GetBusVReg) refers to stm32h7xx_hal_i2c.o(i.HAL_I2C_Master_Receive) for HAL_I2C_Master_Receive
+    ina226.o(i.INA226_GetBusVReg) refers to main.o(.bss) for hi2c1
+    ina226.o(i.INA226_GetCurrent) refers to ina226.o(i.INA226_GetCurrentReg) for INA226_GetCurrentReg
+    ina226.o(i.INA226_GetCurrentReg) refers to stm32h7xx_hal_i2c.o(i.HAL_I2C_Master_Transmit) for HAL_I2C_Master_Transmit
+    ina226.o(i.INA226_GetCurrentReg) refers to stm32h7xx_hal_i2c.o(i.HAL_I2C_Master_Receive) for HAL_I2C_Master_Receive
+    ina226.o(i.INA226_GetCurrentReg) refers to main.o(.bss) for hi2c1
+    ina226.o(i.INA226_GetPower) refers to ina226.o(i.INA226_GetPowerReg) for INA226_GetPowerReg
+    ina226.o(i.INA226_GetPowerReg) refers to stm32h7xx_hal_i2c.o(i.HAL_I2C_Master_Transmit) for HAL_I2C_Master_Transmit
+    ina226.o(i.INA226_GetPowerReg) refers to stm32h7xx_hal_i2c.o(i.HAL_I2C_Master_Receive) for HAL_I2C_Master_Receive
+    ina226.o(i.INA226_GetPowerReg) refers to main.o(.bss) for hi2c1
+    ina226.o(i.INA226_SetCalibrationReg) refers to stm32h7xx_hal_i2c.o(i.HAL_I2C_Master_Transmit) for HAL_I2C_Master_Transmit
+    ina226.o(i.INA226_SetCalibrationReg) refers to main.o(.bss) for hi2c1
+    ina226.o(i.INA226_SetConfig) refers to stm32h7xx_hal_i2c.o(i.HAL_I2C_Master_Transmit) for HAL_I2C_Master_Transmit
+    ina226.o(i.INA226_SetConfig) refers to main.o(.bss) for hi2c1
+    ina226.o(i.INA226_init) refers to ina226.o(i.INA226_SetConfig) for INA226_SetConfig
+    ina226.o(i.INA226_init) refers to ina226.o(i.INA226_SetCalibrationReg) for INA226_SetCalibrationReg
+    ad9554.o(i.AD9554_DelayMs) refers to stm32h7xx_hal.o(i.HAL_Delay) for HAL_Delay
+    ad9554.o(i.AD9554_DelayUs) refers to system_stm32h7xx.o(.data) for SystemCoreClock
+    ad9554.o(i.AD9554_IOUpdate) refers to stm32h7xx_hal_gpio.o(i.HAL_GPIO_WritePin) for HAL_GPIO_WritePin
+    ad9554.o(i.AD9554_IOUpdate) refers to ad9554.o(i.AD9554_DelayUs) for AD9554_DelayUs
+    ad9554.o(i.AD9554_Init) refers to ad9554.o(i.AD9554_Reset) for AD9554_Reset
+    ad9554.o(i.AD9554_Init) refers to ad9554.o(i.AD9554_DelayMs) for AD9554_DelayMs
+    ad9554.o(i.AD9554_Init) refers to stm32h7xx_hal_gpio.o(i.HAL_GPIO_WritePin) for HAL_GPIO_WritePin
+    ad9554.o(i.AD9554_Init) refers to ad9554.o(i.AD9554_SPI_WriteByte) for AD9554_SPI_WriteByte
+    ad9554.o(i.AD9554_Init) refers to ad9554.o(.data) for .data
+    ad9554.o(i.AD9554_Reset) refers to stm32h7xx_hal_gpio.o(i.HAL_GPIO_WritePin) for HAL_GPIO_WritePin
+    ad9554.o(i.AD9554_Reset) refers to ad9554.o(i.AD9554_DelayMs) for AD9554_DelayMs
+    ad9554.o(i.AD9554_SPI_ReadByte) refers to stm32h7xx_hal_gpio.o(i.HAL_GPIO_WritePin) for HAL_GPIO_WritePin
+    ad9554.o(i.AD9554_SPI_ReadByte) refers to ad9554.o(i.AD9554_DelayUs) for AD9554_DelayUs
+    ad9554.o(i.AD9554_SPI_ReadByte) refers to stm32h7xx_hal_gpio.o(i.HAL_GPIO_ReadPin) for HAL_GPIO_ReadPin
+    ad9554.o(i.AD9554_SPI_WriteByte) refers to stm32h7xx_hal_gpio.o(i.HAL_GPIO_WritePin) for HAL_GPIO_WritePin
+    ad9554.o(i.AD9554_SPI_WriteByte) refers to ad9554.o(i.AD9554_DelayUs) for AD9554_DelayUs
+    ad9554.o(i.AD9554_SetAmplitude) refers to stm32h7xx_hal_gpio.o(i.HAL_GPIO_WritePin) for HAL_GPIO_WritePin
+    ad9554.o(i.AD9554_SetAmplitude) refers to ad9554.o(i.AD9554_SPI_WriteByte) for AD9554_SPI_WriteByte
+    ad9554.o(i.AD9554_SetAmplitude) refers to ad9554.o(i.AD9554_IOUpdate) for AD9554_IOUpdate
+    ad9554.o(i.AD9554_SetAmplitude) refers to ad9554.o(.data) for .data
+    ad9554.o(i.AD9554_SetFrequency) refers to ad9554.o(i.AD9554_FrequencyToFTW) for AD9554_FrequencyToFTW
+    ad9554.o(i.AD9554_SetFrequency) refers to stm32h7xx_hal_gpio.o(i.HAL_GPIO_WritePin) for HAL_GPIO_WritePin
+    ad9554.o(i.AD9554_SetFrequency) refers to ad9554.o(i.AD9554_SPI_WriteByte) for AD9554_SPI_WriteByte
+    ad9554.o(i.AD9554_SetFrequency) refers to ad9554.o(i.AD9554_IOUpdate) for AD9554_IOUpdate
+    ad9554.o(i.AD9554_SetFrequency) refers to ad9554.o(.data) for .data
+    ad9554.o(i.AD9554_SetPhase) refers to stm32h7xx_hal_gpio.o(i.HAL_GPIO_WritePin) for HAL_GPIO_WritePin
+    ad9554.o(i.AD9554_SetPhase) refers to ad9554.o(i.AD9554_SPI_WriteByte) for AD9554_SPI_WriteByte
+    ad9554.o(i.AD9554_SetPhase) refers to ad9554.o(i.AD9554_IOUpdate) for AD9554_IOUpdate
+    ad9554.o(i.AD9554_SetPhase) refers to ad9554.o(.data) for .data
+    ad9554.o(i.AD9554_SetScanMode) refers to stm32h7xx_hal_gpio.o(i.HAL_GPIO_WritePin) for HAL_GPIO_WritePin
+    ad9554.o(i.AD9554_SetScanMode) refers to ad9554.o(.data) for .data
     entry.o(.ARM.Collect$$$$00000000) refers (Special) to entry10a.o(.ARM.Collect$$$$0000000F) for __rt_final_cpp
     entry.o(.ARM.Collect$$$$00000000) refers (Special) to entry11a.o(.ARM.Collect$$$$00000011) for __rt_final_exit
     entry.o(.ARM.Collect$$$$00000000) refers (Special) to entry12b.o(.ARM.Collect$$$$0000000E) for __rt_lib_shutdown_fini
@@ -2762,8 +2811,37 @@ Removing Unused input sections from the image.
     Removing adcsampletask.o(i.ADC_PrintSystemStatus), (2 bytes).
     Removing adcsampletask.o(i.ADC_SetOutputMode), (132 bytes).
     Removing adcsampletask.o(i.ADC_SwitchToNextOutputMode), (20 bytes).
+    Removing ina226.o(.rev16_text), (4 bytes).
+    Removing ina226.o(.revsh_text), (4 bytes).
+    Removing ina226.o(.rrx_text), (6 bytes).
+    Removing ina226.o(i.INA226_GetBusV), (28 bytes).
+    Removing ina226.o(i.INA226_GetBusVReg), (60 bytes).
+    Removing ina226.o(i.INA226_GetCurrent), (36 bytes).
+    Removing ina226.o(i.INA226_GetCurrentReg), (60 bytes).
+    Removing ina226.o(i.INA226_GetPower), (28 bytes).
+    Removing ina226.o(i.INA226_GetPowerReg), (60 bytes).
+    Removing ina226.o(i.INA226_SetCalibrationReg), (40 bytes).
+    Removing ina226.o(i.INA226_SetConfig), (40 bytes).
+    Removing ina226.o(i.INA226_init), (22 bytes).
+    Removing ad9554.o(.rev16_text), (4 bytes).
+    Removing ad9554.o(.revsh_text), (4 bytes).
+    Removing ad9554.o(.rrx_text), (6 bytes).
+    Removing ad9554.o(i.AD9554_DelayMs), (4 bytes).
+    Removing ad9554.o(i.AD9554_DelayUs), (44 bytes).
+    Removing ad9554.o(i.AD9554_FTWToFrequency), (28 bytes).
+    Removing ad9554.o(i.AD9554_FrequencyToFTW), (28 bytes).
+    Removing ad9554.o(i.AD9554_IOUpdate), (60 bytes).
+    Removing ad9554.o(i.AD9554_Init), (184 bytes).
+    Removing ad9554.o(i.AD9554_Reset), (132 bytes).
+    Removing ad9554.o(i.AD9554_SPI_ReadByte), (96 bytes).
+    Removing ad9554.o(i.AD9554_SPI_WriteByte), (104 bytes).
+    Removing ad9554.o(i.AD9554_SetAmplitude), (84 bytes).
+    Removing ad9554.o(i.AD9554_SetFrequency), (96 bytes).
+    Removing ad9554.o(i.AD9554_SetPhase), (76 bytes).
+    Removing ad9554.o(i.AD9554_SetScanMode), (80 bytes).
+    Removing ad9554.o(.data), (1 bytes).
 
-886 unused section(s) (total 84792 bytes) removed from the image.
+915 unused section(s) (total 86211 bytes) removed from the image.
 
 ==============================================================================
 
@@ -2811,43 +2889,43 @@ Image Symbol Table
     ../Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c 0x00000000   Number         0  stream_buffer.o ABSOLUTE
     ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c 0x00000000   Number         0  tasks.o ABSOLUTE
     ../Middlewares/Third_Party/FreeRTOS/Source/timers.c 0x00000000   Number         0  timers.o ABSOLUTE
-    ../clib/microlib/division.c              0x00000000   Number         0  uldiv.o ABSOLUTE
     ../clib/microlib/division.c              0x00000000   Number         0  uidiv.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10b.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry8a.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry12b.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry12a.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry11b.o ABSOLUTE
+    ../clib/microlib/division.c              0x00000000   Number         0  uldiv.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry7b.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry8b.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry9a.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry7a.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry9b.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry9a.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry5.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10a.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry9b.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry12b.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10b.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry12a.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry8b.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry8a.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry11b.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry2.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry11a.o ABSOLUTE
     ../clib/microlib/longlong.c              0x00000000   Number         0  llsshr.o ABSOLUTE
     ../clib/microlib/longlong.c              0x00000000   Number         0  llshl.o ABSOLUTE
     ../clib/microlib/longlong.c              0x00000000   Number         0  llushr.o ABSOLUTE
+    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf8.o ABSOLUTE
+    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printfb.o ABSOLUTE
+    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf7.o ABSOLUTE
+    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf0.o ABSOLUTE
+    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf1.o ABSOLUTE
     ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf2.o ABSOLUTE
     ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf3.o ABSOLUTE
     ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf4.o ABSOLUTE
     ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf5.o ABSOLUTE
     ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf6.o ABSOLUTE
-    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf7.o ABSOLUTE
-    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf8.o ABSOLUTE
     ../clib/microlib/printf/printf.c         0x00000000   Number         0  printfa.o ABSOLUTE
-    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printfb.o ABSOLUTE
-    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf0.o ABSOLUTE
-    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf1.o ABSOLUTE
     ../clib/microlib/printf/stubs.s          0x00000000   Number         0  stubs.o ABSOLUTE
     ../clib/microlib/stdio/streams.c         0x00000000   Number         0  stdout.o ABSOLUTE
     ../clib/microlib/string/memcpy.c         0x00000000   Number         0  memcpyb.o ABSOLUTE
     ../clib/microlib/string/memcpy.c         0x00000000   Number         0  memcpya.o ABSOLUTE
-    ../clib/microlib/string/memset.c         0x00000000   Number         0  memseta.o ABSOLUTE
     ../clib/microlib/string/memset.c         0x00000000   Number         0  memset.o ABSOLUTE
+    ../clib/microlib/string/memset.c         0x00000000   Number         0  memseta.o ABSOLUTE
     ../clib/microlib/stubs.s                 0x00000000   Number         0  iusefp.o ABSOLUTE
     ../fplib/microlib/fpadd.c                0x00000000   Number         0  dadd.o ABSOLUTE
     ../fplib/microlib/fpdiv.c                0x00000000   Number         0  ddiv.o ABSOLUTE
@@ -2860,6 +2938,8 @@ Image Symbol Table
     ..\Core\Src\stm32h7xx_hal_timebase_tim.c 0x00000000   Number         0  stm32h7xx_hal_timebase_tim.o ABSOLUTE
     ..\Core\Src\stm32h7xx_it.c               0x00000000   Number         0  stm32h7xx_it.o ABSOLUTE
     ..\Core\Src\system_stm32h7xx.c           0x00000000   Number         0  system_stm32h7xx.o ABSOLUTE
+    ..\Drivers\AD9554\AD9554.c               0x00000000   Number         0  ad9554.o ABSOLUTE
+    ..\Drivers\INA226\INA226.c               0x00000000   Number         0  ina226.o ABSOLUTE
     ..\Drivers\STM32H7xx_HAL_Driver\Src\stm32h7xx_hal.c 0x00000000   Number         0  stm32h7xx_hal.o ABSOLUTE
     ..\Drivers\STM32H7xx_HAL_Driver\Src\stm32h7xx_hal_adc.c 0x00000000   Number         0  stm32h7xx_hal_adc.o ABSOLUTE
     ..\Drivers\STM32H7xx_HAL_Driver\Src\stm32h7xx_hal_adc_ex.c 0x00000000   Number         0  stm32h7xx_hal_adc_ex.o ABSOLUTE
@@ -2885,6 +2965,8 @@ Image Symbol Table
     ..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS_V2\cmsis_os2.c 0x00000000   Number         0  cmsis_os2.o ABSOLUTE
     ..\Middlewares\Third_Party\FreeRTOS\Source\portable\RVDS\ARM_CM4F\port.c 0x00000000   Number         0  port.o ABSOLUTE
     ..\Task\ADCsampleTask.c                  0x00000000   Number         0  adcsampletask.o ABSOLUTE
+    ..\\Drivers\\AD9554\\AD9554.c            0x00000000   Number         0  ad9554.o ABSOLUTE
+    ..\\Drivers\\INA226\\INA226.c            0x00000000   Number         0  ina226.o ABSOLUTE
     ..\\Task\\ADCsampleTask.c                0x00000000   Number         0  adcsampletask.o ABSOLUTE
     cdrcmple.s                               0x00000000   Number         0  cdrcmple.o ABSOLUTE
     dc.s                                     0x00000000   Number         0  dc.o ABSOLUTE
@@ -2913,8 +2995,8 @@ Image Symbol Table
     .text                                    0x0800043e   Section        0  uidiv.o(.text)
     .text                                    0x0800046a   Section        0  llshl.o(.text)
     .text                                    0x08000488   Section        0  llushr.o(.text)
-    .text                                    0x080004a8   Section        0  iusefp.o(.text)
     .text                                    0x080004a8   Section        0  dadd.o(.text)
+    .text                                    0x080004a8   Section        0  iusefp.o(.text)
     .text                                    0x080005f6   Section        0  dmul.o(.text)
     .text                                    0x080006da   Section        0  ddiv.o(.text)
     .text                                    0x080007b8   Section        0  dfixul.o(.text)
@@ -3699,34 +3781,34 @@ Memory Map of the image
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
     0x08000000   0x08000000   0x00000298   Data   RO            3    RESET               startup_stm32h750xx.o
-    0x08000298   0x08000298   0x00000000   Code   RO         6779  * .ARM.Collect$$$$00000000  mc_w.l(entry.o)
-    0x08000298   0x08000298   0x00000004   Code   RO         7053    .ARM.Collect$$$$00000001  mc_w.l(entry2.o)
-    0x0800029c   0x0800029c   0x00000004   Code   RO         7056    .ARM.Collect$$$$00000004  mc_w.l(entry5.o)
-    0x080002a0   0x080002a0   0x00000000   Code   RO         7058    .ARM.Collect$$$$00000008  mc_w.l(entry7b.o)
-    0x080002a0   0x080002a0   0x00000000   Code   RO         7060    .ARM.Collect$$$$0000000A  mc_w.l(entry8b.o)
-    0x080002a0   0x080002a0   0x00000008   Code   RO         7061    .ARM.Collect$$$$0000000B  mc_w.l(entry9a.o)
-    0x080002a8   0x080002a8   0x00000004   Code   RO         7068    .ARM.Collect$$$$0000000E  mc_w.l(entry12b.o)
-    0x080002ac   0x080002ac   0x00000000   Code   RO         7063    .ARM.Collect$$$$0000000F  mc_w.l(entry10a.o)
-    0x080002ac   0x080002ac   0x00000000   Code   RO         7065    .ARM.Collect$$$$00000011  mc_w.l(entry11a.o)
-    0x080002ac   0x080002ac   0x00000004   Code   RO         7054    .ARM.Collect$$$$00002712  mc_w.l(entry2.o)
+    0x08000298   0x08000298   0x00000000   Code   RO         6955  * .ARM.Collect$$$$00000000  mc_w.l(entry.o)
+    0x08000298   0x08000298   0x00000004   Code   RO         7229    .ARM.Collect$$$$00000001  mc_w.l(entry2.o)
+    0x0800029c   0x0800029c   0x00000004   Code   RO         7232    .ARM.Collect$$$$00000004  mc_w.l(entry5.o)
+    0x080002a0   0x080002a0   0x00000000   Code   RO         7234    .ARM.Collect$$$$00000008  mc_w.l(entry7b.o)
+    0x080002a0   0x080002a0   0x00000000   Code   RO         7236    .ARM.Collect$$$$0000000A  mc_w.l(entry8b.o)
+    0x080002a0   0x080002a0   0x00000008   Code   RO         7237    .ARM.Collect$$$$0000000B  mc_w.l(entry9a.o)
+    0x080002a8   0x080002a8   0x00000004   Code   RO         7244    .ARM.Collect$$$$0000000E  mc_w.l(entry12b.o)
+    0x080002ac   0x080002ac   0x00000000   Code   RO         7239    .ARM.Collect$$$$0000000F  mc_w.l(entry10a.o)
+    0x080002ac   0x080002ac   0x00000000   Code   RO         7241    .ARM.Collect$$$$00000011  mc_w.l(entry11a.o)
+    0x080002ac   0x080002ac   0x00000004   Code   RO         7230    .ARM.Collect$$$$00002712  mc_w.l(entry2.o)
     0x080002b0   0x080002b0   0x000000be   Code   RO         6557    .emb_text           port.o
     0x0800036e   0x0800036e   0x00000002   PAD
     0x08000370   0x08000370   0x00000024   Code   RO            4    .text               startup_stm32h750xx.o
-    0x08000394   0x08000394   0x00000062   Code   RO         6782    .text               mc_w.l(uldiv.o)
-    0x080003f6   0x080003f6   0x00000024   Code   RO         6784    .text               mc_w.l(memcpya.o)
-    0x0800041a   0x0800041a   0x00000024   Code   RO         6788    .text               mc_w.l(memseta.o)
-    0x0800043e   0x0800043e   0x0000002c   Code   RO         7070    .text               mc_w.l(uidiv.o)
-    0x0800046a   0x0800046a   0x0000001e   Code   RO         7072    .text               mc_w.l(llshl.o)
-    0x08000488   0x08000488   0x00000020   Code   RO         7074    .text               mc_w.l(llushr.o)
-    0x080004a8   0x080004a8   0x00000000   Code   RO         7076    .text               mc_w.l(iusefp.o)
-    0x080004a8   0x080004a8   0x0000014e   Code   RO         7077    .text               mf_w.l(dadd.o)
-    0x080005f6   0x080005f6   0x000000e4   Code   RO         7079    .text               mf_w.l(dmul.o)
-    0x080006da   0x080006da   0x000000de   Code   RO         7081    .text               mf_w.l(ddiv.o)
-    0x080007b8   0x080007b8   0x00000030   Code   RO         7083    .text               mf_w.l(dfixul.o)
-    0x080007e8   0x080007e8   0x00000030   Code   RO         7085    .text               mf_w.l(cdrcmple.o)
-    0x08000818   0x08000818   0x00000024   Code   RO         7087    .text               mc_w.l(init.o)
-    0x0800083c   0x0800083c   0x00000024   Code   RO         7089    .text               mc_w.l(llsshr.o)
-    0x08000860   0x08000860   0x000000ba   Code   RO         7091    .text               mf_w.l(depilogue.o)
+    0x08000394   0x08000394   0x00000062   Code   RO         6958    .text               mc_w.l(uldiv.o)
+    0x080003f6   0x080003f6   0x00000024   Code   RO         6960    .text               mc_w.l(memcpya.o)
+    0x0800041a   0x0800041a   0x00000024   Code   RO         6964    .text               mc_w.l(memseta.o)
+    0x0800043e   0x0800043e   0x0000002c   Code   RO         7246    .text               mc_w.l(uidiv.o)
+    0x0800046a   0x0800046a   0x0000001e   Code   RO         7248    .text               mc_w.l(llshl.o)
+    0x08000488   0x08000488   0x00000020   Code   RO         7250    .text               mc_w.l(llushr.o)
+    0x080004a8   0x080004a8   0x00000000   Code   RO         7252    .text               mc_w.l(iusefp.o)
+    0x080004a8   0x080004a8   0x0000014e   Code   RO         7253    .text               mf_w.l(dadd.o)
+    0x080005f6   0x080005f6   0x000000e4   Code   RO         7255    .text               mf_w.l(dmul.o)
+    0x080006da   0x080006da   0x000000de   Code   RO         7257    .text               mf_w.l(ddiv.o)
+    0x080007b8   0x080007b8   0x00000030   Code   RO         7259    .text               mf_w.l(dfixul.o)
+    0x080007e8   0x080007e8   0x00000030   Code   RO         7261    .text               mf_w.l(cdrcmple.o)
+    0x08000818   0x08000818   0x00000024   Code   RO         7263    .text               mc_w.l(init.o)
+    0x0800083c   0x0800083c   0x00000024   Code   RO         7265    .text               mc_w.l(llsshr.o)
+    0x08000860   0x08000860   0x000000ba   Code   RO         7267    .text               mf_w.l(depilogue.o)
     0x0800091a   0x0800091a   0x00000002   PAD
     0x0800091c   0x0800091c   0x00000268   Code   RO         6637    i.ADCOutputTask     adcsampletask.o
     0x08000b84   0x08000b84   0x00000484   Code   RO         6638    i.ADCSamplingTask   adcsampletask.o
@@ -3840,15 +3922,15 @@ Memory Map of the image
     0x08005808   0x08005808   0x00000094   Code   RO         4372    i.UART_WaitOnFlagUntilTimeout  stm32h7xx_hal_uart.o
     0x0800589c   0x0800589c   0x00000002   Code   RO          299    i.UsageFault_Handler  stm32h7xx_it.o
     0x0800589e   0x0800589e   0x00000002   PAD
-    0x080058a0   0x080058a0   0x00000020   Code   RO         7025    i.__0printf         mc_w.l(printfa.o)
+    0x080058a0   0x080058a0   0x00000020   Code   RO         7201    i.__0printf         mc_w.l(printfa.o)
     0x080058c0   0x080058c0   0x00000022   Code   RO         2255    i.__NVIC_SetPriority  stm32h7xx_hal_cortex.o
-    0x080058e2   0x080058e2   0x0000000e   Code   RO         7095    i.__scatterload_copy  mc_w.l(handlers.o)
-    0x080058f0   0x080058f0   0x00000002   Code   RO         7096    i.__scatterload_null  mc_w.l(handlers.o)
-    0x080058f2   0x080058f2   0x0000000e   Code   RO         7097    i.__scatterload_zeroinit  mc_w.l(handlers.o)
-    0x08005900   0x08005900   0x00000184   Code   RO         7032    i._fp_digits        mc_w.l(printfa.o)
-    0x08005a84   0x08005a84   0x000006b4   Code   RO         7033    i._printf_core      mc_w.l(printfa.o)
-    0x08006138   0x08006138   0x00000024   Code   RO         7034    i._printf_post_padding  mc_w.l(printfa.o)
-    0x0800615c   0x0800615c   0x0000002e   Code   RO         7035    i._printf_pre_padding  mc_w.l(printfa.o)
+    0x080058e2   0x080058e2   0x0000000e   Code   RO         7271    i.__scatterload_copy  mc_w.l(handlers.o)
+    0x080058f0   0x080058f0   0x00000002   Code   RO         7272    i.__scatterload_null  mc_w.l(handlers.o)
+    0x080058f2   0x080058f2   0x0000000e   Code   RO         7273    i.__scatterload_zeroinit  mc_w.l(handlers.o)
+    0x08005900   0x08005900   0x00000184   Code   RO         7208    i._fp_digits        mc_w.l(printfa.o)
+    0x08005a84   0x08005a84   0x000006b4   Code   RO         7209    i._printf_core      mc_w.l(printfa.o)
+    0x08006138   0x08006138   0x00000024   Code   RO         7210    i._printf_post_padding  mc_w.l(printfa.o)
+    0x0800615c   0x0800615c   0x0000002e   Code   RO         7211    i._printf_pre_padding  mc_w.l(printfa.o)
     0x0800618a   0x0800618a   0x00000002   PAD
     0x0800618c   0x0800618c   0x00000018   Code   RO           22    i.fputc             main.o
     0x080061a4   0x080061a4   0x000000c8   Code   RO           23    i.main              main.o
@@ -3956,7 +4038,7 @@ Memory Map of the image
     0x08007f08   0x08007f08   0x0000000e   Data   RO         6660    .conststring        adcsampletask.o
     0x08007f16   0x08007f16   0x00000002   PAD
     0x08007f18   0x08007f18   0x000000b8   Data   RO         6661    .conststring        adcsampletask.o
-    0x08007fd0   0x08007fd0   0x00000020   Data   RO         7093    Region$$Table       anon$$obj.o
+    0x08007fd0   0x08007fd0   0x00000020   Data   RO         7269    Region$$Table       anon$$obj.o
 
 
     Execution Region RW_IRAM1 (Exec base: 0x20000000, Load base: 0x08007ff0, Size: 0x00000000, Max: 0x00020000, ABSOLUTE)
@@ -3979,7 +4061,7 @@ Memory Map of the image
     0x2400009c   0x0800808c   0x00000014   Data   RW         6662    .data               adcsampletask.o
     0x240000b0   0x080080a0   0x00000004   Data   RW         6663    .data               adcsampletask.o
     0x240000b4   0x080080a4   0x00000004   Data   RW         6664    .data               adcsampletask.o
-    0x240000b8   0x080080a8   0x00000004   Data   RW         7069    .data               mc_w.l(stdout.o)
+    0x240000b8   0x080080a8   0x00000004   Data   RW         7245    .data               mc_w.l(stdout.o)
     0x240000bc        -       0x0000014c   Zero   RW           24    .bss                main.o
     0x24000208        -       0x0000004c   Zero   RW          420    .bss                stm32h7xx_hal_timebase_tim.o
     0x24000254        -       0x00000040   Zero   RW         5084    .bss                queue.o

@@ -1,12 +1,15 @@
-finallattackproject/queue.o: \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\queue.c \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\include\FreeRTOS.h \
-  ..\Core\Inc\FreeRTOSConfig.h \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\include\projdefs.h \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\include\portable.h \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\include\deprecated_definitions.h \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\portable\RVDS\ARM_CM4F\portmacro.h \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\include\mpu_wrappers.h \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\include\task.h \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\include\list.h \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\include\queue.h
+finallattackproject\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/queue.c
+finallattackproject\queue.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdlib.h
+finallattackproject\queue.o: D:\KEIL\ARM\ARMCC\Bin\..\include\string.h
+finallattackproject\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+finallattackproject\queue.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stddef.h
+finallattackproject\queue.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdint.h
+finallattackproject\queue.o: ../Core/Inc/FreeRTOSConfig.h
+finallattackproject\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+finallattackproject\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+finallattackproject\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+finallattackproject\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
+finallattackproject\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+finallattackproject\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+finallattackproject\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
+finallattackproject\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
