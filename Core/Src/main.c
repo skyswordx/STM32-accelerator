@@ -119,26 +119,11 @@ int fgetc(FILE * f)
   */
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
-  /* ADC???????? */
+  /* ADC转换完成回调 */
   if(hadc->Instance == ADC1)
   {
-
-    SCB_InvalidateDCache_by_Addr((uint32_t*)dmabuffer, ADC_BUFFER_SIZE * sizeof(uint32_t));
-    
-    
-    for(uint32_t j = 0; j < 10; j++)
-    {
-
-      adc1_data[j] = (uint16_t)(dmabuffer[j] & 0xFF);
-      adc2_data[j] = (uint16_t)((dmabuffer[j] >> 16) & 0xFF);
-    }
-    
-
+    /* 仅在中断中设置标志，避免在中断上下文中进行复杂操作 */
     adc_conversion_complete = 1;
-    
-  
-    printf("ADC??: ADC1: %u, ADC2: %u\r\n", 
-           (unsigned int)adc1_data[0], (unsigned int)adc2_data[0]);
   }
 }
 /* USER CODE END 0 */
@@ -217,18 +202,18 @@ int main(void)
          (unsigned long)dmabuffer, 
          (unsigned long)(ADC_BUFFER_SIZE * sizeof(uint32_t)));
 
-  /* ???DMA????????DMA???????????0 */
+  /* 清空DMA缓冲区并确保缓存一致性 */
   memset(dmabuffer, 0, ADC_BUFFER_SIZE * sizeof(uint32_t));
   
-  /* ?DMA????????D-Cache???DMA???????????? */
+  /* 清除DMA缓冲区的D-Cache，确保DMA能够正确写入 */
   SCB_CleanDCache_by_Addr((uint32_t*)dmabuffer, ADC_BUFFER_SIZE * sizeof(uint32_t));
   
-  /* ??DMA????? */
+  /* 检查DMA缓冲区对齐 */
   printf("DMA buffer address: 0x%08lx, aligned: %s\r\n", 
          (unsigned long)dmabuffer, 
          (((uint32_t)dmabuffer & 0x1F) == 0) ? "yes" : "no");
 
-  /* ????ADC */
+  /* 启动ADC2 */
   printf("Starting ADC2...\r\n");
   if (HAL_ADC_Start(&hadc2) != HAL_OK)
   {
@@ -237,14 +222,14 @@ int main(void)
   }
   printf("ADC2 started successfully\r\n");
   
-  /* ?????ADC?DMA?? */
+  /* 启动ADC1的DMA多通道模式 */
   printf("Starting ADC1 with DMA...\r\n");
   
-  /* ??DMA???? */
-  uint32_t dma_test_size = 32; // ?????????
+  /* 设置DMA测试大小 */
+  uint32_t dma_test_size = ADC_BUFFER_SIZE; // 初始测试样本数
   printf("DMA test size: %lu samples\r\n", (unsigned long)dma_test_size);
   
-  /* ?????ADC?????DMA?? */
+  /* 启动ADC双通道模式DMA传输 */
   HAL_StatusTypeDef status = HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)dmabuffer, dma_test_size);
   if (status != HAL_OK)
   {
@@ -282,7 +267,7 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
-  // �? ADC 的多通道采样和输出，不采�?
+  // ďż?? ADC çĺ¤éééć ˇĺčžĺşďźä¸éďż??
   // ADCSamplingTaskHandle = osThreadNew(ADCSamplingTask, NULL, &ADCSamplingTask_attributes);
   // ADCOutputTaskHandle = osThreadNew(ADCOutputTask, NULL, &ADCOutputTask_attributes);
   /* USER CODE END RTOS_THREADS */
@@ -497,7 +482,7 @@ static void MX_ADC2_Init(void)
   hadc2.Init.ContinuousConvMode = ENABLE;
   hadc2.Init.NbrOfConversion = 1;
   hadc2.Init.DiscontinuousConvMode = DISABLE;
-  hadc2.Init.ConversionDataManagement = ADC_CONVERSIONDATA_DMA_CIRCULAR;
+  hadc2.Init.ConversionDataManagement = ADC_CONVERSIONDATA_DR;
   hadc2.Init.Overrun = ADC_OVR_DATA_PRESERVED;
   hadc2.Init.LeftBitShift = ADC_LEFTBITSHIFT_NONE;
   hadc2.Init.OversamplingMode = DISABLE;
@@ -778,6 +763,21 @@ void StartDefaultTask(void *argument)
       /* Reset the flag */
       adc_conversion_complete = 0;
       
+      /* 在主任务中进行缓存操作，避免在中断上下文中的时序问题 */
+      /* 刷新DMA缓冲区的D-Cache */
+      SCB_InvalidateDCache_by_Addr((uint32_t*)dmabuffer, ADC_BUFFER_SIZE * sizeof(uint32_t));
+      
+      /* 8位模式下数据解包：
+       * dmabuffer[j] = 0x0000xxyy
+       * 其中 xx (高8位) = ADC2 (slave)
+       * 其中 yy (低8位) = ADC1 (master)
+       */
+      for(uint32_t j = 0; j < 10; j++)
+      {
+        adc1_data[j] = (uint16_t)(dmabuffer[j] & 0xFF);        // 低8位是ADC1 (master)
+        adc2_data[j] = (uint16_t)((dmabuffer[j] >> 8) & 0xFF); // 高8位是ADC2 (slave)
+      }
+      
       /* Process the ADC data here */
       /* For example, calculate average of first 10 samples */
       uint32_t adc1_sum = 0, adc2_sum = 0;
@@ -792,9 +792,11 @@ void StartDefaultTask(void *argument)
       if(current_tick - last_check_tick >= 1000)
       {
         last_check_tick = current_tick;
-        printf("ADC1 Avg: %lu, ADC2 Avg: %lu\r\n", 
+        printf("ADC1 Avg: %lu, ADC2 Avg: %lu (Real-time: ADC1=%u, ADC2=%u)\r\n", 
                (unsigned long)(adc1_sum / 10), 
-               (unsigned long)(adc2_sum / 10));
+               (unsigned long)(adc2_sum / 10),
+               (unsigned int)adc1_data[0], 
+               (unsigned int)adc2_data[0]);
       }
     }
     
@@ -809,30 +811,25 @@ void MPU_Config(void)
 {
   MPU_Region_InitTypeDef MPU_InitStruct = {0};
 
-  /* ??MPU */
+  /* Disables the MPU */
   HAL_MPU_Disable();
 
-  /* ??DMA?????????? */
+  /** Initializes and configures the Region and the memory to be protected
+  */
   MPU_InitStruct.Enable = MPU_REGION_ENABLE;
   MPU_InitStruct.Number = MPU_REGION_NUMBER0;
-  /* ??????DMA??????????32???? */
-  MPU_InitStruct.BaseAddress = (uint32_t)dmabuffer & ~0x1F;
-  /* ??????????????DMA??? */
-  MPU_InitStruct.Size = MPU_REGION_SIZE_4KB;
-  MPU_InitStruct.SubRegionDisable = 0x00;
+  MPU_InitStruct.BaseAddress = 0x0;
+  MPU_InitStruct.Size = MPU_REGION_SIZE_4GB;
+  MPU_InitStruct.SubRegionDisable = 0x87;
   MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;
-  /* ????????? */
-  MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
-  /* ?????????????? */
-  MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
-  MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
+  MPU_InitStruct.AccessPermission = MPU_REGION_NO_ACCESS;
+  MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_DISABLE;
   MPU_InitStruct.IsShareable = MPU_ACCESS_SHAREABLE;
-  /* ???? */
-  MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_ENABLE;
+  MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
+  MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
 
   HAL_MPU_ConfigRegion(&MPU_InitStruct);
-  
-  /* ??MPU */
+  /* Enables the MPU */
   HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
 
 }

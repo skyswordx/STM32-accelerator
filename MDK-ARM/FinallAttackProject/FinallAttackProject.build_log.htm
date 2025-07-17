@@ -22,20 +22,21 @@ Dialog DLL:      TCM.DLL V1.56.4.0
  
 <h2>Project:</h2>
 D:\Musii-SnapShot\GithubRepo\STM32-accelerator\MDK-ARM\FinallAttackProject.uvprojx
-Project File Date:  07/16/2025
+Project File Date:  07/17/2025
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\KEIL\ARM\ARMCC\Bin'
 Build target 'FinallAttackProject'
-assembling startup_stm32h750xx.s...
 compiling main.c...
 ../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
   #endif /* INA226_H_ */
-../Core/Src/main.c: 1 warning, 0 errors
+../Core/Src/main.c(206): warning:  #223-D: function "memset" declared implicitly
+    memset(dmabuffer, 0, ADC_BUFFER_SIZE * sizeof(uint32_t));
+../Core/Src/main.c: 2 warnings, 0 errors
 linking...
-Program Size: Code=32160 RO-data=808 RW-data=4276 ZI-data=24532  
+Program Size: Code=32272 RO-data=808 RW-data=4276 ZI-data=24532  
 FromELF: creating hex file...
-"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 1 Warning(s).
+"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 2 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -58,7 +59,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:12
+Build Time Elapsed:  00:00:07
 </pre>
 </body>
 </html>
