@@ -47,3 +47,5 @@ __STATIC_FORCEINLINE void SCB_InvalidateDCache_by_Addr (void *addr, int32_t dsiz
 的
 SCB->DCIMVAC = op_addr;             /* register accepts only 32byte aligned values, only bits 31..5 are valid */
 ```
+
+我现在用信号发生器输出 1 MHz，用 VOFA 上位机测量的波形发现，现在在串口助手中一个周期内有 14 或者 15 个样本点，请你结合现在系统时间戳，以及实际测量的结果，根据误差微调一下每个样本点的间隔单位，顺便以 vofa 的协议输出根据系统中的时间戳算出来的信号频率（不需要按照波形协议显示这个信号频率和时间戳，只需要输出文字即可，波形数据本身需要按照波形协议输出）

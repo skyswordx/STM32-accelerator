@@ -73,11 +73,18 @@ osMessageQueueId_t ADCQueueHandle;
 /* Variables for ADC dual mode DMA testing */
 #define ADC_BUFFER_SIZE 1024
 
-uint32_t dmabuffer[ADC_BUFFER_SIZE]__attribute__((section(".ARM.__at_0x24000000"))); // Buffer for DMA transfers
+/* 双缓冲机制 - 使用链接器自动分配内存，避免地址冲突 */
+uint32_t dmabuffer_ping[ADC_BUFFER_SIZE] __attribute__((aligned(32))); // Ping buffer for DMA transfers - 32字节对齐
+uint32_t dmabuffer_pong[ADC_BUFFER_SIZE] __attribute__((aligned(32))); // Pong buffer for DMA transfers - 32字节对齐
+
+uint32_t* active_dma_buffer = dmabuffer_ping;     // 当前DMA写入的缓冲区
+uint32_t* processing_buffer = dmabuffer_pong;     // 当前处理的缓冲区
 
 uint16_t adc1_data[ADC_BUFFER_SIZE]; // Buffer for ADC1 data
 uint16_t adc2_data[ADC_BUFFER_SIZE]; // Buffer for ADC2 data
+uint16_t merged_adc_data[ADC_BUFFER_SIZE * 2]; // Buffer for merged interleaved ADC data
 volatile uint8_t adc_conversion_complete = 0; // Flag to indicate conversion complete
+volatile uint8_t buffer_swap_flag = 0; // Flag to indicate buffer swap is needed
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -94,7 +101,11 @@ static void MX_ADC2_Init(void);
 void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
-
+/* 函数声明 */
+static void SwapDMABuffers(void);
+static void ProcessCompleteBuffer(uint32_t* buffer);
+static void PrintInterleavedDataVOFA(uint16_t* merged_data, uint32_t sample_count);
+static float ADC_ToVoltage(uint16_t adc_value);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -122,6 +133,8 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
   /* ADC转换完成回调 */
   if(hadc->Instance == ADC1)
   {
+    /* 设置缓冲区交换标志 */
+    buffer_swap_flag = 1;
     /* 仅在中断中设置标志，避免在中断上下文中进行复杂操作 */
     adc_conversion_complete = 1;
   }
@@ -174,13 +187,16 @@ int main(void)
   MX_ADC2_Init();
   /* USER CODE BEGIN 2 */
   
+  /* 初始化时间戳基准 */
+  printf("Initializing interleaved ADC sampling system...\r\n");
+  
   AD9954_Init();
 	AD9954_Set_Fre(1000.0);
 	AD9954_Set_Amp(16383);
 	AD9954_Set_Phase(0);
 
   /* Initialize and setup ADCs for dual mode DMA operation */
-  printf("Starting ADC dual mode DMA test...\r\n");
+  printf("Starting ADC dual mode interleaved sampling...\r\n");
   
   /* Calibrate both ADCs */
   if (HAL_ADCEx_Calibration_Start(&hadc2, ADC_CALIB_FACTOR_LINEARITY_REGOFFSET, ADC_SINGLE_ENDED) != HAL_OK)
@@ -198,20 +214,23 @@ int main(void)
   printf("ADC calibration complete\r\n");
 
   /* Print DMA buffer information */
-  printf("DMA buffer address: 0x%08lx, size: %lu bytes\r\n", 
-         (unsigned long)dmabuffer, 
+  printf("DMA buffer addresses: Ping=0x%08lx, Pong=0x%08lx, size: %lu bytes each\r\n", 
+         (unsigned long)dmabuffer_ping, 
+         (unsigned long)dmabuffer_pong,
          (unsigned long)(ADC_BUFFER_SIZE * sizeof(uint32_t)));
 
   /* 清空DMA缓冲区并确保缓存一致性 */
-  memset(dmabuffer, 0, ADC_BUFFER_SIZE * sizeof(uint32_t));
+  memset(dmabuffer_ping, 0, ADC_BUFFER_SIZE * sizeof(uint32_t));
+  memset(dmabuffer_pong, 0, ADC_BUFFER_SIZE * sizeof(uint32_t));
   
   /* 清除DMA缓冲区的D-Cache，确保DMA能够正确写入 */
-  SCB_CleanDCache_by_Addr((uint32_t*)dmabuffer, ADC_BUFFER_SIZE * sizeof(uint32_t));
+  SCB_CleanDCache_by_Addr((uint32_t*)dmabuffer_ping, ADC_BUFFER_SIZE * sizeof(uint32_t));
+  SCB_CleanDCache_by_Addr((uint32_t*)dmabuffer_pong, ADC_BUFFER_SIZE * sizeof(uint32_t));
   
   /* 检查DMA缓冲区对齐 */
-  printf("DMA buffer address: 0x%08lx, aligned: %s\r\n", 
-         (unsigned long)dmabuffer, 
-         (((uint32_t)dmabuffer & 0x1F) == 0) ? "yes" : "no");
+  printf("DMA buffer alignment: Ping=%s, Pong=%s\r\n", 
+         (((uint32_t)dmabuffer_ping & 0x1F) == 0) ? "yes" : "no",
+         (((uint32_t)dmabuffer_pong & 0x1F) == 0) ? "yes" : "no");
 
   /* 启动ADC2 */
   printf("Starting ADC2...\r\n");
@@ -230,14 +249,14 @@ int main(void)
   printf("DMA test size: %lu samples\r\n", (unsigned long)dma_test_size);
   
   /* 启动ADC双通道模式DMA传输 */
-  HAL_StatusTypeDef status = HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)dmabuffer, dma_test_size);
+  HAL_StatusTypeDef status = HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)active_dma_buffer, dma_test_size);
   if (status != HAL_OK)
   {
     printf("ADC1 multimode DMA start error: %d\r\n", (int)status);
     Error_Handler();
   }
   
-  printf("ADC dual mode DMA started successfully\r\n");
+  printf("ADC dual mode interleaved sampling started successfully\r\n");
 
   /* USER CODE END 2 */
 
@@ -740,6 +759,102 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+/**
+ * @brief 交换DMA缓冲区
+ * @retval None
+ */
+static void SwapDMABuffers(void)
+{
+  /* 停止当前DMA传输 */
+  HAL_ADCEx_MultiModeStop_DMA(&hadc1);
+  
+  /* 交换缓冲区指针 */
+  uint32_t* temp = active_dma_buffer;
+  active_dma_buffer = processing_buffer;
+  processing_buffer = temp;
+  
+  /* 重新启动DMA传输到新的活动缓冲区 */
+  HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)active_dma_buffer, ADC_BUFFER_SIZE);
+}
+
+/**
+ * @brief 处理完整的缓冲区数据
+ * @param buffer 要处理的缓冲区指针
+ * @retval None
+ */
+static void ProcessCompleteBuffer(uint32_t* buffer)
+{
+  /* 在主任务中进行缓存操作，避免在中断上下文中的时序问题 */
+  /* 刷新DMA缓冲区的D-Cache */
+  SCB_InvalidateDCache_by_Addr((uint32_t*)buffer, ADC_BUFFER_SIZE * sizeof(uint32_t));
+  
+  /* 8位模式下数据解包：
+   * buffer[j] = 0x0000xxyy
+   * 其中 xx (高8位) = ADC2 (slave)
+   * 其中 yy (低8位) = ADC1 (master)
+   */
+  for(uint32_t j = 0; j < ADC_BUFFER_SIZE; j++)
+  {
+    adc1_data[j] = (uint16_t)(buffer[j] & 0xFF);        // 低8位是ADC1 (master)
+    adc2_data[j] = (uint16_t)((buffer[j] >> 8) & 0xFF); // 高8位是ADC2 (slave)
+  }
+  
+  /* 合并主从ADC数据为交替采样数据，实现双倍采样率效果：
+   * 假设ADC1先采样，ADC2后采样，则交替排列为：
+   * merged_data[0] = ADC1[0], merged_data[1] = ADC2[0]
+   * merged_data[2] = ADC1[1], merged_data[3] = ADC2[1]
+   * ...
+   * 这样可以实现双倍的有效采样率
+   */
+  for(uint32_t i = 0; i < ADC_BUFFER_SIZE; i++)
+  {
+    merged_adc_data[i * 2] = adc1_data[i];     // 偶数索引放ADC1数据
+    merged_adc_data[i * 2 + 1] = adc2_data[i]; // 奇数索引放ADC2数据
+  }
+  
+  /* 输出交替采样数据到VOFA */
+  PrintInterleavedDataVOFA(merged_adc_data, ADC_BUFFER_SIZE * 2);
+}
+
+/**
+ * @brief 按照VOFA协议输出交替采样数据
+ * @param merged_data 合并后的交替采样数据缓冲区
+ * @param sample_count 总样本数量
+ * @retval None
+ */
+static void PrintInterleavedDataVOFA(uint16_t* merged_data, uint32_t sample_count)
+{
+  static uint32_t sample_index = 0; // 静态变量保存样本索引
+  
+  /* 输出交替采样数据，每个样本包含电压值和时间戳 */
+  for(uint32_t i = 0; i < sample_count; i++)
+  {
+    float voltage = ADC_ToVoltage(merged_data[i]);
+    
+    /* 计算每个样本的时间戳（微秒）
+     * 使用样本索引来计算时间戳，假设每个样本间隔固定
+     * 这里假设交替采样的有效采样率为20kHz（每个样本间隔50微秒）
+     */
+    uint32_t timestamp = sample_index * 50; // 每个样本间隔50微秒
+    
+    /* VOFA协议格式：voltage,timestamp */
+    printf("%.6f,%lu\n", voltage, timestamp);
+    
+    sample_index++;
+  }
+}
+
+/**
+ * @brief 将ADC原始值转换为电压值
+ * @param adc_value ADC原始值 (8位)
+ * @retval float 电压值 (V)
+ */
+static float ADC_ToVoltage(uint16_t adc_value)
+{
+  /* 8位ADC，参考电压3.3V */
+  return (float)adc_value * 3.3f / 255.0f;
+}
+
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -753,6 +868,9 @@ void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
   uint32_t last_check_tick = 0;
+  uint32_t waveform_count = 0;
+  
+  printf("DefaultTask started, waiting for interleaved ADC data...\r\n");
   
   /* Infinite loop */
   for(;;)
@@ -763,44 +881,29 @@ void StartDefaultTask(void *argument)
       /* Reset the flag */
       adc_conversion_complete = 0;
       
-      /* 在主任务中进行缓存操作，避免在中断上下文中的时序问题 */
-      /* 刷新DMA缓冲区的D-Cache */
-      SCB_InvalidateDCache_by_Addr((uint32_t*)dmabuffer, ADC_BUFFER_SIZE * sizeof(uint32_t));
-      
-      /* 8位模式下数据解包：
-       * dmabuffer[j] = 0x0000xxyy
-       * 其中 xx (高8位) = ADC2 (slave)
-       * 其中 yy (低8位) = ADC1 (master)
-       */
-      for(uint32_t j = 0; j < 10; j++)
+      /* 处理缓冲区交换 */
+      if(buffer_swap_flag)
       {
-        adc1_data[j] = (uint16_t)(dmabuffer[j] & 0xFF);        // 低8位是ADC1 (master)
-        adc2_data[j] = (uint16_t)((dmabuffer[j] >> 8) & 0xFF); // 高8位是ADC2 (slave)
+        buffer_swap_flag = 0;
+        SwapDMABuffers();
       }
       
-      /* Process the ADC data here */
-      /* For example, calculate average of first 10 samples */
-      uint32_t adc1_sum = 0, adc2_sum = 0;
-      for(int i = 0; i < 10; i++)
-      {
-        adc1_sum += adc1_data[i];
-        adc2_sum += adc2_data[i];
-      }
+      /* 处理完整的缓冲区 */
+      ProcessCompleteBuffer(processing_buffer);
       
-      /* Print results every second */
+      waveform_count++;
+      
+      /* 每10个波形输出一次统计信息（减少干扰） */
       uint32_t current_tick = osKernelGetTickCount();
-      if(current_tick - last_check_tick >= 1000)
+      if(current_tick - last_check_tick >= 10000)
       {
         last_check_tick = current_tick;
-        printf("ADC1 Avg: %lu, ADC2 Avg: %lu (Real-time: ADC1=%u, ADC2=%u)\r\n", 
-               (unsigned long)(adc1_sum / 10), 
-               (unsigned long)(adc2_sum / 10),
-               (unsigned int)adc1_data[0], 
-               (unsigned int)adc2_data[0]);
+        printf("# Interleaved samples processed: %lu, System time: %lu ms\r\n", 
+               waveform_count * ADC_BUFFER_SIZE * 2, current_tick);
       }
     }
     
-    osDelay(10);  /* Small delay to prevent CPU hogging */
+    osDelay(1);  /* Small delay to prevent CPU hogging */
   }
   /* USER CODE END 5 */
 }

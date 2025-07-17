@@ -30,11 +30,11 @@ Build target 'FinallAttackProject'
 compiling main.c...
 ../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
   #endif /* INA226_H_ */
-../Core/Src/main.c(206): warning:  #223-D: function "memset" declared implicitly
-    memset(dmabuffer, 0, ADC_BUFFER_SIZE * sizeof(uint32_t));
+../Core/Src/main.c(223): warning:  #223-D: function "memset" declared implicitly
+    memset(dmabuffer_ping, 0, ADC_BUFFER_SIZE * sizeof(uint32_t));
 ../Core/Src/main.c: 2 warnings, 0 errors
 linking...
-Program Size: Code=32272 RO-data=808 RW-data=4276 ZI-data=24532  
+Program Size: Code=36056 RO-data=884 RW-data=188 ZI-data=36828  
 FromELF: creating hex file...
 "FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 2 Warning(s).
 
@@ -59,7 +59,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:07
+Build Time Elapsed:  00:00:08
 </pre>
 </body>
 </html>
