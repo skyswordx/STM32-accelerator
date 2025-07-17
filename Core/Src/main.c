@@ -27,6 +27,7 @@
 // #include "ADCOutputTask.h"
 #include "AD9954.h"
 #include "INA226.h"
+#include "arm_math.h"
 
 /* USER CODE END Includes */
 
