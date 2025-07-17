@@ -39,6 +39,21 @@ typedef struct {
   uint16_t adc1_value;
   uint16_t adc2_value;
 } adc_system_data_t;
+
+/* 频谱数据结构 */
+typedef struct {
+  float frequency;    // 频率值 (Hz)
+  float magnitude;    // 幅度值
+  uint32_t bin_index; // FFT bin 索引
+} spectrum_data_t;
+
+/* 基波分量结果结构 */
+typedef struct {
+  float fundamental_frequency;  // 基波频率 (Hz)
+  float fundamental_magnitude;  // 基波幅度
+  uint32_t fundamental_index;   // 基波在频谱数组中的索引
+  uint8_t found;               // 是否找到基波 (1=找到, 0=未找到)
+} fundamental_result_t;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -82,6 +97,10 @@ arm_cfft_radix4_instance_f32 scfft;//定义scfft结构体
 float FFT_InputBuf[FFT_LENGTH*2];  //FFT输入数组
 float FFT_OutputBuf[FFT_LENGTH];  //FFT输出数组
 
+/* 频谱数据存储数组 */
+spectrum_data_t spectrum_array[FFT_LENGTH];  // 频谱数据数组
+uint32_t spectrum_valid_count = 0;           // 有效频谱数据点数量
+
 /* 双缓冲机制 - 使用链接器自动分配内避免地址冲突 */
 uint32_t dmabuffer_ping[ADC_BUFFER_SIZE] __attribute__((aligned(32))); // Ping buffer for DMA transfers - 32字节对齐
 uint32_t dmabuffer_pong[ADC_BUFFER_SIZE] __attribute__((aligned(32))); // Pong buffer for DMA transfers - 32字节对齐
@@ -116,6 +135,8 @@ static void ProcessCompleteBuffer(uint32_t* buffer);
 static void PrintTimeDomainDataVOFA(uint16_t* merged_data, uint32_t sample_count);
 static void PrintFrequencySpectrumVOFA(uint16_t* merged_data, uint32_t sample_count, uint8_t remove_dc);
 static float ADC_ToVoltage(uint16_t adc_value);
+static void BuildSpectrumArray(float actual_sampling_rate, uint8_t remove_dc);
+static fundamental_result_t FindFundamentalComponent(float min_freq, float max_freq);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -931,6 +952,18 @@ static void PrintFrequencySpectrumVOFA(uint16_t* merged_data, uint32_t sample_co
   /* 执行FFT */
   arm_cfft_radix4_f32(&scfft, FFT_InputBuf);
   
+  /* 构建频谱数据数组 */
+  BuildSpectrumArray(actual_sampling_rate, remove_dc);
+  
+  /* 查找基波分量 (避免直流分量，搜索范围从100Hz到5MHz) */
+  fundamental_result_t fundamental = FindFundamentalComponent(100.0f, 5000000.0f);
+  
+  if (fundamental.found) {
+    printf("# 基波分量: %.2f Hz, 幅度: %.6f\n", 
+           fundamental.fundamental_frequency, 
+           fundamental.fundamental_magnitude);
+  }
+  
   /* 计算幅度谱并输出 */ 
   // 全频谱，实际上有效频率范围只有 0 到采样率的 1/2（奈奎斯特频率）
   // 采样率的 1/2 到采样率本身的部分是镜像
@@ -946,6 +979,105 @@ static void PrintFrequencySpectrumVOFA(uint16_t* merged_data, uint32_t sample_co
   }
   
   printf("=== 频谱数据结束 ===\n");
+}
+
+/**
+ * @brief 构建频谱数据数组
+ * @param actual_sampling_rate 实际采样率
+ * @param remove_dc 是否已滤除直流分量
+ * @retval None
+ */
+static void BuildSpectrumArray(float actual_sampling_rate, uint8_t remove_dc)
+{
+  spectrum_valid_count = 0;
+  
+  /* 只计算有效频谱范围 (0 到 采样率/2) */
+  uint32_t valid_bins = FFT_LENGTH / 2;
+  
+  /* 计算神秘系数 */
+  float shi = 0.09f;
+  
+  for(uint32_t i = 0; i < valid_bins; i++) {
+    float32_t real = FFT_InputBuf[2 * i];
+    float32_t imag = FFT_InputBuf[2 * i + 1];
+    float32_t magnitude = sqrtf(real * real + imag * imag);
+    
+    /* 计算频率 */
+    float frequency = shi * (float)i * actual_sampling_rate / FFT_LENGTH;
+    
+    /* 存储到频谱数组 */
+    spectrum_array[spectrum_valid_count].frequency = frequency;
+    spectrum_array[spectrum_valid_count].magnitude = magnitude;
+    spectrum_array[spectrum_valid_count].bin_index = i;
+    
+    spectrum_valid_count++;
+  }
+  
+  printf("# 频谱数组构建完成: %lu 个有效频谱点\n", spectrum_valid_count);
+}
+
+/**
+ * @brief 查找基波分量
+ * @param min_freq 搜索的最小频率 (Hz)
+ * @param max_freq 搜索的最大频率 (Hz)
+ * @retval fundamental_result_t 基波查找结果
+ */
+static fundamental_result_t FindFundamentalComponent(float min_freq, float max_freq)
+{
+  fundamental_result_t result = {0};
+  result.found = 0;
+  
+  if (spectrum_valid_count == 0) {
+    printf("# 错误: 频谱数组为空\n");
+    return result;
+  }
+  
+  /* 创建幅度数组用于arm_max_f32 */
+  static float magnitude_array[FFT_LENGTH/2];
+  uint32_t search_count = 0;
+  uint32_t start_index = 0;
+  
+  /* 找到搜索频率范围内的数据点 */
+  for(uint32_t i = 0; i < spectrum_valid_count; i++) {
+    if (spectrum_array[i].frequency >= min_freq && 
+        spectrum_array[i].frequency <= max_freq) {
+      
+      if (search_count == 0) {
+        start_index = i;
+      }
+      
+      magnitude_array[search_count] = spectrum_array[i].magnitude;
+      search_count++;
+    }
+  }
+  
+  if (search_count == 0) {
+    printf("# 警告: 在频率范围 %.2f - %.2f Hz 内未找到数据点\n", min_freq, max_freq);
+    return result;
+  }
+  
+  /* 使用 arm_max_f32 查找最大幅度 */
+  float max_magnitude;
+  uint32_t max_index_relative;
+  
+  arm_max_f32(magnitude_array, search_count, &max_magnitude, &max_index_relative);
+  
+  /* 计算在原始频谱数组中的实际索引 */
+  uint32_t actual_index = start_index + max_index_relative;
+  
+  /* 填充结果 */
+  result.fundamental_frequency = spectrum_array[actual_index].frequency;
+  result.fundamental_magnitude = max_magnitude;
+  result.fundamental_index = actual_index;
+  result.found = 1;
+  
+  printf("# 基波分量查找结果:\n");
+  printf("# 频率: %.2f Hz, 幅度: %.6f, 索引: %lu\n", 
+         result.fundamental_frequency, 
+         result.fundamental_magnitude, 
+         result.fundamental_index);
+  
+  return result;
 }
 
 /* USER CODE END 4 */
