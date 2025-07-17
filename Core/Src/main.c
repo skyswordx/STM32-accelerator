@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stdio.h"
+#include "math.h"
 // #include "ADCsampleTask.h"
 // #include "ADCOutputTask.h"
 #include "AD9954.h"
@@ -73,8 +74,15 @@ osMessageQueueId_t ADCQueueHandle;
 
 /* Variables for ADC dual mode DMA testing */
 #define ADC_BUFFER_SIZE 1024
+#define ADC_8BIT_RESOLUTION 256.0f // 8位ADC分辨率
 
-/* 双缓冲机制 - 使用链接器自动分配内存，避免地址冲突 */
+/* FFT相关变量定义 */
+#define FFT_LENGTH (ADC_BUFFER_SIZE) //交替采样的最大长度
+arm_cfft_radix4_instance_f32 scfft;//定义scfft结构体
+float FFT_InputBuf[FFT_LENGTH*2];  //FFT输入数组
+float FFT_OutputBuf[FFT_LENGTH];  //FFT输出数组
+
+/* 双缓冲机制 - 使用链接器自动分配内避免地址冲突 */
 uint32_t dmabuffer_ping[ADC_BUFFER_SIZE] __attribute__((aligned(32))); // Ping buffer for DMA transfers - 32字节对齐
 uint32_t dmabuffer_pong[ADC_BUFFER_SIZE] __attribute__((aligned(32))); // Pong buffer for DMA transfers - 32字节对齐
 
@@ -105,7 +113,8 @@ void StartDefaultTask(void *argument);
 /* 函数声明 */
 static void SwapDMABuffers(void);
 static void ProcessCompleteBuffer(uint32_t* buffer);
-static void PrintInterleavedDataVOFA(uint16_t* merged_data, uint32_t sample_count);
+static void PrintTimeDomainDataVOFA(uint16_t* merged_data, uint32_t sample_count);
+static void PrintFrequencySpectrumVOFA(uint16_t* merged_data, uint32_t sample_count, uint8_t remove_dc);
 static float ADC_ToVoltage(uint16_t adc_value);
 /* USER CODE END PFP */
 
@@ -814,16 +823,22 @@ static void ProcessCompleteBuffer(uint32_t* buffer)
   }
   
   /* 输出交替采样数据到VOFA */
-  PrintInterleavedDataVOFA(merged_adc_data, ADC_BUFFER_SIZE * 2);
+  // PrintTimeDomainDataVOFA(merged_adc_data, ADC_BUFFER_SIZE * 2);
+  
+  /* 输出频谱数据到VOFA - 包含直流分量 */
+  // PrintFrequencySpectrumVOFA(merged_adc_data, ADC_BUFFER_SIZE * 2, 0);
+  
+  /* 输出频谱数据到VOFA - 滤除直流分量 */
+  PrintFrequencySpectrumVOFA(merged_adc_data, ADC_BUFFER_SIZE * 2, 1);
 }
 
 /**
- * @brief 按照VOFA协议输出交替采样数据
+ * @brief 按照VOFA协议输出时域波形数据
  * @param merged_data 合并后的交替采样数据缓冲区
  * @param sample_count 总样本数量
  * @retval None
  */
-static void PrintInterleavedDataVOFA(uint16_t* merged_data, uint32_t sample_count)
+static void PrintTimeDomainDataVOFA(uint16_t* merged_data, uint32_t sample_count)
 {
   static uint32_t sample_index = 0; // 静态变量保存样本索引
   
@@ -854,6 +869,83 @@ static float ADC_ToVoltage(uint16_t adc_value)
 {
   /* 8位ADC，参考电压3.3V */
   return (float)adc_value * 3.3f / 255.0f;
+}
+
+/**
+ * @brief 按照VOFA协议输出频谱数据
+ * @param merged_data 合并后的交替采样数据缓冲区
+ * @param sample_count 总样本数量
+ * @param remove_dc 是否滤除直流分量：0-保留直流分量，1-滤除直流分量
+ * @retval None
+ */
+static void PrintFrequencySpectrumVOFA(uint16_t* merged_data, uint32_t sample_count, uint8_t remove_dc)
+{
+  /* 确保数据长度不超过FFT_LENGTH */
+  uint32_t fft_samples = (sample_count > FFT_LENGTH) ? FFT_LENGTH : sample_count;
+  
+  // float actual_sampling_rate = 26670000.0f; // 26.67 MHz
+  
+  /* 神秘系数 todo shi*/
+  // 根据实际测量结果校正采样率
+  // 测试：1MHz信号在14.5MHz设置下输出为13.52MHz
+  // 校正：14.5 * (1/13.52) = 1.073MHz
+  static float actual_sampling_rate = 10730000.0f; // 10.73 MHz
+  static float shi = 0.09f; // 0.09
+
+  /* 初始化FFT实例 */
+  arm_cfft_radix4_init_f32(&scfft, FFT_LENGTH, 0, 1);
+  
+  if (remove_dc == 1) {
+    /* 计算直流分量 */
+    float dc_component = 0.0f;
+    for(uint32_t i = 0; i < fft_samples; i++) {
+      dc_component += merged_data[i];
+    }
+    dc_component /= fft_samples;
+    
+    /* 填充FFT输入缓冲区并滤除直流分量 */
+    for(uint32_t i = 0; i < FFT_LENGTH; i++) {
+      if (i < fft_samples) {
+        FFT_InputBuf[2*i] = (merged_data[i] - dc_component) * 3.3f / ADC_8BIT_RESOLUTION; // 实部，滤除直流分量
+      } else {
+        FFT_InputBuf[2*i] = 0.0f; // 不足的部分补零
+      }
+      FFT_InputBuf[2*i+1] = 0.0f; // 虚部
+    }
+    
+    printf("=== 频谱数据 (滤除直流分量) ===\n");
+  } else {
+    /* 填充FFT输入缓冲区，保留直流分量 */
+    for(uint32_t i = 0; i < FFT_LENGTH; i++) {
+      if (i < fft_samples) {
+        FFT_InputBuf[2*i] = merged_data[i] * 3.3f / ADC_8BIT_RESOLUTION; // 实部
+      } else {
+        FFT_InputBuf[2*i] = 0.0f; // 不足的部分补零
+      }
+      FFT_InputBuf[2*i+1] = 0.0f; // 虚部
+    }
+    
+    printf("=== 频谱数据 (包含直流分量) ===\n");
+  }
+  
+  /* 执行FFT */
+  arm_cfft_radix4_f32(&scfft, FFT_InputBuf);
+  
+  /* 计算幅度谱并输出 */ 
+  // 全频谱，实际上有效频率范围只有 0 到采样率的 1/2（奈奎斯特频率）
+  // 采样率的 1/2 到采样率本身的部分是镜像
+  for(uint32_t i = 0; i < FFT_LENGTH; i++) {
+    float32_t real = FFT_InputBuf[2 * i];
+    float32_t imag = FFT_InputBuf[2 * i + 1];
+    float32_t magnitude = sqrtf(real * real + imag * imag);
+    
+    /* 神秘公式 todo shi */
+    /* 输出频率和对应的幅度值 */
+    float frequency = shi *  (float)i * actual_sampling_rate / FFT_LENGTH; 
+    printf("%.2f,%.6f\n", frequency, magnitude);
+  }
+  
+  printf("=== 频谱数据结束 ===\n");
 }
 
 /* USER CODE END 4 */
