@@ -34,16 +34,10 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-/* ADC system data structure for message queue */
-typedef struct {
-  uint16_t adc1_value;
-  uint16_t adc2_value;
-} adc_system_data_t;
-
 /* 频谱数据结构 */
 typedef struct {
-  float frequency;    // 频率值 (Hz)
-  float magnitude;    // 幅度值
+  float frequency;    // 频率�? (Hz)
+  float magnitude;    // 幅度�?
   uint32_t bin_index; // FFT bin 索引
 } spectrum_data_t;
 
@@ -51,8 +45,8 @@ typedef struct {
 typedef struct {
   float fundamental_frequency;  // 基波频率 (Hz)
   float fundamental_magnitude;  // 基波幅度
-  uint32_t fundamental_index;   // 基波在频谱数组中的索引
-  uint8_t found;               // 是否找到基波 (1=找到, 0=未找到)
+  uint32_t fundamental_index;   // 基波在频谱数组中的索�?
+  uint8_t found;               // 是否找到基波 (1=找到, 0=未找�?)
 } fundamental_result_t;
 /* USER CODE END PTD */
 
@@ -77,6 +71,7 @@ SPI_HandleTypeDef hspi1;
 
 UART_HandleTypeDef huart1;
 
+DMA_HandleTypeDef hdma_bdma_generator0;
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
@@ -85,31 +80,24 @@ const osThreadAttr_t defaultTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
-osMessageQueueId_t ADCQueueHandle;
-
 /* Variables for ADC dual mode DMA testing */
-#define ADC_BUFFER_SIZE 1024
-#define ADC_8BIT_RESOLUTION 256.0f // 8位ADC分辨率
+#define ADC_BUFFER_SIZE 1024 * 16 
+#define ADC_8BIT_RESOLUTION 256.0f // 8位ADC分辨�?
 
 /* FFT相关变量定义 */
-#define FFT_LENGTH (ADC_BUFFER_SIZE) //交替采样的最大长度
-arm_cfft_radix4_instance_f32 scfft;//定义scfft结构体
-float FFT_InputBuf[FFT_LENGTH*2];  //FFT输入数组
-float FFT_OutputBuf[FFT_LENGTH];  //FFT输出数组
+#define FFT_LENGTH ADC_BUFFER_SIZE //FFT长度
+arm_cfft_radix4_instance_f32 scfft;//定义scfft结构�?
+float FFT_InputBuf[FFT_LENGTH*2];  //FFT输入数组（复数形式：实部+虚部�?
+float magnitude_array[FFT_LENGTH/2];  //幅度谱数组（只保留有效频谱范围）
 
-/* 频谱数据存储数组 */
-spectrum_data_t spectrum_array[FFT_LENGTH];  // 频谱数据数组
-uint32_t spectrum_valid_count = 0;           // 有效频谱数据点数量
+/* 双缓冲机�? - 使用链接器自动分配内避免地址冲突 */
+uint16_t dmabuffer_ping[ADC_BUFFER_SIZE] __attribute__((aligned(32))); // Ping buffer for DMA transfers - 32字节对齐
+uint16_t dmabuffer_pong[ADC_BUFFER_SIZE] __attribute__((aligned(32))); // Pong buffer for DMA transfers - 32字节对齐
 
-/* 双缓冲机制 - 使用链接器自动分配内避免地址冲突 */
-uint32_t dmabuffer_ping[ADC_BUFFER_SIZE] __attribute__((aligned(32))); // Ping buffer for DMA transfers - 32字节对齐
-uint32_t dmabuffer_pong[ADC_BUFFER_SIZE] __attribute__((aligned(32))); // Pong buffer for DMA transfers - 32字节对齐
+uint16_t* active_dma_buffer = dmabuffer_ping;     // 当前DMA写入的缓冲区
+uint16_t* processing_buffer = dmabuffer_pong;     // 当前处理的缓冲区
 
-uint32_t* active_dma_buffer = dmabuffer_ping;     // 当前DMA写入的缓冲区
-uint32_t* processing_buffer = dmabuffer_pong;     // 当前处理的缓冲区
-
-uint16_t adc1_data[ADC_BUFFER_SIZE]; // Buffer for ADC1 data
-uint16_t adc2_data[ADC_BUFFER_SIZE]; // Buffer for ADC2 data
+/* 合并的ADC数据 - 优化：直接从DMA缓冲区填充，无需中间数组 */
 uint16_t merged_adc_data[ADC_BUFFER_SIZE * 2]; // Buffer for merged interleaved ADC data
 volatile uint8_t adc_conversion_complete = 0; // Flag to indicate conversion complete
 volatile uint8_t buffer_swap_flag = 0; // Flag to indicate buffer swap is needed
@@ -121,6 +109,7 @@ void PeriphCommonClock_Config(void);
 static void MPU_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
+static void MX_BDMA_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_USART1_UART_Init(void);
@@ -131,11 +120,11 @@ void StartDefaultTask(void *argument);
 /* USER CODE BEGIN PFP */
 /* 函数声明 */
 static void SwapDMABuffers(void);
-static void ProcessCompleteBuffer(uint32_t* buffer);
+static void ProcessCompleteBuffer(uint16_t* buffer);
 static void PrintTimeDomainDataVOFA(uint16_t* merged_data, uint32_t sample_count);
-static void PrintFrequencySpectrumVOFA(uint16_t* merged_data, uint32_t sample_count, uint8_t remove_dc);
+static void PrintFrequencySpectrumVOFA(float actual_sampling_rate, uint8_t remove_dc, float shi);
 static float ADC_ToVoltage(uint16_t adc_value);
-static void BuildSpectrumArray(float actual_sampling_rate, uint8_t remove_dc);
+static void BuildMagnitudeArray(float actual_sampling_rate, uint8_t remove_dc, float shi);
 static fundamental_result_t FindFundamentalComponent(float min_freq, float max_freq);
 /* USER CODE END PFP */
 
@@ -164,9 +153,9 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
   /* ADC转换完成回调 */
   if(hadc->Instance == ADC1)
   {
-    /* 设置缓冲区交换标志 */
+    /* 设置缓冲区交换标�? */
     buffer_swap_flag = 1;
-    /* 仅在中断中设置标志，避免在中断上下文中进行复杂操作 */
+    /* 仅在中断中设置标志，避免在中断上下文中进行复杂操�? */
     adc_conversion_complete = 1;
   }
 }
@@ -211,6 +200,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
+  MX_BDMA_Init();
   MX_ADC1_Init();
   MX_I2C1_Init();
   MX_USART1_UART_Init();
@@ -245,20 +235,17 @@ int main(void)
   printf("ADC calibration complete\r\n");
 
   /* Print DMA buffer information */
-  printf("DMA buffer addresses: Ping=0x%08lx, Pong=0x%08lx, size: %lu bytes each\r\n", 
-         (unsigned long)dmabuffer_ping, 
-         (unsigned long)dmabuffer_pong,
-         (unsigned long)(ADC_BUFFER_SIZE * sizeof(uint32_t)));
 
-  /* 清空DMA缓冲区并确保缓存一致性 */
-  memset(dmabuffer_ping, 0, ADC_BUFFER_SIZE * sizeof(uint32_t));
-  memset(dmabuffer_pong, 0, ADC_BUFFER_SIZE * sizeof(uint32_t));
+
+  /* 清空DMA缓冲区并确保缓存�?致�?? */
+  memset(dmabuffer_ping, 0, ADC_BUFFER_SIZE * sizeof(uint16_t));
+  memset(dmabuffer_pong, 0, ADC_BUFFER_SIZE * sizeof(uint16_t));
   
   /* 清除DMA缓冲区的D-Cache，确保DMA能够正确写入 */
-  SCB_CleanDCache_by_Addr((uint32_t*)dmabuffer_ping, ADC_BUFFER_SIZE * sizeof(uint32_t));
-  SCB_CleanDCache_by_Addr((uint32_t*)dmabuffer_pong, ADC_BUFFER_SIZE * sizeof(uint32_t));
+  SCB_CleanDCache_by_Addr((uint32_t*)dmabuffer_ping, ADC_BUFFER_SIZE * sizeof(uint16_t));
+  SCB_CleanDCache_by_Addr((uint32_t*)dmabuffer_pong, ADC_BUFFER_SIZE * sizeof(uint16_t));
   
-  /* 检查DMA缓冲区对齐 */
+  /* �?查DMA缓冲区对�? */
   printf("DMA buffer alignment: Ping=%s, Pong=%s\r\n", 
          (((uint32_t)dmabuffer_ping & 0x1F) == 0) ? "yes" : "no",
          (((uint32_t)dmabuffer_pong & 0x1F) == 0) ? "yes" : "no");
@@ -272,14 +259,14 @@ int main(void)
   }
   printf("ADC2 started successfully\r\n");
   
-  /* 启动ADC1的DMA多通道模式 */
+  /* 启动ADC1的DMA多�?�道模式 */
   printf("Starting ADC1 with DMA...\r\n");
   
   /* 设置DMA测试大小 */
-  uint32_t dma_test_size = ADC_BUFFER_SIZE; // 初始测试样本数
-  printf("DMA test size: %lu samples\r\n", (unsigned long)dma_test_size);
+  uint32_t dma_test_size = ADC_BUFFER_SIZE; // 初始测试样本�?
+ 
   
-  /* 启动ADC双通道模式DMA传输 */
+  /* 启动ADC双�?�道模式DMA传输 */
   HAL_StatusTypeDef status = HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)active_dma_buffer, dma_test_size);
   if (status != HAL_OK)
   {
@@ -308,7 +295,6 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
-  ADCQueueHandle = osMessageQueueNew(10, sizeof(adc_system_data_t), NULL);
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
@@ -713,6 +699,34 @@ static void MX_USART1_UART_Init(void)
 
 /**
   * Enable DMA controller clock
+  * Configure DMA for memory to memory transfers
+  *   hdma_bdma_generator0
+  */
+static void MX_BDMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_BDMA_CLK_ENABLE();
+
+  /* Configure DMA request hdma_bdma_generator0 on BDMA_Channel0 */
+  hdma_bdma_generator0.Instance = BDMA_Channel0;
+  hdma_bdma_generator0.Init.Request = BDMA_REQUEST_GENERATOR0;
+  hdma_bdma_generator0.Init.Direction = DMA_PERIPH_TO_MEMORY;
+  hdma_bdma_generator0.Init.PeriphInc = DMA_PINC_DISABLE;
+  hdma_bdma_generator0.Init.MemInc = DMA_MINC_ENABLE;
+  hdma_bdma_generator0.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+  hdma_bdma_generator0.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+  hdma_bdma_generator0.Init.Mode = DMA_NORMAL;
+  hdma_bdma_generator0.Init.Priority = DMA_PRIORITY_LOW;
+  if (HAL_DMA_Init(&hdma_bdma_generator0) != HAL_OK)
+  {
+    Error_Handler( );
+  }
+
+}
+
+/**
+  * Enable DMA controller clock
   */
 static void MX_DMA_Init(void)
 {
@@ -791,7 +805,7 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 /**
- * @brief 交换DMA缓冲区
+ * @brief 交换DMA缓冲�?
  * @retval None
  */
 static void SwapDMABuffers(void)
@@ -799,8 +813,8 @@ static void SwapDMABuffers(void)
   /* 停止当前DMA传输 */
   HAL_ADCEx_MultiModeStop_DMA(&hadc1);
   
-  /* 交换缓冲区指针 */
-  uint32_t* temp = active_dma_buffer;
+  /* 交换缓冲区指�? */
+  uint16_t* temp = active_dma_buffer;
   active_dma_buffer = processing_buffer;
   processing_buffer = temp;
   
@@ -810,67 +824,97 @@ static void SwapDMABuffers(void)
 
 /**
  * @brief 处理完整的缓冲区数据
- * @param buffer 要处理的缓冲区指针
+ * @param buffer 要处理的缓冲区指�?
  * @retval None
  */
-static void ProcessCompleteBuffer(uint32_t* buffer)
+static void ProcessCompleteBuffer(uint16_t* buffer)
 {
   /* 在主任务中进行缓存操作，避免在中断上下文中的时序问题 */
   /* 刷新DMA缓冲区的D-Cache */
-  SCB_InvalidateDCache_by_Addr((uint32_t*)buffer, ADC_BUFFER_SIZE * sizeof(uint32_t));
+  SCB_InvalidateDCache_by_Addr((uint32_t*)buffer, ADC_BUFFER_SIZE * sizeof(uint16_t));
   
-  /* 8位模式下数据解包：
-   * buffer[j] = 0x0000xxyy
-   * 其中 xx (高8位) = ADC2 (slave)
-   * 其中 yy (低8位) = ADC1 (master)
-   */
-  for(uint32_t j = 0; j < ADC_BUFFER_SIZE; j++)
-  {
-    adc1_data[j] = (uint16_t)(buffer[j] & 0xFF);        // 低8位是ADC1 (master)
-    adc2_data[j] = (uint16_t)((buffer[j] >> 8) & 0xFF); // 高8位是ADC2 (slave)
-  }
-  
-  /* 合并主从ADC数据为交替采样数据，实现双倍采样率效果：
-   * 假设ADC1先采样，ADC2后采样，则交替排列为：
-   * merged_data[0] = ADC1[0], merged_data[1] = ADC2[0]
+  /* 直接从DMA缓冲区解包数据到merged_adc_data数组，避免中间数组：
+   * buffer[j] = 0xXXYY (16位)
+   * 其中 XX (高8位) = ADC2 (slave)
+   * 其中 YY (低8位) = ADC1 (master)
+   * 交替排列为：merged_data[0] = ADC1[0], merged_data[1] = ADC2[0]
    * merged_data[2] = ADC1[1], merged_data[3] = ADC2[1]
    * ...
    * 这样可以实现双倍的有效采样率
    */
-  for(uint32_t i = 0; i < ADC_BUFFER_SIZE; i++)
+  for(uint32_t j = 0; j < ADC_BUFFER_SIZE; j++)
   {
-    merged_adc_data[i * 2] = adc1_data[i];     // 偶数索引放ADC1数据
-    merged_adc_data[i * 2 + 1] = adc2_data[i]; // 奇数索引放ADC2数据
+    merged_adc_data[j * 2] = (uint16_t)(buffer[j] & 0xFF);        // 偶数索引放ADC1数据 (低8位)
+    merged_adc_data[j * 2 + 1] = (uint16_t)((buffer[j] >> 8) & 0xFF); // 奇数索引放ADC2数据 (高8位)
   }
   
-  /* 输出交替采样数据到VOFA */
-  // PrintTimeDomainDataVOFA(merged_adc_data, ADC_BUFFER_SIZE * 2);
+  /* 系统参数 */
+  static float actual_sampling_rate = 10730000.0f; // 10.73 MHz
+  static float shi = 0.09f; // 神秘系数
+  uint8_t remove_dc = 1; // 滤除直流分量
   
-  /* 输出频谱数据到VOFA - 包含直流分量 */
-  // PrintFrequencySpectrumVOFA(merged_adc_data, ADC_BUFFER_SIZE * 2, 0);
+  /* 直接在全�?FFT_InputBuf中准备FFT数据 */
+  if (remove_dc == 1) {
+    /* 计算直流分量 */
+    float dc_component = 0.0f;
+    for(uint32_t i = 0; i < ADC_BUFFER_SIZE * 2; i++) {
+      dc_component += merged_adc_data[i];
+    }
+    dc_component /= (ADC_BUFFER_SIZE * 2);
+    
+    /* 填充FFT输入缓冲区并滤除直流分量 */
+    for(uint32_t i = 0; i < FFT_LENGTH; i++) {
+      FFT_InputBuf[2*i] = (merged_adc_data[i] - dc_component) * 3.3f / ADC_8BIT_RESOLUTION; // 实部
+      FFT_InputBuf[2*i+1] = 0.0f; // 虚部
+    }
+  } else {
+    /* 填充FFT输入缓冲区，保留直流分量 */
+    for(uint32_t i = 0; i < FFT_LENGTH; i++) {
+      FFT_InputBuf[2*i] = merged_adc_data[i] * 3.3f / ADC_8BIT_RESOLUTION; // 实部
+      FFT_InputBuf[2*i+1] = 0.0f; // 虚部
+    }
+  }
   
-  /* 输出频谱数据到VOFA - 滤除直流分量 */
-  PrintFrequencySpectrumVOFA(merged_adc_data, ADC_BUFFER_SIZE * 2, 1);
+  /* 初始化并执行FFT */
+  arm_cfft_radix4_init_f32(&scfft, FFT_LENGTH, 0, 1);
+  arm_cfft_radix4_f32(&scfft, FFT_InputBuf);
+  
+  /* 计算幅度谱并存储到全�?数组 */
+  BuildMagnitudeArray(actual_sampling_rate, remove_dc, shi);
+  
+  /* 查找基波分量 (避免直流分量，搜索范围从100Hz�?5MHz) */
+  // fundamental_result_t fundamental = FindFundamentalComponent(100.0f, 5000000.0f);
+  
+  // if (fundamental.found) {
+  //   printf("# 基波分量: %.2f Hz, 幅度: %.6f\n", 
+  //          fundamental.fundamental_frequency, 
+  //          fundamental.fundamental_magnitude);
+  // }
+  
+  /* 可�?�的输出操作 */
+  PrintTimeDomainDataVOFA(merged_adc_data, ADC_BUFFER_SIZE * 2);
+  // PrintFrequencySpectrumVOFA(actual_sampling_rate, remove_dc, shi);
+
 }
 
 /**
  * @brief 按照VOFA协议输出时域波形数据
- * @param merged_data 合并后的交替采样数据缓冲区
- * @param sample_count 总样本数量
+ * @param merged_data 合并后的交替采样数据缓冲�?
+ * @param sample_count 总样本数�?
  * @retval None
  */
 static void PrintTimeDomainDataVOFA(uint16_t* merged_data, uint32_t sample_count)
 {
-  static uint32_t sample_index = 0; // 静态变量保存样本索引
+  static uint32_t sample_index = 0; // 静�?�变量保存样本索�?
   
-  /* 输出交替采样数据，每个样本包含电压值和时间戳 */
+  /* 输出交替采样数据，每个样本包含电压�?�和时间�? */
   for(uint32_t i = 0; i < sample_count; i++)
   {
     float voltage = ADC_ToVoltage(merged_data[i]);
     
     /* 计算每个样本的时间戳（微秒）
-     * 使用样本索引来计算时间戳，假设每个样本间隔固定
-     * 这里假设交替采样的有效采样率为20kHz（每个样本间隔50微秒）
+     * 使用样本索引来计算时间戳，假设每个样本间隔固�?
+     * 这里假设交替采样的有效采样率�?20kHz（每个样本间�?50微秒�?
      */
     uint32_t timestamp = sample_index * 50; // 每个样本间隔50微秒
     
@@ -882,99 +926,42 @@ static void PrintTimeDomainDataVOFA(uint16_t* merged_data, uint32_t sample_count
 }
 
 /**
- * @brief 将ADC原始值转换为电压值
- * @param adc_value ADC原始值 (8位)
- * @retval float 电压值 (V)
+ * @brief 将ADC原始值转换为电压�?
+ * @param adc_value ADC原始�? (8�?)
+ * @retval float 电压�? (V)
  */
 static float ADC_ToVoltage(uint16_t adc_value)
 {
-  /* 8位ADC，参考电压3.3V */
+  /* 8位ADC，参考电�?3.3V */
   return (float)adc_value * 3.3f / 255.0f;
 }
 
 /**
  * @brief 按照VOFA协议输出频谱数据
- * @param merged_data 合并后的交替采样数据缓冲区
- * @param sample_count 总样本数量
- * @param remove_dc 是否滤除直流分量：0-保留直流分量，1-滤除直流分量
+ * @param actual_sampling_rate 实际采样�?
+ * @param remove_dc 是否已滤除直流分�?
+ * @param shi 神秘系数
  * @retval None
  */
-static void PrintFrequencySpectrumVOFA(uint16_t* merged_data, uint32_t sample_count, uint8_t remove_dc)
+static void PrintFrequencySpectrumVOFA(float actual_sampling_rate, uint8_t remove_dc, float shi)
 {
-  /* 确保数据长度不超过FFT_LENGTH */
-  uint32_t fft_samples = (sample_count > FFT_LENGTH) ? FFT_LENGTH : sample_count;
-  
-  // float actual_sampling_rate = 26670000.0f; // 26.67 MHz
-  
-  /* 神秘系数 todo shi*/
-  // 根据实际测量结果校正采样率
-  // 测试：1MHz信号在14.5MHz设置下输出为13.52MHz
-  // 校正：14.5 * (1/13.52) = 1.073MHz
-  static float actual_sampling_rate = 10730000.0f; // 10.73 MHz
-  static float shi = 0.09f; // 0.09
-
-  /* 初始化FFT实例 */
-  arm_cfft_radix4_init_f32(&scfft, FFT_LENGTH, 0, 1);
-  
   if (remove_dc == 1) {
-    /* 计算直流分量 */
-    float dc_component = 0.0f;
-    for(uint32_t i = 0; i < fft_samples; i++) {
-      dc_component += merged_data[i];
-    }
-    dc_component /= fft_samples;
-    
-    /* 填充FFT输入缓冲区并滤除直流分量 */
-    for(uint32_t i = 0; i < FFT_LENGTH; i++) {
-      if (i < fft_samples) {
-        FFT_InputBuf[2*i] = (merged_data[i] - dc_component) * 3.3f / ADC_8BIT_RESOLUTION; // 实部，滤除直流分量
-      } else {
-        FFT_InputBuf[2*i] = 0.0f; // 不足的部分补零
-      }
-      FFT_InputBuf[2*i+1] = 0.0f; // 虚部
-    }
-    
     printf("=== 频谱数据 (滤除直流分量) ===\n");
   } else {
-    /* 填充FFT输入缓冲区，保留直流分量 */
-    for(uint32_t i = 0; i < FFT_LENGTH; i++) {
-      if (i < fft_samples) {
-        FFT_InputBuf[2*i] = merged_data[i] * 3.3f / ADC_8BIT_RESOLUTION; // 实部
-      } else {
-        FFT_InputBuf[2*i] = 0.0f; // 不足的部分补零
-      }
-      FFT_InputBuf[2*i+1] = 0.0f; // 虚部
-    }
-    
     printf("=== 频谱数据 (包含直流分量) ===\n");
   }
   
-  /* 执行FFT */
-  arm_cfft_radix4_f32(&scfft, FFT_InputBuf);
-  
-  /* 构建频谱数据数组 */
-  BuildSpectrumArray(actual_sampling_rate, remove_dc);
-  
-  /* 查找基波分量 (避免直流分量，搜索范围从100Hz到5MHz) */
-  fundamental_result_t fundamental = FindFundamentalComponent(100.0f, 5000000.0f);
-  
-  if (fundamental.found) {
-    printf("# 基波分量: %.2f Hz, 幅度: %.6f\n", 
-           fundamental.fundamental_frequency, 
-           fundamental.fundamental_magnitude);
-  }
-  
   /* 计算幅度谱并输出 */ 
-  // 全频谱，实际上有效频率范围只有 0 到采样率的 1/2（奈奎斯特频率）
+  // 全频谱，实际上有效频率范围只�? 0 到采样率�? 1/2（奈奎斯特频率）
   // 采样率的 1/2 到采样率本身的部分是镜像
   for(uint32_t i = 0; i < FFT_LENGTH; i++) {
     float32_t real = FFT_InputBuf[2 * i];
     float32_t imag = FFT_InputBuf[2 * i + 1];
     float32_t magnitude = sqrtf(real * real + imag * imag);
     
-    /* 神秘公式 todo shi */
-    /* 输出频率和对应的幅度值 */
-    float frequency = shi *  (float)i * actual_sampling_rate / FFT_LENGTH; 
+    /* 神秘公式 */
+    /* 输出频率和对应的幅度�? */
+    float frequency = shi * (float)i * actual_sampling_rate / FFT_LENGTH; 
     printf("%.2f,%.6f\n", frequency, magnitude);
   }
   
@@ -982,44 +969,31 @@ static void PrintFrequencySpectrumVOFA(uint16_t* merged_data, uint32_t sample_co
 }
 
 /**
- * @brief 构建频谱数据数组
- * @param actual_sampling_rate 实际采样率
- * @param remove_dc 是否已滤除直流分量
+ * @brief 构建幅度谱数�?
+ * @param actual_sampling_rate 实际采样�?
+ * @param remove_dc 是否已滤除直流分�?
+ * @param shi 神秘系数
  * @retval None
  */
-static void BuildSpectrumArray(float actual_sampling_rate, uint8_t remove_dc)
+static void BuildMagnitudeArray(float actual_sampling_rate, uint8_t remove_dc, float shi)
 {
-  spectrum_valid_count = 0;
-  
-  /* 只计算有效频谱范围 (0 到 采样率/2) */
+  /* 只计算有效频谱范�? (0 �? 采样�?/2) */
   uint32_t valid_bins = FFT_LENGTH / 2;
-  
-  /* 计算神秘系数 */
-  float shi = 0.09f;
   
   for(uint32_t i = 0; i < valid_bins; i++) {
     float32_t real = FFT_InputBuf[2 * i];
     float32_t imag = FFT_InputBuf[2 * i + 1];
     float32_t magnitude = sqrtf(real * real + imag * imag);
     
-    /* 计算频率 */
-    float frequency = shi * (float)i * actual_sampling_rate / FFT_LENGTH;
-    
-    /* 存储到频谱数组 */
-    spectrum_array[spectrum_valid_count].frequency = frequency;
-    spectrum_array[spectrum_valid_count].magnitude = magnitude;
-    spectrum_array[spectrum_valid_count].bin_index = i;
-    
-    spectrum_valid_count++;
+    /* 存储到幅度数�? */
+    magnitude_array[i] = magnitude;
   }
-  
-  printf("# 频谱数组构建完成: %lu 个有效频谱点\n", spectrum_valid_count);
 }
 
 /**
  * @brief 查找基波分量
- * @param min_freq 搜索的最小频率 (Hz)
- * @param max_freq 搜索的最大频率 (Hz)
+ * @param min_freq 搜索的最小频�? (Hz)
+ * @param max_freq 搜索的最大频�? (Hz)
  * @retval fundamental_result_t 基波查找结果
  */
 static fundamental_result_t FindFundamentalComponent(float min_freq, float max_freq)
@@ -1027,55 +1001,52 @@ static fundamental_result_t FindFundamentalComponent(float min_freq, float max_f
   fundamental_result_t result = {0};
   result.found = 0;
   
-  if (spectrum_valid_count == 0) {
-    printf("# 错误: 频谱数组为空\n");
+  /* 系统参数 */
+  static float actual_sampling_rate = 10730000.0f; // 10.73 MHz
+  static float shi = 0.09f; // 神秘系数
+  
+  /* 有效频谱范围 */
+  uint32_t valid_bins = FFT_LENGTH / 2;
+  
+  /* 直接通过频率计算bin索引范围 - 避免循环查找 */
+  uint32_t start_bin = (uint32_t)(min_freq * FFT_LENGTH / (shi * actual_sampling_rate));
+  uint32_t end_bin = (uint32_t)(max_freq * FFT_LENGTH / (shi * actual_sampling_rate));
+  
+  /* 确保索引在有效范围内 */
+  if (start_bin >= valid_bins) start_bin = valid_bins - 1;
+  if (end_bin >= valid_bins) end_bin = valid_bins - 1;
+  if (start_bin > end_bin) {
+    printf("# 警告: 频率范围 %.2f - %.2f Hz 无效\n", min_freq, max_freq);
     return result;
   }
   
-  /* 创建幅度数组用于arm_max_f32 */
-  static float magnitude_array[FFT_LENGTH/2];
-  uint32_t search_count = 0;
-  uint32_t start_index = 0;
+  /* 计算搜索范围的长�? */
+  uint32_t search_length = end_bin - start_bin + 1;
   
-  /* 找到搜索频率范围内的数据点 */
-  for(uint32_t i = 0; i < spectrum_valid_count; i++) {
-    if (spectrum_array[i].frequency >= min_freq && 
-        spectrum_array[i].frequency <= max_freq) {
-      
-      if (search_count == 0) {
-        start_index = i;
-      }
-      
-      magnitude_array[search_count] = spectrum_array[i].magnitude;
-      search_count++;
-    }
-  }
-  
-  if (search_count == 0) {
-    printf("# 警告: 在频率范围 %.2f - %.2f Hz 内未找到数据点\n", min_freq, max_freq);
-    return result;
-  }
-  
-  /* 使用 arm_max_f32 查找最大幅度 */
+  /* 使用ARM DSP库的arm_max_f32函数查找�?大幅�? */
   float max_magnitude;
   uint32_t max_index_relative;
   
-  arm_max_f32(magnitude_array, search_count, &max_magnitude, &max_index_relative);
+  arm_max_f32(&magnitude_array[start_bin], search_length, &max_magnitude, &max_index_relative);
   
-  /* 计算在原始频谱数组中的实际索引 */
-  uint32_t actual_index = start_index + max_index_relative;
+  /* 计算实际的bin索引 */
+  uint32_t actual_bin_index = start_bin + max_index_relative;
+  
+  /* 计算基波频率 */
+  float fundamental_frequency = shi * (float)actual_bin_index * actual_sampling_rate / FFT_LENGTH;
   
   /* 填充结果 */
-  result.fundamental_frequency = spectrum_array[actual_index].frequency;
+  result.fundamental_frequency = fundamental_frequency;
   result.fundamental_magnitude = max_magnitude;
-  result.fundamental_index = actual_index;
+  result.fundamental_index = actual_bin_index;
   result.found = 1;
   
   printf("# 基波分量查找结果:\n");
-  printf("# 频率: %.2f Hz, 幅度: %.6f, 索引: %lu\n", 
+  printf("# 频率: %.2f Hz, 幅度: %.6f, 索引: %d (搜索范围: %d-%d)\n", 
          result.fundamental_frequency, 
          result.fundamental_magnitude, 
-         result.fundamental_index);
+         result.fundamental_index,
+         start_bin, end_bin);
   
   return result;
 }
@@ -1092,10 +1063,6 @@ static fundamental_result_t FindFundamentalComponent(float min_freq, float max_f
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
-  uint32_t last_check_tick = 0;
-  uint32_t waveform_count = 0;
-  
-  printf("DefaultTask started, waiting for interleaved ADC data...\r\n");
   
   /* Infinite loop */
   for(;;)
@@ -1106,7 +1073,7 @@ void StartDefaultTask(void *argument)
       /* Reset the flag */
       adc_conversion_complete = 0;
       
-      /* 处理缓冲区交换 */
+      /* 处理缓冲区交�? */
       if(buffer_swap_flag)
       {
         buffer_swap_flag = 0;
@@ -1115,17 +1082,7 @@ void StartDefaultTask(void *argument)
       
       /* 处理完整的缓冲区 */
       ProcessCompleteBuffer(processing_buffer);
-      
-      waveform_count++;
-      
-      /* 每10个波形输出一次统计信息（减少干扰） */
-      uint32_t current_tick = osKernelGetTickCount();
-      if(current_tick - last_check_tick >= 10000)
-      {
-        last_check_tick = current_tick;
-        printf("# Interleaved samples processed: %lu, System time: %lu ms\r\n", 
-               waveform_count * ADC_BUFFER_SIZE * 2, current_tick);
-      }
+
     }
     
     osDelay(1);  /* Small delay to prevent CPU hogging */
