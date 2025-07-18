@@ -27,18 +27,23 @@ Project File Date:  07/18/2025
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\KEIL\ARM\ARMCC\Bin'
 Build target 'FinallAttackProject'
+assembling startup_stm32h750xx.s...
 compiling main.c...
 ../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
   #endif /* INA226_H_ */
-../Core/Src/main.c(946): warning:  #177-D: function "PrintFrequencySpectrumVOFA"  was declared but never referenced
+../Core/Src/main.c(49): warning:  #2532-D: support for trigraphs is disabled
+    uint8_t found;               // 是否找到基波 (1=找到, 0=未找�???)
+../Core/Src/main.c(961): warning:  #177-D: function "PrintFrequencySpectrumVOFA"  was declared but never referenced
   static void PrintFrequencySpectrumVOFA(float actual_sampling_rate, uint8_t remove_dc, float shi)
-../Core/Src/main.c(999): warning:  #177-D: function "FindFundamentalComponent"  was declared but never referenced
+../Core/Src/main.c(993): warning:  #177-D: function "BuildMagnitudeArray"  was declared but never referenced
+  static void BuildMagnitudeArray(float actual_sampling_rate, uint8_t remove_dc, float shi)
+../Core/Src/main.c(1014): warning:  #177-D: function "FindFundamentalComponent"  was declared but never referenced
   static fundamental_result_t FindFundamentalComponent(float min_freq, float max_freq)
-../Core/Src/main.c: 3 warnings, 0 errors
+../Core/Src/main.c: 5 warnings, 0 errors
 linking...
-Program Size: Code=38000 RO-data=35624 RW-data=200 ZI-data=315536  
+Program Size: Code=36060 RO-data=808 RW-data=188 ZI-data=151708  
 FromELF: creating hex file...
-"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 3 Warning(s).
+"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 5 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -61,7 +66,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:07
+Build Time Elapsed:  00:00:08
 </pre>
 </body>
 </html>
