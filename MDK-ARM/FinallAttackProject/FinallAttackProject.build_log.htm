@@ -27,29 +27,22 @@ Project File Date:  07/21/2025
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\KEIL\ARM\ARMCC\Bin'
 Build target 'FinallAttackProject'
-assembling startup_stm32h750xx.s...
-compiling AD9954.c...
-compiling freertos.c...
-compiling INA226.c...
-..\Drivers\INA226\INA226.h(15): warning:  #1-D: last line of file ends without a newline
-  #endif /* INA226_H_ */
-..\Drivers\INA226\INA226.c(278): warning:  #1-D: last line of file ends without a newline
-  // }
-..\Drivers\INA226\INA226.c: 2 warnings, 0 errors
-compiling stm32h7xx_it.c...
-compiling stm32h7xx_hal_msp.c...
 compiling main.c...
 ../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
   #endif /* INA226_H_ */
-../Core/Src/main.c(49): warning:  #2532-D: support for trigraphs is disabled
-    uint8_t found;               // 是否找到基波 (1=找到, 0=未找�????)
-../Core/Src/main.c(922): warning:  #177-D: function "PrintFrequencySpectrumVOFA"  was declared but never referenced
+../Core/Src/main.c(55): warning:  #2532-D: support for trigraphs is disabled
+    uint8_t found;               // 是否找到基波 (1=找到, 0=未找�???)
+../Core/Src/main.c(873): warning:  #177-D: function "PrintTimeDomainDataVOFA"  was declared but never referenced
+  static void PrintTimeDomainDataVOFA(uint16_t* merged_data, uint32_t sample_count)
+../Core/Src/main.c(913): warning:  #177-D: function "PrintFrequencySpectrumVOFA"  was declared but never referenced
   static void PrintFrequencySpectrumVOFA(float actual_sampling_rate, uint8_t remove_dc, float shi)
-../Core/Src/main.c(975): warning:  #177-D: function "FindFundamentalComponent"  was declared but never referenced
+../Core/Src/main.c(966): warning:  #177-D: function "FindFundamentalComponent"  was declared but never referenced
   static fundamental_result_t FindFundamentalComponent(float min_freq, float max_freq)
-../Core/Src/main.c: 4 warnings, 0 errors
+../Core/Src/main.c(1028): warning:  #177-D: function "ProcessFrequencyDomain"  was declared but never referenced
+  static void ProcessFrequencyDomain(uint16_t* adc_data, uint32_t data_length, uint32_t update_interval_ms)
+../Core/Src/main.c: 6 warnings, 0 errors
 linking...
-Program Size: Code=38468 RO-data=35624 RW-data=200 ZI-data=315600  
+Program Size: Code=35048 RO-data=808 RW-data=172 ZI-data=118860  
 FromELF: creating hex file...
 "FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 6 Warning(s).
 
@@ -74,7 +67,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:25
+Build Time Elapsed:  00:00:07
 </pre>
 </body>
 </html>
