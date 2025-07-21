@@ -1353,9 +1353,9 @@
           <GroupName>Application/Task</GroupName>
           <Files>
             <File>
-              <FileName>adc_task.c</FileName>
+              <FileName>adc_processing_task.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Module\adc_task.c</FilePath>
+              <FilePath>..\Module\adc_processing_task.c</FilePath>
             </File>
           </Files>
         </Group>

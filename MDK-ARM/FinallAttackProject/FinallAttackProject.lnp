@@ -41,7 +41,7 @@
 "finallattackproject\cmsis_os2.o"
 "finallattackproject\heap_4.o"
 "finallattackproject\port.o"
-"finallattackproject\adc_task.o"
+"finallattackproject\adc_processing_task.o"
 "finallattackproject\ina226.o"
 "finallattackproject\ad9954.o"
 "finallattackproject\adc_processing.o"

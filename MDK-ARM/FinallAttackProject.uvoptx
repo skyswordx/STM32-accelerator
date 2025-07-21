@@ -775,8 +775,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Module\adc_task.c</PathWithFileName>
-      <FilenameWithoutPath>adc_task.c</FilenameWithoutPath>
+      <PathWithFileName>..\Module\adc_processing_task.c</PathWithFileName>
+      <FilenameWithoutPath>adc_processing_task.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

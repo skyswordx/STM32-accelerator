@@ -29,7 +29,7 @@
 #include "INA226.h"
 #include "arm_math.h"
 #include "adc_processing.h"
-#include "adc_task.h"
+#include "adc_processing_task.h"
 
 /* USER CODE END Includes */
 

@@ -1,5 +1,5 @@
-#ifndef ADC_TASK_H
-#define ADC_TASK_H
+#ifndef ADC_PROCESSING_TASK_H
+#define ADC_PROCESSING_TASK_H
 
 #include "cmsis_os.h"
 #include "adc_processing.h"
@@ -8,4 +8,4 @@
 void StartADCProcessingTask(void *argument);
 
 
-#endif /* ADC_TASK_H */
+#endif /* ADC_PROCESSING_TASK_H */

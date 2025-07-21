@@ -59,5 +59,5 @@ finallattackproject\main.o: ../Drivers/CMSIS/DSP/Include/arm_math.h
 finallattackproject\main.o: D:\KEIL\ARM\ARMCC\Bin\..\include\string.h
 finallattackproject\main.o: D:\KEIL\ARM\ARMCC\Bin\..\include\float.h
 finallattackproject\main.o: ../Core/Inc/adc_processing.h
-finallattackproject\main.o: ../Module/adc_task.h
+finallattackproject\main.o: ../Module/adc_processing_task.h
 finallattackproject\main.o: ../Module/adc_processing.h
