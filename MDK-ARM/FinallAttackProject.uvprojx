@@ -341,7 +341,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32H750xx,ARM_MATH_CM7,__CC_ARM,ARM_MATH_DSP,ARM_MATH_MATRIX_CHECK,ARM_MATH_ROUNDING</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32H7xx/Include;../Drivers/CMSIS/Include;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../Module;../Task;../Drivers/INA226;../Drivers/AD9954;../Drivers/CMSIS/DSP/Include</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32H7xx/Include;../Drivers/CMSIS/Include;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../Module;../Task;../Drivers/INA226;../Drivers/AD9954;../Drivers/CMSIS/DSP/Include;..\Module</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1369,6 +1369,16 @@
               <FileName>AD9954.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Drivers\AD9954\AD9954.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Module/ADC</GroupName>
+          <Files>
+            <File>
+              <FileName>adc_processing.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Module\adc_processing.c</FilePath>
             </File>
           </Files>
         </Group>

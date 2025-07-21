@@ -58,3 +58,4 @@ finallattackproject\main.o: ../Drivers/INA226/INA226.h
 finallattackproject\main.o: ../Drivers/CMSIS/DSP/Include/arm_math.h
 finallattackproject\main.o: D:\KEIL\ARM\ARMCC\Bin\..\include\string.h
 finallattackproject\main.o: D:\KEIL\ARM\ARMCC\Bin\..\include\float.h
+finallattackproject\main.o: ../Module/adc_processing.h
