@@ -43,7 +43,7 @@ extern UART_HandleTypeDef huart1;
 #define ADC_BUFFER_SIZE 1024 * 16 
 #define ADC_8BIT_RESOLUTION 256.0f // 8位ADC分辨率
 
-#define FFT_LENGTH ADC_BUFFER_SIZE //FFT长度
+#define FFT_LENGTH  ADC_BUFFER_SIZE //FFT长度
 
 /* Exported types ------------------------------------------------------------*/
 /* 频谱数据结构 */
@@ -84,22 +84,51 @@ extern uint16_t* active_dma_buffer;     // 当前DMA写入的缓冲区
 extern uint16_t* processing_buffer;     // 当前处理的缓冲区
 
 /* FFT相关变量定义 */
-extern arm_cfft_radix4_instance_f32 scfft;//定义scfft结构
-extern float FFT_InputBuf[FFT_LENGTH*2];  //FFT输入数组（复数形式：实部+虚部）
-extern float magnitude_array[FFT_LENGTH/2];  //幅度谱数组（只保留有效频谱范围）
+extern arm_cfft_radix4_instance_f32 scfft;  //定义scfft结构
+
+/* 交替采样模式的FFT数据结构 */
+#if USE_DUAL_ADC_INTERLEAVED
+extern float merged_fft_inputbuf[2 * FFT_LENGTH];    // 交替采样FFT输入数组（复数形式）
+extern float merged_magnitude_array[FFT_LENGTH/2];    // 交替采样幅度谱数组
+
+/* 同步采样模式的FFT数据结构 */
+#elif USE_DUAL_ADC_SIMULTANEOUS
+extern float adc1_fft_inputbuf[2 * FFT_LENGTH];      // ADC1 FFT输入数组（复数形式）
+extern float adc2_fft_inputbuf[2 * FFT_LENGTH];      // ADC2 FFT输入数组（复数形式）
+extern float adc1_magnitude_array[FFT_LENGTH/2];      // ADC1幅度谱数组
+extern float adc2_magnitude_array[FFT_LENGTH/2];      // ADC2幅度谱数组
+#endif
 
 /* Exported functions prototypes ---------------------------------------------*/
+/* 核心接口 - 重构后的清晰接口 */
+void ADC_Processing_Init(void);
+void ADC_Processing_SetConfig(float sampling_rate, float shi_coefficient, 
+                              uint8_t remove_dc, uint32_t fft_update_interval_ms);
+
+/* 数据处理接口 */
 void SwapDMABuffers(void);
 void ProcessCompleteBuffer(uint16_t* buffer);
+
+/* 频域分析接口 */
+void ADC_Processing_TriggerFFT(uint16_t* adc_data, uint32_t data_length, float* fft_buffer, float* magnitude_buffer);
+float* ADC_Processing_GetMagnitudeArray(uint8_t adc_channel);  // adc_channel: 1=ADC1, 2=ADC2 (仅在同步采样模式下使用)
+uint32_t ADC_Processing_GetValidBins(void);
+fundamental_result_t FindFundamentalComponent(float min_freq, float max_freq, float* magnitude_array);
+
+/* 内部处理函数声明 */
+static void ExtractDualADCData(uint16_t* dma_buffer);
+static void PrepareFFTInput(uint16_t* adc_data, uint32_t data_length, float* fft_buffer);
+static void ExecuteFFTAndBuildSpectrum(float* fft_buffer, float* magnitude_buffer);
+static void OutputFrequencySpectrum(void);
+
+/* 工具函数 */
+float ADC_ToVoltage(uint16_t adc_value);
+
+/* 兼容性接口 (保留旧接口以确保兼容性) */
 void PrintTimeDomainDataVOFA(uint16_t* merged_data, uint32_t sample_count);
 void PrintFrequencySpectrumVOFA(float actual_sampling_rate, uint8_t remove_dc, float shi);
-float ADC_ToVoltage(uint16_t adc_value);
 void BuildMagnitudeArray(float actual_sampling_rate, uint8_t remove_dc, float shi);
-fundamental_result_t FindFundamentalComponent(float min_freq, float max_freq);
 void ProcessFrequencyDomain(uint16_t* adc_data, uint32_t data_length, uint32_t update_interval_ms);
-
-/* ADC采样处理相关初始化函数 */
-void ADC_Processing_Init(void);
 
 #ifdef __cplusplus
 }
