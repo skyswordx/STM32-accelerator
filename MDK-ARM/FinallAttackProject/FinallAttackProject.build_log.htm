@@ -27,11 +27,20 @@ Project File Date:  07/21/2025
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\KEIL\ARM\ARMCC\Bin'
 Build target 'FinallAttackProject'
-compiling adc_processing.c...
+compiling adc_task.c...
+..\Module\adc_task.h(11): warning:  #1-D: last line of file ends without a newline
+  #endif /* ADC_TASK_H */
+..\Module\adc_task.c: 1 warning, 0 errors
+compiling main.c...
+../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
+  #endif /* INA226_H_ */
+../Module/adc_task.h(11): warning:  #1-D: last line of file ends without a newline
+  #endif /* ADC_TASK_H */
+../Core/Src/main.c: 2 warnings, 0 errors
 linking...
-Program Size: Code=37604 RO-data=35640 RW-data=200 ZI-data=446516  
+Program Size: Code=37828 RO-data=35696 RW-data=216 ZI-data=446516  
 FromELF: creating hex file...
-"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 0 Warning(s).
+"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 3 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -54,7 +63,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:07
+Build Time Elapsed:  00:00:08
 </pre>
 </body>
 </html>

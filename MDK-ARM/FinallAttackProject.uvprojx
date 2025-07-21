@@ -1351,6 +1351,13 @@
         </Group>
         <Group>
           <GroupName>Application/Task</GroupName>
+          <Files>
+            <File>
+              <FileName>adc_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Module\adc_task.c</FilePath>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>Drivers/INA226</GroupName>

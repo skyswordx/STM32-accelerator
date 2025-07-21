@@ -21,6 +21,9 @@
 #include "adc_processing.h"
 #include "string.h"
 
+/* 定时器句柄外部引用 */
+extern TIM_HandleTypeDef htim3;  /* 实际使用TIM3作为ADC触发源 */
+
 /* Private defines -----------------------------------------------------------*/
 /* 系统参数配置 */
 #define DEFAULT_SAMPLING_RATE    10730000.0f  // 默认采样率 10.73 MHz
@@ -86,6 +89,12 @@ static adc_processing_config_t processing_config = {
 static uint32_t last_fft_update_time = 0;
 static uint32_t time_domain_sample_index = 0;
 
+/* ADC采样控制变量 */
+static uint32_t buffer_fill_count = 0;         // 已采集的缓冲区数量
+static uint32_t max_buffer_fill_count = 5;     // 最大采集缓冲区数量，可配置
+static uint8_t adc_sampling_active = 1;        // ADC采样状态标志
+static uint8_t auto_stop_enabled = 1;          // 自动停止采样使能标志，默认开启
+
 /* Private function prototypes -----------------------------------------------*/
 /* 底层数据处理函数 */
 static void ExtractDualADCData(uint16_t* dma_buffer);
@@ -103,9 +112,11 @@ static float CalculateDCComponent(uint16_t* data, uint32_t length);
 
 /**
  * @brief ADC处理模块初始化
+ * @param max_buffers 最大采样缓冲区数量，设置为0则使用默认值(5)
+ * @param enable_auto_stop 是否启用自动停止采样，0:禁用, 1:启用
  * @retval None
  */
-void ADC_Processing_Init(void)
+void ADC_Processing_Init(uint32_t max_buffers, uint8_t enable_auto_stop)
 {
   /* 清空DMA缓冲区并确保缓存一致 */
   memset(dmabuffer_ping, 0, ADC_BUFFER_SIZE * sizeof(uint16_t));
@@ -118,6 +129,20 @@ void ADC_Processing_Init(void)
   /* 初始化时间控制变量 */
   last_fft_update_time = 0;
   time_domain_sample_index = 0;
+  
+  /* 初始化采样控制变量 */
+  buffer_fill_count = 0;
+  adc_sampling_active = 1;
+  
+  /* 设置最大缓冲区数量 */
+  if (max_buffers > 0) {
+    max_buffer_fill_count = max_buffers;
+  } else {
+    max_buffer_fill_count = 5; /* 默认值 */
+  }
+  
+  /* 设置自动停止使能状态 */
+  auto_stop_enabled = enable_auto_stop ? 1 : 0;
 
   #if USE_DUAL_ADC_INTERLEAVED || USE_DUAL_ADC_SIMULTANEOUS
     HAL_ADCEx_Calibration_Start(&hadc2, ADC_CALIB_FACTOR_LINEARITY_REGOFFSET, ADC_SINGLE_ENDED);
@@ -145,6 +170,18 @@ void ADC_Processing_SetConfig(float sampling_rate, float shi_coefficient,
   processing_config.shi_coefficient = shi_coefficient;
   processing_config.remove_dc = remove_dc;
   processing_config.fft_update_interval_ms = fft_update_interval_ms;
+}
+
+/**
+ * @brief 设置最大采样缓冲区数量
+ * @param count 最大采样缓冲区数量
+ * @retval None
+ */
+void ADC_Processing_SetMaxBufferCount(uint32_t count)
+{
+  if (count > 0) {
+    max_buffer_fill_count = count;
+  }
 }
 
 /**
@@ -213,6 +250,12 @@ void ProcessCompleteBuffer(uint16_t* buffer)
     #endif
     
     // OutputFrequencySpectrum();
+  }
+  
+  /* 步骤5: 检查是否达到最大采样数量 */
+  buffer_fill_count++;
+  if (auto_stop_enabled && adc_sampling_active && buffer_fill_count >= max_buffer_fill_count) {
+    ADC_Processing_StopSampling();
   }
 }
 
@@ -384,6 +427,77 @@ static float CalculateDCComponent(uint16_t* data, uint32_t length)
 }
 
 /* =============================================================================
+ * ADC采样控制函数
+ * ============================================================================= */
+
+/**
+ * @brief 停止ADC采样
+ * 当达到设定的缓冲区采样次数时自动调用，也可手动调用
+ * @retval None
+ */
+void ADC_Processing_StopSampling(void)
+{
+  if (adc_sampling_active) {
+    /* 停止定时器，停止ADC触发 */
+    HAL_TIM_Base_Stop(&htim3);
+    
+    /* 停止DMA传输 */
+    HAL_ADCEx_MultiModeStop_DMA(&hadc1);
+    
+    /* 复位定时器计数器 */
+    __HAL_TIM_SET_COUNTER(&htim3, 0);
+    
+    /* 更新状态标志 */
+    adc_sampling_active = 0;
+    
+    printf("ADC sampling stopped after %lu buffers\n", buffer_fill_count);
+  }
+}
+
+/**
+ * @brief 恢复ADC采样
+ * @retval None
+ */
+void ADC_Processing_ResumeSampling(void)
+{
+  if (!adc_sampling_active) {
+    /* 重置缓冲区计数 */
+    buffer_fill_count = 0;
+    
+    /* 重新启动DMA传输 */
+    HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)active_dma_buffer, ADC_BUFFER_SIZE);
+    
+    /* 重新启动定时器，恢复ADC触发 */
+    HAL_TIM_Base_Start(&htim3);
+    
+    /* 更新状态标志 */
+    adc_sampling_active = 1;
+    
+    printf("ADC sampling resumed\n");
+  }
+}
+
+/**
+ * @brief 获取当前采样状态
+ * @retval uint8_t 1:正在采样, 0:已停止采样
+ */
+uint8_t ADC_Processing_IsActive(void)
+{
+  return adc_sampling_active;
+}
+
+/**
+ * @brief 设置自动停止采样功能
+ * @param enabled 1:启用自动停止, 0:禁用自动停止
+ * @retval None
+ */
+void ADC_Processing_SetAutoStopEnabled(uint8_t enabled)
+{
+  auto_stop_enabled = enabled ? 1 : 0;
+  printf("ADC auto-stop sampling %s\n", auto_stop_enabled ? "enabled" : "disabled");
+}
+
+/* =============================================================================
  * 保留的公共接口函数 (兼容性)
  * ============================================================================= */
 
@@ -550,4 +664,18 @@ void ProcessFrequencyDomain(uint16_t* adc_data, uint32_t data_length, uint32_t u
                                adc1_fft_inputbuf, adc1_magnitude_array);
     #endif
   }
+}
+
+/**
+ * @brief 兼容性接口：无参数初始化函数
+ * 使用默认参数调用新的初始化函数，保持向后兼容性
+ * @retval None
+ */
+void ADC_Processing_Init_Compat(void)
+{
+  /* 使用默认参数调用新版初始化函数:
+   * - 默认最大缓冲区数量: 5
+   * - 默认启用自动停止: 1
+   */
+  ADC_Processing_Init(5, 1);
 }

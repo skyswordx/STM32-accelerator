@@ -24,12 +24,12 @@
 /* USER CODE BEGIN Includes */
 #include "stdio.h"
 #include "math.h"
-// #include "ADCsampleTask.h"
-// #include "ADCOutputTask.h"
+
 #include "AD9954.h"
 #include "INA226.h"
 #include "arm_math.h"
 #include "adc_processing.h"
+#include "adc_task.h"
 
 /* USER CODE END Includes */
 
@@ -70,6 +70,13 @@ const osThreadAttr_t defaultTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for ADCProcessingTask */
+osThreadId_t ADCProcessingTaskHandle;
+const osThreadAttr_t ADCProcessingTask_attributes = {
+  .name = "ADCProcessingTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityHigh,
+};
 /* USER CODE BEGIN PV */
 /* ADC处理相关变量已迁移到adc_processing.h/c */
 
@@ -91,6 +98,8 @@ void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 /* ADC处理相关函数声明已迁移到adc_processing.h */
+/* ADC任务函数声明 */
+void StartADCProcessingTask(void *argument);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -118,7 +127,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
   /* ADC转换完成回调 */
   if(hadc->Instance == ADC1)
   {
-    /* 设置缓冲区交换标�??? */
+    /* 设置缓冲区交换标志 */
     buffer_swap_flag = 1;
     /* 仅在中断中设置标志，避免在中断上下文中进行复杂操�??? */
     adc_conversion_complete = 1;
@@ -181,8 +190,8 @@ int main(void)
   #endif
   HAL_TIM_Base_Start(&htim3); // 启动定时器3作为时间戳基准
   
-  /* 初始化ADC处理模块 */
-  ADC_Processing_Init();
+  /* 初始化ADC处理模块 - 设置采样2个缓冲区后自动停止 */
+  ADC_Processing_Init(1, 1); // 参数含义: 2个缓冲区, 启用自动停止
 
   /* USER CODE END 2 */
 
@@ -209,9 +218,10 @@ int main(void)
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
+  ADCProcessingTaskHandle = osThreadNew(StartADCProcessingTask, NULL, &ADCProcessingTask_attributes);
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
-  // ďż?? ADC çĺ¤éééć ˇĺčžĺşďźä¸éďż??
+
   // ADCSamplingTaskHandle = osThreadNew(ADCSamplingTask, NULL, &ADCSamplingTask_attributes);
   // ADCOutputTaskHandle = osThreadNew(ADCOutputTask, NULL, &ADCOutputTask_attributes);
   /* USER CODE END RTOS_THREADS */
@@ -745,23 +755,7 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    /* Check if ADC conversion is complete */
-    if(adc_conversion_complete)
-    {
-      /* Reset the flag */
-      adc_conversion_complete = 0;
 
-      /* 处理缓冲区交�??? */
-      if(buffer_swap_flag)
-      {
-        buffer_swap_flag = 0;
-        SwapDMABuffers();
-      }
-      
-      /* 处理完整的缓冲区 */
-      ProcessCompleteBuffer(processing_buffer);
-
-    }
     
     osDelay(1);  /* Small delay to prevent CPU hogging */
   }
