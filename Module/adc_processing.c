@@ -252,11 +252,8 @@ void ProcessCompleteBuffer(uint16_t* buffer)
     // OutputFrequencySpectrum();
   }
   
-  /* 步骤5: 检查是否达到最大采样数量 */
+  /* 步骤5: 更新缓冲区计数 */
   buffer_fill_count++;
-  if (auto_stop_enabled && adc_sampling_active && buffer_fill_count >= max_buffer_fill_count) {
-    ADC_Processing_StopSampling();
-  }
 }
 
 /* =============================================================================
@@ -393,18 +390,11 @@ static void OutputFrequencySpectrum(void)
       printf("%.2f,%.6f\n", frequency, merged_magnitude_array[i]);
     }
   #elif USE_DUAL_ADC_SIMULTANEOUS
-    printf("=== ADC1频谱数据 ===\n");
+    printf("=== ADC1/2 频谱数据 ===\n");
     for(uint32_t i = 0; i < valid_bins; i++) {
       float frequency = processing_config.shi_coefficient * (float)i * 
                        processing_config.sampling_rate / FFT_LENGTH;
-      printf("%.2f,%.6f\n", frequency, adc1_magnitude_array[i]);
-    }
-    
-    printf("=== ADC2频谱数据 ===\n");
-    for(uint32_t i = 0; i < valid_bins; i++) {
-      float frequency = processing_config.shi_coefficient * (float)i * 
-                       processing_config.sampling_rate / FFT_LENGTH;
-      printf("%.2f,%.6f\n", frequency, adc2_magnitude_array[i]);
+      printf("%.4f,%.4f\n", adc1_magnitude_array[i], adc2_magnitude_array[i]);
     }
   #endif
   
@@ -497,31 +487,31 @@ void ADC_Processing_SetAutoStopEnabled(uint8_t enabled)
   printf("ADC auto-stop sampling %s\n", auto_stop_enabled ? "enabled" : "disabled");
 }
 
-/* =============================================================================
- * 保留的公共接口函数 (兼容性)
- * ============================================================================= */
-
 /**
- * @brief 获取频谱数组指针 (新增接口)
- * @param adc_channel ADC通道编号 (1或2，仅在同步采样模式下使用)
- * @retval float* 幅度谱数组指针
+ * @brief 获取自动停止采样功能状态
+ * @return 1:启用自动停止, 0:禁用自动停止
  */
-float* ADC_Processing_GetMagnitudeArray(uint8_t adc_channel)
+uint8_t ADC_Processing_IsAutoStopEnabled(void)
 {
-  #if USE_DUAL_ADC_INTERLEAVED
-    return merged_magnitude_array;
-  #elif USE_DUAL_ADC_SIMULTANEOUS
-    return (adc_channel == 1) ? adc1_magnitude_array : adc2_magnitude_array;
-  #endif
+  return auto_stop_enabled;
 }
 
 /**
- * @brief 获取有效频谱bins数量 (新增接口)
- * @retval uint32_t 有效频谱bins数量
+ * @brief 获取当前已填充的缓冲区数量
+ * @return 已填充的缓冲区数量
  */
-uint32_t ADC_Processing_GetValidBins(void)
+uint32_t ADC_Processing_GetBufferFillCount(void)
 {
-  return FFT_LENGTH / 2;
+  return buffer_fill_count;
+}
+
+/**
+ * @brief 获取最大缓冲区填充数量
+ * @return 最大缓冲区填充数量
+ */
+uint32_t ADC_Processing_GetMaxBufferFillCount(void)
+{
+  return max_buffer_fill_count;
 }
 
 /**
@@ -597,85 +587,3 @@ fundamental_result_t FindFundamentalComponent(float min_freq, float max_freq, fl
   return result;
 }
 
-/* =============================================================================
- * 兼容性接口 (保留旧接口以确保兼容性)
- * ============================================================================= */
-
-/**
- * @brief 兼容性接口：按照VOFA协议输出时域波形数据
- * @param merged_data 合并后的交替采样数据缓冲区
- * @param sample_count 总样本数
- * @retval None
- */
-void PrintTimeDomainDataVOFA(uint16_t* merged_data, uint32_t sample_count)
-{
-  for(uint32_t i = 0; i < sample_count; i++) {
-    float voltage = (float)(merged_data[i] * ADC_REFERENCE_VOLTAGE / ADC_8BIT_RESOLUTION);
-    uint32_t timestamp = time_domain_sample_index * TIME_DOMAIN_SAMPLE_INTERVAL_US;
-    printf("%.6f,%lu\n", voltage, timestamp);
-    time_domain_sample_index++;
-  }
-}
-
-/**
- * @brief 兼容性接口：按照VOFA协议输出频谱数据
- * @param actual_sampling_rate 实际采样率 (Hz) - 将被忽略，使用配置值
- * @param remove_dc 是否已滤除直流分量 - 将被忽略，使用配置值
- * @param shi 神秘系数 - 将被忽略，使用配置值
- * @retval None
- */
-void PrintFrequencySpectrumVOFA(float actual_sampling_rate, uint8_t remove_dc, float shi)
-{
-  OutputFrequencySpectrum(); // 直接调用新的内部函数
-}
-
-/**
- * @brief 兼容性接口：构建幅度谱数组
- * @param actual_sampling_rate 实际采样率 (Hz) - 将被忽略
- * @param remove_dc 是否已滤除直流分量 - 将被忽略
- * @param shi 神秘系数 - 将被忽略
- * @retval None
- */
-void BuildMagnitudeArray(float actual_sampling_rate, uint8_t remove_dc, float shi)
-{
-  /* 此函数功能已整合到ExecuteFFTAndBuildSpectrum中 */
-  /* 为兼容性保留，但实际不执行任何操作 */
-}
-
-/**
- * @brief 兼容性接口：频域处理函数
- * @param adc_data ADC数据缓冲区指针
- * @param data_length ADC数据长度
- * @param update_interval_ms 更新间隔时间（毫秒） - 将被忽略，使用配置值
- * @retval None
- */
-void ProcessFrequencyDomain(uint16_t* adc_data, uint32_t data_length, uint32_t update_interval_ms)
-{
-  uint32_t current_time = HAL_GetTick();
-  if (current_time - last_fft_update_time >= processing_config.fft_update_interval_ms) {
-    last_fft_update_time = current_time;
-    
-    #if USE_DUAL_ADC_INTERLEAVED
-      ADC_Processing_TriggerFFT(adc_data, data_length, 
-                               merged_fft_inputbuf, merged_magnitude_array);
-    #elif USE_DUAL_ADC_SIMULTANEOUS
-      /* 使用ADC1数据处理 */
-      ADC_Processing_TriggerFFT(adc_data, data_length, 
-                               adc1_fft_inputbuf, adc1_magnitude_array);
-    #endif
-  }
-}
-
-/**
- * @brief 兼容性接口：无参数初始化函数
- * 使用默认参数调用新的初始化函数，保持向后兼容性
- * @retval None
- */
-void ADC_Processing_Init_Compat(void)
-{
-  /* 使用默认参数调用新版初始化函数:
-   * - 默认最大缓冲区数量: 5
-   * - 默认启用自动停止: 1
-   */
-  ADC_Processing_Init(5, 1);
-}

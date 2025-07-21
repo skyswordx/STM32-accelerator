@@ -4,6 +4,9 @@
 #include "cmsis_os.h"
 #include "adc_processing.h"
 #include "main.h"
+#include "stdio.h"
+#include "math.h"
+#include "arm_math.h"
 
 void StartADCProcessingTask(void *argument);
 

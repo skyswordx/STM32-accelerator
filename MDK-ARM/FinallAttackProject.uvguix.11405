@@ -3723,9 +3723,9 @@
       </Doc>
       <Doc>
         <Name>..\Module\adc_processing.c</Name>
-        <ColumnNumber>0</ColumnNumber>
-        <TopLine>19</TopLine>
-        <CurrentLine>33</CurrentLine>
+        <ColumnNumber>24</ColumnNumber>
+        <TopLine>32</TopLine>
+        <CurrentLine>45</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>
         <PaneID>0</PaneID>
