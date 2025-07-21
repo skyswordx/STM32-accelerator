@@ -34,10 +34,14 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+
+#define USE_DUAL_ADC_INTERLEAVED 1 // 使用双ADC交错模式
+#define USE_AD9954 0 // 使用AD9954 DDS芯片
+
 /* 频谱数据结构 */
 typedef struct {
-  float frequency;    // 频率�??? (Hz)
-  float magnitude;    // 幅度�???
+  float frequency;    // 频率
+  float magnitude;    // 幅度
   uint32_t bin_index; // FFT bin 索引
 } spectrum_data_t;
 
@@ -45,8 +49,8 @@ typedef struct {
 typedef struct {
   float fundamental_frequency;  // 基波频率 (Hz)
   float fundamental_magnitude;  // 基波幅度
-  uint32_t fundamental_index;   // 基波在频谱数组中的索�???
-  uint8_t found;               // 是否找到基波 (1=找到, 0=未找�???)
+  uint32_t fundamental_index;   // 基波在频谱数组中的索引
+  uint8_t found;               // 是否找到基波 (1=找到, 0=未找到)
 } fundamental_result_t;
 /* USER CODE END PTD */
 
@@ -84,15 +88,15 @@ const osThreadAttr_t defaultTask_attributes = {
 /* USER CODE BEGIN PV */
 /* Variables for ADC dual mode DMA testing */
 #define ADC_BUFFER_SIZE 1024 * 16 
-#define ADC_8BIT_RESOLUTION 256.0f // 8位ADC分辨�???
+#define ADC_8BIT_RESOLUTION 256.0f // 8位ADC分辨率
 
 /* FFT相关变量定义 */
 #define FFT_LENGTH ADC_BUFFER_SIZE //FFT长度
-arm_cfft_radix4_instance_f32 scfft;//定义scfft结构�???
-float FFT_InputBuf[FFT_LENGTH*2];  //FFT输入数组（复数形式：实部+虚部�???
+arm_cfft_radix4_instance_f32 scfft;//定义scfft结构
+float FFT_InputBuf[FFT_LENGTH*2];  //FFT输入数组（复数形式：实部+虚部）
 float magnitude_array[FFT_LENGTH/2];  //幅度谱数组（只保留有效频谱范围）
 
-/* 双缓冲机�??? - 使用链接器自动分配内避免地址冲突 */
+/* 双缓冲机制 - 使用链接器自动分配内避免地址冲突 */
 uint16_t dmabuffer_ping[ADC_BUFFER_SIZE] __attribute__((aligned(32))); // Ping buffer for DMA transfers - 32字节对齐
 uint16_t dmabuffer_pong[ADC_BUFFER_SIZE] __attribute__((aligned(32))); // Pong buffer for DMA transfers - 32字节对齐
 
@@ -157,9 +161,9 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
   /* ADC转换完成回调 */
   if(hadc->Instance == ADC1)
   {
-    /* 设置缓冲区交换标�??? */
+    /* 设置缓冲区交换标志 */
     buffer_swap_flag = 1;
-    /* 仅在中断中设置标志，避免在中断上下文中进行复杂操�??? */
+    /* 仅在中断中设置标志，避免在中断上下文中进行复杂操作 */
     adc_conversion_complete = 1;
   }
 }
@@ -213,39 +217,32 @@ int main(void)
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
   
-  AD9954_Init();
-	AD9954_Set_Fre(1000.0);
-	AD9954_Set_Amp(16383);
-	AD9954_Set_Phase(0);
+  #if USE_AD9954
+    AD9954_Init();
+    AD9954_Set_Fre(1000.0);
+    AD9954_Set_Amp(16383);
+    AD9954_Set_Phase(0);
+  #endif
 
-  HAL_TIM_Base_Start(&htim3); // 启动定时�?3作为时间戳基�?
-  
-  /* Calibrate both ADCs */
-  HAL_ADCEx_Calibration_Start(&hadc2, ADC_CALIB_FACTOR_LINEARITY_REGOFFSET, ADC_SINGLE_ENDED);
-  HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_FACTOR_LINEARITY_REGOFFSET, ADC_SINGLE_ENDED);
-  /* Print DMA buffer information */
-
-
-  /* 清空DMA缓冲区并确保缓存�?致�?? */
+  /* 清空DMA缓冲区并确保缓存一致 */
   memset(dmabuffer_ping, 0, ADC_BUFFER_SIZE * sizeof(uint16_t));
   memset(dmabuffer_pong, 0, ADC_BUFFER_SIZE * sizeof(uint16_t));
   
   /* 清除DMA缓冲区的D-Cache，确保DMA能够正确写入 */
   SCB_CleanDCache_by_Addr((uint32_t*)dmabuffer_ping, ADC_BUFFER_SIZE * sizeof(uint16_t));
   SCB_CleanDCache_by_Addr((uint32_t*)dmabuffer_pong, ADC_BUFFER_SIZE * sizeof(uint16_t));
-  
 
-  /* 启动ADC2 */
-  HAL_ADC_Start(&hadc2);
-  /* 启动ADC双�?�道模式DMA传输 */
-  HAL_StatusTypeDef status = HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)active_dma_buffer, ADC_BUFFER_SIZE);
-  
-  if (status != HAL_OK)
-  {
-    printf("ADC1 multimode DMA start error: %d\r\n", (int)status);
-  }
-  
-  printf("ADC dual mode interleaved sampling started successfully\r\n");
+  HAL_TIM_Base_Start(&htim3); // 启动定时器3作为时间戳基准
+
+  #if USE_DUAL_ADC_INTERLEAVED
+    HAL_ADCEx_Calibration_Start(&hadc2, ADC_CALIB_FACTOR_LINEARITY_REGOFFSET, ADC_SINGLE_ENDED);
+    HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_FACTOR_LINEARITY_REGOFFSET, ADC_SINGLE_ENDED);
+
+    /* 启动ADC2 */
+    HAL_ADC_Start(&hadc2);
+    /* 启动ADC双通道模式DMA传输 */
+    HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)active_dma_buffer, ADC_BUFFER_SIZE);
+  #endif
 
   /* USER CODE END 2 */
 
@@ -826,16 +823,20 @@ static void MX_GPIO_Init(void)
  */
 static void SwapDMABuffers(void)
 {
-  /* 停止当前DMA传输 */
-  HAL_ADCEx_MultiModeStop_DMA(&hadc1);
+  #if USE_DUAL_ADC_INTERLEAVED
+    /* 停止当前DMA传输 */
+    HAL_ADCEx_MultiModeStop_DMA(&hadc1);
+  #endif
   
-  /* 交换缓冲区指�??? */
+  /* 交换缓冲区指针 */
   uint16_t* temp = active_dma_buffer;
   active_dma_buffer = processing_buffer;
   processing_buffer = temp;
   
-  /* 重新启动DMA传输到新的活动缓冲区 */
-  HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)active_dma_buffer, ADC_BUFFER_SIZE);
+  #if USE_DUAL_ADC_INTERLEAVED
+    /* 重新启动DMA传输到新的活动缓冲区 */
+    HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)active_dma_buffer, ADC_BUFFER_SIZE);
+  #endif
 }
 
 /**
@@ -849,48 +850,50 @@ static void ProcessCompleteBuffer(uint16_t* buffer)
   /* 刷新DMA缓冲区的D-Cache */
   SCB_InvalidateDCache_by_Addr((uint32_t*)buffer, ADC_BUFFER_SIZE * sizeof(uint16_t));
   
-  /* 直接从DMA缓冲区解包数据到merged_adc_data数组，避免中间数组：
-   * buffer[j] = 0xXXYY (16�??)
-   * 其中 XX (�??8�??) = ADC2 (slave)
-   * 其中 YY (�??8�??) = ADC1 (master)
-   * 交替排列为：merged_data[0] = ADC1[0], merged_data[1] = ADC2[0]
-   * merged_data[2] = ADC1[1], merged_data[3] = ADC2[1]
-   * ...
-   * 这样可以实现双�?�的有效采样�??
-   */
-  for(uint32_t j = 0; j < ADC_BUFFER_SIZE; j++)
-  {
-    merged_adc_data[j * 2] = (uint16_t)(buffer[j] & 0xFF);        // 偶数索引放ADC1数据 (低8位)
-    merged_adc_data[j * 2 + 1] = (uint16_t)((buffer[j] >> 8) & 0xFF); // 奇数索引放ADC2数据 (高8位)
-  }
-  
-  /* 调用频域处理函数，每隔1000毫秒（1秒）更新一次频谱分析 */
-  ProcessFrequencyDomain(merged_adc_data, ADC_BUFFER_SIZE * 2, 1000);
-  
-  /* 可选的输出操作 */
-  PrintTimeDomainDataVOFA(merged_adc_data, ADC_BUFFER_SIZE * 2);
-  // PrintFrequencySpectrumVOFA(actual_sampling_rate, remove_dc, shi);
+  #if USE_DUAL_ADC_INTERLEAVED
+     /* 直接从DMA缓冲区解包数据到merged_adc_data数组，避免中间数组：
+      * buffer[j] = 0xXXYY (16位)
+      * 其中 XX (低8位) = ADC2 (slave)
+      * 其中 YY (高8位) = ADC1 (master)
+      * 交替排列为：merged_data[0] = ADC1[0], merged_data[1] = ADC2[0]
+      * merged_data[2] = ADC1[1], merged_data[3] = ADC2[1]
+      * ...
+      * 这样可以实现双通道的有效采样
+      */
+      for(uint32_t j = 0; j < ADC_BUFFER_SIZE; j++)
+      {
+        merged_adc_data[j * 2] = (uint16_t)(buffer[j] & 0xFF);        // 偶数索引放ADC1数据 (低8位)
+        merged_adc_data[j * 2 + 1] = (uint16_t)((buffer[j] >> 8) & 0xFF); // 奇数索引放ADC2数据 (高8位)
+      }
+      
+      /* 调用频域处理函数，每隔1000毫秒（1秒）更新一次频谱分析 */
+      ProcessFrequencyDomain(merged_adc_data, ADC_BUFFER_SIZE * 2, 1000);
+      
+      /* 可选的输出操作 */
+      PrintTimeDomainDataVOFA(merged_adc_data, ADC_BUFFER_SIZE * 2);
+      // PrintFrequencySpectrumVOFA(actual_sampling_rate, remove_dc, shi);
 
+  #endif
 }
 
 /**
  * @brief 按照VOFA协议输出时域波形数据
- * @param merged_data 合并后的交替采样数据缓冲�???
- * @param sample_count 总样本数�???
+ * @param merged_data 合并后的交替采样数据缓冲区
+ * @param sample_count 总样本数 (每个样本包含电压和时间戳)
  * @retval None
  */
 static void PrintTimeDomainDataVOFA(uint16_t* merged_data, uint32_t sample_count)
 {
-  static uint32_t sample_index = 0; // 静�?�变量保存样本索�???
-  
-  /* 输出交替采样数据，每个样本包含电压�?�和时间�??? */
+  static uint32_t sample_index = 0; // 静态变量保存样本索引
+
+  /* 输出交替采样数据，每个样本包含电压和时间戳 */
   for(uint32_t i = 0; i < sample_count; i++)
   {
     float voltage = ADC_ToVoltage(merged_data[i]);
     
     /* 计算每个样本的时间戳（微秒）
-     * 使用样本索引来计算时间戳，假设每个样本间隔固�???
-     * 这里假设交替采样的有效采样率�???20kHz（每个样本间�???50微秒�???
+     * 使用样本索引来计算时间戳，假设每个样本间隔固定
+     * 这里假设交替采样的有效采样率为20kHz（每个样本间隔50微秒）
      */
     uint32_t timestamp = sample_index * 50; // 每个样本间隔50微秒
     
@@ -902,20 +905,20 @@ static void PrintTimeDomainDataVOFA(uint16_t* merged_data, uint32_t sample_count
 }
 
 /**
- * @brief 将ADC原始值转换为电压�???
- * @param adc_value ADC原始�??? (8�???)
- * @retval float 电压�??? (V)
+ * @brief 将ADC原始值转换为电压值
+ * @param adc_value ADC原始值 (8位)
+ * @retval float 电压值 (V)
  */
 static float ADC_ToVoltage(uint16_t adc_value)
 {
-  /* 8位ADC，参考电�???3.3V */
-  return (float)adc_value * 3.3f / 255.0f;
+  /* 8位ADC，参考电压3.3V */
+  return (float)adc_value * 3.3f / ADC_8BIT_RESOLUTION;
 }
 
 /**
  * @brief 按照VOFA协议输出频谱数据
- * @param actual_sampling_rate 实际采样�???
- * @param remove_dc 是否已滤除直流分�???
+ * @param actual_sampling_rate 实际采样率 (Hz)
+ * @param remove_dc 是否已滤除直流分量
  * @param shi 神秘系数
  * @retval None
  */
@@ -926,9 +929,9 @@ static void PrintFrequencySpectrumVOFA(float actual_sampling_rate, uint8_t remov
   } else {
     printf("=== 频谱数据 (包含直流分量) ===\n");
   }
-  
-  /* 计算幅度谱并输出 */ 
-  // 全频谱，实际上有效频率范围只�??? 0 到采样率�??? 1/2（奈奎斯特频率）
+
+  /* 计算幅度谱并输出 */
+  // 全频谱，实际上有效频率范围只从 0 到采样率的 1/2（奈奎斯特频率）
   // 采样率的 1/2 到采样率本身的部分是镜像
   for(uint32_t i = 0; i < FFT_LENGTH; i++) {
     float32_t real = FFT_InputBuf[2 * i];
@@ -936,8 +939,8 @@ static void PrintFrequencySpectrumVOFA(float actual_sampling_rate, uint8_t remov
     float32_t magnitude = sqrtf(real * real + imag * imag);
     
     /* 神秘公式 */
-    /* 输出频率和对应的幅度�??? */
-    float frequency = shi * (float)i * actual_sampling_rate / FFT_LENGTH; 
+    /* 输出频率和对应的幅度值 */
+    float frequency = shi * (float)i * actual_sampling_rate / FFT_LENGTH;
     printf("%.2f,%.6f\n", frequency, magnitude);
   }
   
@@ -945,31 +948,31 @@ static void PrintFrequencySpectrumVOFA(float actual_sampling_rate, uint8_t remov
 }
 
 /**
- * @brief 构建幅度谱数�???
- * @param actual_sampling_rate 实际采样�???
+ * @brief 构建幅度谱数组
+ * @param actual_sampling_rate 实际采样率 (Hz)
  * @param remove_dc 是否已滤除直流分�???
  * @param shi 神秘系数
  * @retval None
  */
 static void BuildMagnitudeArray(float actual_sampling_rate, uint8_t remove_dc, float shi)
 {
-  /* 只计算有效频谱范�??? (0 �??? 采样�???/2) */
+  /* 只计算有效频谱范围 (0 到 采样率/2) */
   uint32_t valid_bins = FFT_LENGTH / 2;
   
   for(uint32_t i = 0; i < valid_bins; i++) {
     float32_t real = FFT_InputBuf[2 * i];
     float32_t imag = FFT_InputBuf[2 * i + 1];
     float32_t magnitude = sqrtf(real * real + imag * imag);
-    
-    /* 存储到幅度数�??? */
+
+    /* 存储到幅度数组 */
     magnitude_array[i] = magnitude;
   }
 }
 
 /**
  * @brief 查找基波分量
- * @param min_freq 搜索的最小频�??? (Hz)
- * @param max_freq 搜索的最大频�??? (Hz)
+ * @param min_freq 搜索的最小频率 (Hz)
+ * @param max_freq 搜索的最大频率 (Hz)
  * @retval fundamental_result_t 基波查找结果
  */
 static fundamental_result_t FindFundamentalComponent(float min_freq, float max_freq)
@@ -995,11 +998,11 @@ static fundamental_result_t FindFundamentalComponent(float min_freq, float max_f
     printf("# 警告: 频率范围 %.2f - %.2f Hz 无效\n", min_freq, max_freq);
     return result;
   }
-  
-  /* 计算搜索范围的长�??? */
+
+  /* 计算搜索范围的长度 */
   uint32_t search_length = end_bin - start_bin + 1;
-  
-  /* 使用ARM DSP库的arm_max_f32函数查找�???大幅�??? */
+
+  /* 使用ARM DSP库的arm_max_f32函数查找最大幅度值 */
   float max_magnitude;
   uint32_t max_index_relative;
   
@@ -1117,8 +1120,8 @@ void StartDefaultTask(void *argument)
     {
       /* Reset the flag */
       adc_conversion_complete = 0;
-      
-      /* 处理缓冲区交�??? */
+
+      /* 处理缓冲区交换 */
       if(buffer_swap_flag)
       {
         buffer_swap_flag = 0;
