@@ -74,7 +74,7 @@ const osThreadAttr_t defaultTask_attributes = {
 osThreadId_t ADCProcessingTaskHandle;
 const osThreadAttr_t ADCProcessingTask_attributes = {
   .name = "ADCProcessingTask",
-  .stack_size = 128 * 4,
+  .stack_size = 128 * 16,
   .priority = (osPriority_t) osPriorityHigh,
 };
 /* USER CODE BEGIN PV */
@@ -191,7 +191,7 @@ int main(void)
   HAL_TIM_Base_Start(&htim3); // 启动定时器3作为时间戳基准
   
   /* 初始化ADC处理模块 - 设置采样2个缓冲区后自动停止 */
-  ADC_Processing_Init(1, 1); // 参数含义: 2个缓冲区, 启用自动停止
+  ADC_Processing_Init(1, 0); // 参数含义: 2个缓冲区, 启用自动停止
 
   /* USER CODE END 2 */
 

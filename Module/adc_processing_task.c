@@ -5,6 +5,7 @@
 void StartADCProcessingTask(void *argument)
 {
   /* Infinite loop */
+
   for(;;)
   {
     if(adc_conversion_complete)
@@ -26,12 +27,6 @@ void StartADCProcessingTask(void *argument)
         
           ADC_Processing_StopSampling();
           /* 可以在这里执行额外的清理或通知操作 */
-
-          // 延时死循环
-          for ( uint8_t i = 0; i < 1000; i++)
-          {
-            
-          }
 
           printf("ADC自动停止采样由任务执行，已处理 %lu 个缓冲区\r\n", 
                 ADC_Processing_GetBufferFillCount());

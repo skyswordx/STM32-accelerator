@@ -229,13 +229,14 @@ void ProcessCompleteBuffer(uint16_t* buffer)
   ExtractDualADCData(buffer);
   
   /* 步骤3: 时域数据输出 */
-  OutputTimeDomainData();
+  // OutputTimeDomainData();
   
   /* 步骤4: 频域处理 (按配置的时间间隔执行) */
-  uint32_t current_time = HAL_GetTick();
-  if (current_time - last_fft_update_time >= processing_config.fft_update_interval_ms) {
+  uint32_t current_time = osKernelGetTickCount();  // 使用 CMSIS RTOS 时间戳
+  uint32_t tick_freq_ms = 1000 / osKernelGetTickFreq();  // 计算每个tick的毫秒数
+  if ((current_time - last_fft_update_time) * tick_freq_ms >= processing_config.fft_update_interval_ms) 
+  {
     last_fft_update_time = current_time;
-    
     #if USE_DUAL_ADC_INTERLEAVED
       ADC_Processing_TriggerFFT(merged_adc_data, ADC_BUFFER_SIZE * 2, 
                                merged_fft_inputbuf, merged_magnitude_array);
@@ -248,9 +249,9 @@ void ProcessCompleteBuffer(uint16_t* buffer)
       ADC_Processing_TriggerFFT((uint16_t*)adc2_data_8bit, ADC_BUFFER_SIZE, 
                                adc2_fft_inputbuf, adc2_magnitude_array);
     #endif
-    
-    // OutputFrequencySpectrum();
   }
+  
+  OutputFrequencySpectrum();
   
   /* 步骤5: 更新缓冲区计数 */
   buffer_fill_count++;
@@ -394,7 +395,7 @@ static void OutputFrequencySpectrum(void)
     for(uint32_t i = 0; i < valid_bins; i++) {
       float frequency = processing_config.shi_coefficient * (float)i * 
                        processing_config.sampling_rate / FFT_LENGTH;
-      printf("%.4f,%.4f\n", adc1_magnitude_array[i], adc2_magnitude_array[i]);
+      printf("Magnitude ADC1/2:%.4f,%.4f\n", adc1_magnitude_array[i], adc2_magnitude_array[i]);
     }
   #endif
   
