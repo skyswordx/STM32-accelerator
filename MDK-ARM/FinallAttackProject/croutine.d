@@ -1,7 +1,7 @@
 finallattackproject\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/croutine.c
 finallattackproject\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-finallattackproject\croutine.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stddef.h
-finallattackproject\croutine.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdint.h
+finallattackproject\croutine.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stddef.h
+finallattackproject\croutine.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stdint.h
 finallattackproject\croutine.o: ../Core/Inc/FreeRTOSConfig.h
 finallattackproject\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 finallattackproject\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h

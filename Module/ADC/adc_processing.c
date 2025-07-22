@@ -420,8 +420,11 @@ void ADC_Processing_StartSampling(void)
   if (!adc_sampling_active) {
     /* 重置缓冲区计数 */
     buffer_fill_count = ADC_DEFAULT_BUFFER_COUNT;
+
+
     
     /* 启动DMA传输 */
+    HAL_ADC_Start(&hadc2);
     HAL_StatusTypeDef dma_status = HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)active_dma_buffer, ADC_BUFFER_SIZE);
     printf("DMA启动状态: %d\n", dma_status);
     
@@ -449,7 +452,13 @@ void ADC_Processing_StopSampling(void)
   
   if (adc_sampling_active) {
     /* 停止DMA传输 */
+
+    // HAL_StatusTypeDef adc1_status = HAL_ADC_Stop(&hadc1);
+    // HAL_StatusTypeDef adc2_status = HAL_ADC_Stop(&hadc2);
+
     HAL_StatusTypeDef dma_status = HAL_ADCEx_MultiModeStop_DMA(&hadc1);
+    HAL_ADC_Stop_DMA(&hadc2);
+
     printf("DMA停止状态: %d\n", dma_status);
     
     /* 停止定时器，停止ADC触发 */
@@ -465,29 +474,6 @@ void ADC_Processing_StopSampling(void)
     printf("✓ ADC采样已停止，状态设置为: %d\n", adc_sampling_active);
   } else {
     printf("⚠ ADC已处于停止状态，跳过停止操作\n");
-  }
-}
-
-/**
- * @brief 恢复ADC采样
- * @retval None
- */
-void ADC_Processing_ResumeSampling(void)
-{
-  if (!adc_sampling_active) {
-    /* 重置缓冲区计数 */
-    buffer_fill_count = ADC_DEFAULT_BUFFER_COUNT;
-    
-    /* 重新启动DMA传输 */
-    HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)active_dma_buffer, ADC_BUFFER_SIZE);
-    
-    /* 重新启动定时器，恢复ADC触发 */
-    HAL_TIM_Base_Start(&htim3);
-    
-    /* 更新状态标志 */
-    adc_sampling_active = ADC_SAMPLING_ACTIVE_DEFAULT;
-    
-    printf("ADC sampling resumed\n");
   }
 }
 

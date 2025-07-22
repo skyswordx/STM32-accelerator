@@ -57,8 +57,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define AD9954_OSK_Pin GPIO_PIN_13
-#define AD9954_OSK_GPIO_Port GPIOD
 #define S_SDO_Pin GPIO_PIN_14
 #define S_SDO_GPIO_Port GPIOD
 #define PS0_Pin GPIO_PIN_6

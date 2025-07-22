@@ -71,7 +71,7 @@ void StartADCProcessingTask(void *argument)
       /* 检查是否需要处理数据（只在ADC仍在采样时处理） */
       if (adc_sampling_active) 
       {
-        ProcessCompleteBuffer(processing_buffer);
+        // ProcessCompleteBuffer(processing_buffer);
       }
       
       /* 检查是否达到最大采样数量并停止ADC采样 */

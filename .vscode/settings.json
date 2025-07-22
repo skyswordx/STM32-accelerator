@@ -1,6 +1,9 @@
 {
   "files.associations": {
     "stm32h7xx_hal.h": "c",
-    "adc_processing.h": "c"
+    "adc_processing.h": "c",
+    "ina226.h": "c",
+    "arm_math.h": "c",
+    "my_dac_task.h": "c"
   }
 }
