@@ -2,7 +2,7 @@
 /**
   ******************************************************************************
   * @file           : adc_processing.c
-  * @brief          : ADC采样与频域处理相关函数
+  * @brief          : ADC sampling and frequency domain processing functions
   ******************************************************************************
   * @attention
   *
@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "adc_processing.h"
 #include "string.h"
+#include "cmsis_os.h"  /* Add CMSIS RTOS header for osKernelGetTickCount functions */
 
 /* 定时器句柄外部引用 */
 extern TIM_HandleTypeDef htim3;  /* 实际使用TIM3作为ADC触发源 */
@@ -98,7 +99,7 @@ static uint8_t auto_stop_enabled = 1;          // 自动停止采样使能标志
 /* Private function prototypes -----------------------------------------------*/
 /* 底层数据处理函数 */
 static void ExtractDualADCData(uint16_t* dma_buffer);
-static void PrepareFFTInput(uint16_t* adc_data, uint32_t data_length, float* fft_buffer);
+static void PrepareFFTInput(uint16_t* adc_data, uint32_t start_index, uint32_t data_length, float* fft_buffer);
 static void ExecuteFFTAndBuildSpectrum(float* fft_buffer, float* magnitude_buffer);
 
 /* 数据输出函数 */
@@ -238,15 +239,16 @@ void ProcessCompleteBuffer(uint16_t* buffer)
   {
     last_fft_update_time = current_time;
     #if USE_DUAL_ADC_INTERLEAVED
-      ADC_Processing_TriggerFFT(merged_adc_data, ADC_BUFFER_SIZE * 2, 
+      /* 起始索引设为0，从头开始处理 */
+      ADC_Processing_TriggerFFT(merged_adc_data, 0, ADC_BUFFER_SIZE * 2, 
                                merged_fft_inputbuf, merged_magnitude_array);
     #elif USE_DUAL_ADC_SIMULTANEOUS
-      /* 处理ADC1数据 */
-      ADC_Processing_TriggerFFT((uint16_t*)adc1_data_8bit, ADC_BUFFER_SIZE, 
+      /* 处理ADC1数据 - 起始索引设为0，从头开始处理 */
+      ADC_Processing_TriggerFFT((uint16_t*)adc1_data_8bit, 0, ADC_BUFFER_SIZE, 
                                adc1_fft_inputbuf, adc1_magnitude_array);
       
-      /* 处理ADC2数据 */
-      ADC_Processing_TriggerFFT((uint16_t*)adc2_data_8bit, ADC_BUFFER_SIZE, 
+      /* 处理ADC2数据 - 起始索引设为0，从头开始处理 */
+      ADC_Processing_TriggerFFT((uint16_t*)adc2_data_8bit, 0, ADC_BUFFER_SIZE, 
                                adc2_fft_inputbuf, adc2_magnitude_array);
     #endif
   }
@@ -289,28 +291,47 @@ static void ExtractDualADCData(uint16_t* dma_buffer)
 }
 
 /**
- * @brief 准备FFT输入数据
+ * @brief 准备FFT输入数据 - 支持任意段处理
  * @param adc_data ADC数据缓冲区
- * @param data_length 数据长度
- * @param fft_buffer 目标FFT缓冲区
+ * @param start_index 开始处理的数据索引 (从adc_data[start_index]开始)
+ * @param data_length 数据总长度 (用于边界检查)
+ * @param fft_buffer 目标FFT缓冲区 (大小需为2*FFT_LENGTH)
  * @retval None
  */
-static void PrepareFFTInput(uint16_t* adc_data, uint32_t data_length, float* fft_buffer)
+static void PrepareFFTInput(uint16_t* adc_data, uint32_t start_index, uint32_t data_length, float* fft_buffer)
 {
-  uint32_t fft_samples = (data_length < FFT_LENGTH) ? data_length : FFT_LENGTH;
+  /* 确保索引不越界 */
+  if (start_index >= data_length) {
+    printf("错误: 起始索引 %lu 超出数据长度 %lu\n", start_index, data_length);
+    return;
+  }
+
+  /* 计算从起始索引开始可用的样本数量 */
+  uint32_t available_samples = data_length - start_index;
+  
+  /* 确保只处理FFT_LENGTH长度的数据，避免超出支持范围 */
+  uint32_t fft_samples = (available_samples < FFT_LENGTH) ? available_samples : FFT_LENGTH;
+  
+  printf("Prepare FFT input: start_idx=%lu, available=%lu, proc_len=%lu, FFT_LEN=%d\n", 
+         start_index, available_samples, fft_samples, FFT_LENGTH);
   
   if (processing_config.remove_dc) {
-    /* 计算并移除直流分量 */
-    float dc_component = CalculateDCComponent(adc_data, data_length);
+    /* 计算并移除直流分量 - 只对要处理的段计算DC值 */
+    float dc_sum = 0.0f;
+    for(uint32_t i = 0; i < fft_samples; i++) {
+      dc_sum += adc_data[start_index + i];
+    }
+    float dc_component = dc_sum / fft_samples;
+    printf("直流分量: %.6f\n", dc_component);
     
     for(uint32_t i = 0; i < fft_samples; i++) {
-      fft_buffer[2*i] = (adc_data[i] - dc_component) * ADC_REFERENCE_VOLTAGE / ADC_8BIT_RESOLUTION;
+      fft_buffer[2*i] = (adc_data[start_index + i] - dc_component) * ADC_REFERENCE_VOLTAGE / ADC_8BIT_RESOLUTION;
       fft_buffer[2*i+1] = 0.0f; // 虚部设为0
     }
   } else {
     /* 保留直流分量 */
     for(uint32_t i = 0; i < fft_samples; i++) {
-      fft_buffer[2*i] = adc_data[i] * ADC_REFERENCE_VOLTAGE / ADC_8BIT_RESOLUTION;
+      fft_buffer[2*i] = adc_data[start_index + i] * ADC_REFERENCE_VOLTAGE / ADC_8BIT_RESOLUTION;
       fft_buffer[2*i+1] = 0.0f; // 虚部设为0
     }
   }
@@ -320,6 +341,13 @@ static void PrepareFFTInput(uint16_t* adc_data, uint32_t data_length, float* fft
     fft_buffer[2*i] = 0.0f;
     fft_buffer[2*i+1] = 0.0f;
   }
+  
+  /* 验证数据：输出前几个样本 */
+  printf("FFT输入样本 [%lu-%lu]: ", start_index, start_index + 4);
+  for(uint32_t i = 0; i < 5 && i < fft_samples; i++) {
+    printf("%.3f ", fft_buffer[2*i]);
+  }
+  printf("\n");
 }
 
 /**
@@ -330,16 +358,43 @@ static void PrepareFFTInput(uint16_t* adc_data, uint32_t data_length, float* fft
  */
 static void ExecuteFFTAndBuildSpectrum(float* fft_buffer, float* magnitude_buffer)
 {
+  uint32_t start_time = osKernelGetTickCount();
+  
+  printf("Start FFT processing: data_len=%d, FFT_buf=%p, mag_buf=%p\n", 
+         FFT_LENGTH, (void*)fft_buffer, (void*)magnitude_buffer);
+  
+  /* 执行FFT初始化 */
+  arm_status status = arm_cfft_radix4_init_f32(&scfft, FFT_LENGTH, 0, 1);
+  if (status != ARM_MATH_SUCCESS) {
+    printf("错误: FFT初始化失败 (状态=%d)\n", status);
+    return;
+  }
+  
   /* 执行FFT */
-  arm_cfft_radix4_init_f32(&scfft, FFT_LENGTH, 0, 1);
   arm_cfft_radix4_f32(&scfft, fft_buffer);
   
-  /* 同时计算幅度谱 - 避免重复循环 */
+  /* 计算幅度谱 */
   uint32_t valid_bins = FFT_LENGTH / 2;
   for(uint32_t i = 0; i < valid_bins; i++) {
     float32_t real = fft_buffer[2 * i];
     float32_t imag = fft_buffer[2 * i + 1];
     magnitude_buffer[i] = sqrtf(real * real + imag * imag);
+  }
+  
+  uint32_t end_time = osKernelGetTickCount();
+  uint32_t tick_freq_ms = 1000 / osKernelGetTickFreq();
+  printf("FFT处理完成: 耗时约%lu毫秒\n", (end_time - start_time) * tick_freq_ms);
+  
+  /* 检查前10个频点是否都接近零 */
+  uint8_t all_zero = 1;
+  for(uint32_t i = 0; i < 10 && i < valid_bins; i++) {
+    if (magnitude_buffer[i] > 0.001f) {  // 阈值0.001
+      all_zero = 0;
+      break;
+    }
+  }
+  if (all_zero) {
+    printf("警告: 前10个频点幅度都接近零! 检查FFT计算.\n");
   }
 }
 
@@ -374,32 +429,32 @@ static void OutputTimeDomainData(void)
  */
 static void OutputFrequencySpectrum(void)
 {
-  if (processing_config.remove_dc) {
-    printf("=== 频谱数据 (滤除直流分量) ===\n");
-  } else {
-    printf("=== 频谱数据 (包含直流分量) ===\n");
-  }
 
   /* 输出有效频谱范围 (0 到采样率/2) */
   uint32_t valid_bins = FFT_LENGTH / 2;
 
   #if USE_DUAL_ADC_INTERLEAVED
-    printf("=== 交替采样频谱数据 ===\n");
-    for(uint32_t i = 0; i < valid_bins; i++) {
-      float frequency = processing_config.shi_coefficient * (float)i * 
-                       processing_config.sampling_rate / FFT_LENGTH;
-      printf("%.2f,%.6f\n", frequency, merged_magnitude_array[i]);
-    }
+    printf("=== ADC1/2 交替采样频谱数据 ===\n");
+    
+    
   #elif USE_DUAL_ADC_SIMULTANEOUS
-    printf("=== ADC1/2 频谱数据 ===\n");
+    printf("=== ADC1/2 同步采样频谱数据 ===\n");
+    
+    /* 找到最大幅度值 */
+    // float max_adc1, max_adc2;
+    // uint32_t max_idx_adc1, max_idx_adc2;
+    // arm_max_f32(adc1_magnitude_array, valid_bins, &max_adc1, &max_idx_adc1);
+    // arm_max_f32(adc2_magnitude_array, valid_bins, &max_adc2, &max_idx_adc2);
+    // printf("最大幅度: ADC1=%.6f (bin %lu), ADC2=%.6f (bin %lu)\n", 
+    //        max_adc1, max_idx_adc1, max_adc2, max_idx_adc2);
+
     for(uint32_t i = 0; i < valid_bins; i++) {
-      float frequency = processing_config.shi_coefficient * (float)i * 
+      float frequency = processing_config.shi_coefficient * (float)i *
                        processing_config.sampling_rate / FFT_LENGTH;
-      printf("Magnitude ADC1/2:%.4f,%.4f\n", adc1_magnitude_array[i], adc2_magnitude_array[i]);
+      printf("[%.2fHz]  ADC1/2:%.6f,%.6f\n", 
+             frequency, adc1_magnitude_array[i], adc2_magnitude_array[i]);
     }
   #endif
-  
-  printf("=== 频谱数据结束 ===\n");
 }
 
 /**
@@ -516,12 +571,43 @@ uint32_t ADC_Processing_GetMaxBufferFillCount(void)
 }
 
 /**
- * @brief 手动触发频域处理 (新增接口)
+ * @brief 手动触发频域处理 - 支持任意段FFT计算
+ * @param adc_data ADC数据缓冲区指针
+ * @param start_index 开始计算的数据索引 (从adc_data[start_index]开始)
+ * @param data_length 数据总长度，用于边界检查
+ * @param fft_buffer FFT输入/输出缓冲区 (大小为2*FFT_LENGTH)
+ * @param magnitude_buffer 幅度谱输出缓冲区 (大小为FFT_LENGTH/2)
+ * @note 函数会从adc_data[start_index]开始提取FFT_LENGTH个样本进行FFT计算
+ *       可用于将大量样本(如16384)分段(如4段，每段4096个点)处理
  * @retval None
  */
-void ADC_Processing_TriggerFFT(uint16_t* adc_data, uint32_t data_length, float* fft_buffer, float* magnitude_buffer)
+void ADC_Processing_TriggerFFT(uint16_t* adc_data, uint32_t start_index, uint32_t data_length, float* fft_buffer, float* magnitude_buffer)
 {
-    PrepareFFTInput(adc_data, data_length, fft_buffer);
+    uint32_t sample_window = (start_index + FFT_LENGTH > data_length) ? (data_length - start_index) : FFT_LENGTH;
+    
+    printf("触发FFT处理: 起始索引=%lu, 总数据长度=%lu, 处理窗口大小=%lu\n", 
+           start_index, data_length, sample_window);
+    
+    /* 验证输入参数 */
+    if (adc_data == NULL || fft_buffer == NULL || magnitude_buffer == NULL) {
+        printf("错误: FFT输入参数为空指针\n");
+        return;
+    }
+    
+    if (start_index >= data_length) {
+        printf("错误: 起始索引(%lu)超出数据总长度(%lu)\n", start_index, data_length);
+        return;
+    }
+    
+    /* 检查起始位置的ADC数据值 */
+    printf("ADC原始数据 [%lu-%lu]: ", start_index, start_index + 4);
+    for(uint32_t i = 0; i < 5 && (start_index + i) < data_length; i++) {
+        printf("%u ", adc_data[start_index + i]);
+    }
+    printf("\n");
+    
+    /* 准备FFT输入并执行FFT */
+    PrepareFFTInput(adc_data, start_index, data_length, fft_buffer);
     ExecuteFFTAndBuildSpectrum(fft_buffer, magnitude_buffer);
 }
 

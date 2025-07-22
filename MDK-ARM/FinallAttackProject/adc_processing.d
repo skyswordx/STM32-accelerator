@@ -46,3 +46,14 @@ finallattackproject\adc_processing.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdio.h
 finallattackproject\adc_processing.o: ../Drivers/CMSIS/DSP/Include/arm_math.h
 finallattackproject\adc_processing.o: D:\KEIL\ARM\ARMCC\Bin\..\include\string.h
 finallattackproject\adc_processing.o: D:\KEIL\ARM\ARMCC\Bin\..\include\float.h
+finallattackproject\adc_processing.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h
+finallattackproject\adc_processing.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+finallattackproject\adc_processing.o: ../Core/Inc/FreeRTOSConfig.h
+finallattackproject\adc_processing.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+finallattackproject\adc_processing.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+finallattackproject\adc_processing.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+finallattackproject\adc_processing.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
+finallattackproject\adc_processing.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+finallattackproject\adc_processing.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+finallattackproject\adc_processing.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
+finallattackproject\adc_processing.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h

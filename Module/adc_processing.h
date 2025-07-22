@@ -43,7 +43,7 @@ extern UART_HandleTypeDef huart1;
 #define ADC_BUFFER_SIZE 1024 * 16 
 #define ADC_8BIT_RESOLUTION 256.0f // 8位ADC分辨率
 
-#define FFT_LENGTH  ADC_BUFFER_SIZE //FFT长度
+#define FFT_LENGTH  4096 //FFT长度 - ARM radix-4 FFT支持的最大长度
 
 /* Exported types ------------------------------------------------------------*/
 /* 频谱数据结构 */
@@ -120,13 +120,27 @@ void SwapDMABuffers(void);
 void ProcessCompleteBuffer(uint16_t* buffer);
 
 /* 频域分析接口 */
-void ADC_Processing_TriggerFFT(uint16_t* adc_data, uint32_t data_length, float* fft_buffer, float* magnitude_buffer);
+/**
+ * @brief 触发FFT频域分析
+ * @param adc_data ADC数据缓冲区指针
+ * @param start_index 开始计算的数据索引 (从adc_data[start_index]开始)
+ * @param data_length 数据总长度，用于边界检查
+ * @param fft_buffer FFT输入/输出缓冲区 (大小为2*FFT_LENGTH)
+ * @param magnitude_buffer 幅度谱输出缓冲区 (大小为FFT_LENGTH/2)
+ * @note 函数会从adc_data[start_index]开始提取FFT_LENGTH个样本进行FFT计算
+ *       可用于将大量样本(如16384)分段(如4段，每段4096个点)处理:
+ *       - 处理第0-4095样本: ADC_Processing_TriggerFFT(adc_data, 0, 16384, fft_buf, mag_buf)
+ *       - 处理第4096-8191样本: ADC_Processing_TriggerFFT(adc_data, 4096, 16384, fft_buf, mag_buf)
+ *       - 处理第8192-12287样本: ADC_Processing_TriggerFFT(adc_data, 8192, 16384, fft_buf, mag_buf)
+ *       - 处理第12288-16383样本: ADC_Processing_TriggerFFT(adc_data, 12288, 16384, fft_buf, mag_buf)
+ */
+void ADC_Processing_TriggerFFT(uint16_t* adc_data, uint32_t start_index, uint32_t data_length, float* fft_buffer, float* magnitude_buffer);
 
 fundamental_result_t FindFundamentalComponent(float min_freq, float max_freq, float* magnitude_array);
 
 /* 内部处理函数声明 */
 static void ExtractDualADCData(uint16_t* dma_buffer);
-static void PrepareFFTInput(uint16_t* adc_data, uint32_t data_length, float* fft_buffer);
+static void PrepareFFTInput(uint16_t* adc_data, uint32_t start_index, uint32_t data_length, float* fft_buffer);
 static void ExecuteFFTAndBuildSpectrum(float* fft_buffer, float* magnitude_buffer);
 static void OutputFrequencySpectrum(void);
 

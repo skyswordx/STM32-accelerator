@@ -22,37 +22,37 @@ Dialog DLL:      TCM.DLL V1.56.4.0
  
 <h2>Project:</h2>
 D:\Musii-SnapShot\GithubRepo\STM32-accelerator\MDK-ARM\FinallAttackProject.uvprojx
-Project File Date:  07/21/2025
+Project File Date:  07/22/2025
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\KEIL\ARM\ARMCC\Bin'
 Build target 'FinallAttackProject'
 compiling adc_processing.c...
-..\Module\adc_processing.c(235): warning:  #223-D: function "osKernelGetTickCount" declared implicitly
-    uint32_t current_time = osKernelGetTickCount();  // 使用 CMSIS RTOS 时间�?
-..\Module\adc_processing.c(236): warning:  #223-D: function "osKernelGetTickFreq" declared implicitly
-    uint32_t tick_freq_ms = 1000 / osKernelGetTickFreq();  // 计算每个tick的毫秒数
-..\Module\adc_processing.c(90): warning:  #550-D: variable "time_domain_sample_index"  was set but never used
+..\Module\adc_processing.c(369): warning:  #870-D: invalid multibyte character sequence
+      printf("错误: FFT初始化失�? (状�?=%d)\n", status);
+..\Module\adc_processing.c(369): warning:  #870-D: invalid multibyte character sequence
+      printf("错误: FFT初始化失�? (状�?=%d)\n", status);
+..\Module\adc_processing.c(386): warning:  #870-D: invalid multibyte character sequence
+    printf("FFT处理完成: 耗时�?%lu毫秒\n", (end_time - start_time) * tick_freq_ms);
+..\Module\adc_processing.c(397): warning:  #870-D: invalid multibyte character sequence
+      printf("警告: �?10个频点幅度都接近�?! 检查FFT计算.\n");
+..\Module\adc_processing.c(397): warning:  #870-D: invalid multibyte character sequence
+      printf("警告: �?10个频点幅度都接近�?! 检查FFT计算.\n");
+..\Module\adc_processing.c(588): warning:  #870-D: invalid multibyte character sequence
+      printf("触发FFT处理: 起始索引=%lu, 总数据长�?=%lu, 处理窗口大小=%lu\n", 
+..\Module\adc_processing.c(598): warning:  #870-D: invalid multibyte character sequence
+          printf("错误: 起始索引(%lu)超出数据总长�?(%lu)\n", start_index, data_length);
+..\Module\adc_processing.c(91): warning:  #550-D: variable "time_domain_sample_index"  was set but never used
   static uint32_t time_domain_sample_index = 0;
-..\Module\adc_processing.c(350): warning:  #177-D: function "OutputTimeDomainData"  was declared but never referenced
+..\Module\adc_processing.c(405): warning:  #177-D: function "OutputTimeDomainData"  was declared but never referenced
   static void OutputTimeDomainData(void)
-..\Module\adc_processing.c: 4 warnings, 0 errors
-compiling adc_processing_task.c...
-..\Module\adc_processing_task.h(14): warning:  #1-D: last line of file ends without a newline
-  #endif /* ADC_PROCESSING_TASK_H */
-..\Module\adc_processing_task.c(31): warning:  #870-D: invalid multibyte character sequence
-            printf("ADC自动停止采样由任务执行，已处�? %lu 个缓冲区\r\n", 
-..\Module\adc_processing_task.c: 2 warnings, 0 errors
-compiling main.c...
-../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
-  #endif /* INA226_H_ */
-../Module/adc_processing_task.h(14): warning:  #1-D: last line of file ends without a newline
-  #endif /* ADC_PROCESSING_TASK_H */
-../Core/Src/main.c: 2 warnings, 0 errors
+..\Module\adc_processing.c(466): warning:  #177-D: function "CalculateDCComponent"  was declared but never referenced
+  static float CalculateDCComponent(uint16_t* data, uint32_t length)
+..\Module\adc_processing.c: 10 warnings, 0 errors
 linking...
-Program Size: Code=38128 RO-data=35764 RW-data=216 ZI-data=446516  
+Program Size: Code=38888 RO-data=35904 RW-data=216 ZI-data=200768  
 FromELF: creating hex file...
-"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 8 Warning(s).
+"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 10 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -75,7 +75,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:11
+Build Time Elapsed:  00:00:07
 </pre>
 </body>
 </html>
