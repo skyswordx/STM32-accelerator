@@ -111,19 +111,6 @@ static float CalculateDCComponent(uint16_t* data, uint32_t length);
 /* Functions implementation --------------------------------------------------*/
 
 /**
- * @brief ADC处理模块初始化
- * @param max_buffers 最大采样缓冲区数量，设置为0则使用默认值(ADC_DEFAULT_MAX_BUFFER_COUNT=1)
- * @param enable_auto_stop 是否启用自动停止采样，0:禁用，1:启用
- *        如果启用，当buffer_fill_count >= max_buffer_fill_count时会自动停止采样
- * @note  默认配置为：采集1个缓冲区后自动停止
- * @retval None
- */
-void ADC_Processing_Init(uint32_t max_buffers, uint8_t enable_auto_stop)
-{
-  
-}
-
-/**
  * @brief 设置ADC处理配置参数
  * @param sampling_rate 采样率 (Hz)
  * @param shi_coefficient 神秘系数
@@ -197,7 +184,7 @@ void ProcessCompleteBuffer(uint16_t* buffer)
   ExtractDualADCData(buffer);
   
   /* 步骤3: 时域数据输出 */
-  // OutputTimeDomainData();
+  OutputTimeDomainData();
   
   /* 步骤4: 频域处理 (按配置的时间间隔执行) */
   uint32_t current_time = osKernelGetTickCount();  // 使用 CMSIS RTOS 时间戳

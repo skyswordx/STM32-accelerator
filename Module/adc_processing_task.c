@@ -37,8 +37,16 @@ void StartADCProcessingTask(void *argument)
 
     /* 启动定时器3作为时间戳基准和ADC触发源 */
     HAL_TIM_Base_Start(&htim3);
+    
+    /* 给一个短暂延迟确保定时器稳定运行 */
+    osDelay(5);
+    
     /* 启动ADC2 */
     HAL_ADC_Start(&hadc2);
+    
+    /* 给一个短暂延迟确保ADC2稳定运行 */
+    osDelay(5);
+    
     /* 启动ADC双通道模式DMA传输 - 简化调用 */
     HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)active_dma_buffer, ADC_BUFFER_SIZE);
   #endif
@@ -51,12 +59,8 @@ void StartADCProcessingTask(void *argument)
     if(adc_conversion_complete)
     {
       adc_conversion_complete = 0;
-
-      if(buffer_swap_flag)
-      {
-        buffer_swap_flag = 0;
-        SwapDMABuffers();
-      }
+      if(buffer_swap_flag){buffer_swap_flag = 0; SwapDMABuffers();}
+      
       
       ProcessCompleteBuffer(processing_buffer);
       
