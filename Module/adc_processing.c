@@ -86,14 +86,14 @@ static adc_processing_config_t processing_config = {
 };
 
 /* 时间控制变量 */
-static uint32_t last_fft_update_time = 0;
-static uint32_t time_domain_sample_index = 0;
+uint32_t last_fft_update_time = 0;
+uint32_t time_domain_sample_index = 0;
 
 /* ADC采样控制变量 */
-static uint32_t buffer_fill_count = ADC_DEFAULT_BUFFER_COUNT;       // 已采集的缓冲区数量
-static uint32_t max_buffer_fill_count = ADC_DEFAULT_MAX_BUFFER_COUNT; // 最大采集缓冲区数量，可配置
-static uint8_t adc_sampling_active = ADC_SAMPLING_ACTIVE_DEFAULT;   // ADC采样状态标志
-static uint8_t auto_stop_enabled = ADC_AUTO_STOP_ENABLED;           // 自动停止采样使能标志
+uint32_t buffer_fill_count = ADC_DEFAULT_BUFFER_COUNT;       // 已采集的缓冲区数量
+uint32_t max_buffer_fill_count = ADC_DEFAULT_MAX_BUFFER_COUNT; // 最大采集缓冲区数量，可配置
+uint8_t adc_sampling_active = ADC_SAMPLING_ACTIVE_DEFAULT;   // ADC采样状态标志
+uint8_t auto_stop_enabled = ADC_AUTO_STOP_ENABLED;           // 自动停止采样使能标志
 
 /* Private function prototypes -----------------------------------------------*/
 /* 底层数据处理函数 */
@@ -120,41 +120,7 @@ static float CalculateDCComponent(uint16_t* data, uint32_t length);
  */
 void ADC_Processing_Init(uint32_t max_buffers, uint8_t enable_auto_stop)
 {
-  /* 清空DMA缓冲区并确保缓存一致 */
-  memset(dmabuffer_ping, 0, ADC_BUFFER_SIZE * sizeof(uint16_t));
-  memset(dmabuffer_pong, 0, ADC_BUFFER_SIZE * sizeof(uint16_t));
   
-  /* 清除DMA缓冲区的D-Cache，确保DMA能够正确写入 */
-  SCB_CleanDCache_by_Addr((uint32_t*)dmabuffer_ping, ADC_BUFFER_SIZE * sizeof(uint16_t));
-  SCB_CleanDCache_by_Addr((uint32_t*)dmabuffer_pong, ADC_BUFFER_SIZE * sizeof(uint16_t));
-
-  /* 初始化时间控制变量 */
-  last_fft_update_time = 0;
-  time_domain_sample_index = 0;
-  
-  /* 初始化采样控制变量 */
-  buffer_fill_count = ADC_DEFAULT_BUFFER_COUNT;
-  adc_sampling_active = ADC_SAMPLING_ACTIVE_DEFAULT;
-  
-  /* 设置最大缓冲区数量 */
-  if (max_buffers > 0) {
-    max_buffer_fill_count = max_buffers;
-  } else {
-    max_buffer_fill_count = ADC_DEFAULT_MAX_BUFFER_COUNT; /* 默认采集1个缓冲区后停止 */
-  }
-  
-  /* 设置自动停止使能状态 */
-  auto_stop_enabled = enable_auto_stop ? ADC_AUTO_STOP_ENABLED : ADC_AUTO_STOP_DISABLED;
-
-  #if USE_DUAL_ADC_INTERLEAVED || USE_DUAL_ADC_SIMULTANEOUS
-    HAL_ADCEx_Calibration_Start(&hadc2, ADC_CALIB_FACTOR_LINEARITY_REGOFFSET, ADC_SINGLE_ENDED);
-    HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_FACTOR_LINEARITY_REGOFFSET, ADC_SINGLE_ENDED);
-
-    /* 启动ADC2 */
-    HAL_ADC_Start(&hadc2);
-    /* 启动ADC双通道模式DMA传输 */
-    HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)active_dma_buffer, ADC_BUFFER_SIZE);
-  #endif
 }
 
 /**
@@ -463,19 +429,16 @@ static float CalculateDCComponent(uint16_t* data, uint32_t length)
 void ADC_Processing_StopSampling(void)
 {
   if (adc_sampling_active) {
-    /* 停止定时器，停止ADC触发 */
-    HAL_TIM_Base_Stop(&htim3);
-    
     /* 停止DMA传输 */
     HAL_ADCEx_MultiModeStop_DMA(&hadc1);
     
+    /* 停止定时器，停止ADC触发 */
+    HAL_TIM_Base_Stop(&htim3);
     /* 复位定时器计数器 */
     __HAL_TIM_SET_COUNTER(&htim3, 0);
     
     /* 更新状态标志 */
     adc_sampling_active = ADC_SAMPLING_INACTIVE;
-    
-    printf("ADC sampling stopped after %lu buffers\n", buffer_fill_count);
   }
 }
 

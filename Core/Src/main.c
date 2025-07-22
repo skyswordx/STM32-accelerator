@@ -188,11 +188,6 @@ int main(void)
     AD9954_Set_Amp(16383);
     AD9954_Set_Phase(0);
   #endif
-  HAL_TIM_Base_Start(&htim3); // 启动定时器3作为时间戳基准
-  
-  /* 初始化ADC处理模块 - 设置采样2个缓冲区后自动停止 */
-  ADC_Processing_Init(ADC_DEFAULT_MAX_BUFFER_COUNT,  ADC_AUTO_STOP_DISABLED); // 参数含义: 2个缓冲区, 启用自动停止
-
   /* USER CODE END 2 */
 
   /* Init scheduler */

@@ -35,6 +35,7 @@ extern "C" {
 extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
 extern UART_HandleTypeDef huart1;
+extern TIM_HandleTypeDef htim3;  /* 实际使用TIM3作为ADC触发源和时间戳基准 */
 
 /* Exported defines ----------------------------------------------------------*/
 #define USE_DUAL_ADC_INTERLEAVED 0 // 使用双ADC交错模式
@@ -47,7 +48,7 @@ extern UART_HandleTypeDef huart1;
 
 /* ADC采样控制参数 */
 #define ADC_DEFAULT_BUFFER_COUNT       0      // 默认已采集缓冲区数量
-#define ADC_DEFAULT_MAX_BUFFER_COUNT   1      // 默认最大采集缓冲区数量
+#define ADC_DEFAULT_MAX_BUFFER_COUNT   3      // 默认最大采集缓冲区数量
 #define ADC_SAMPLING_ACTIVE_DEFAULT    1      // 默认ADC采样状态：活动
 #define ADC_SAMPLING_INACTIVE          0      // ADC采样状态：非活动
 #define ADC_AUTO_STOP_ENABLED          1      // 自动停止采样：启用
@@ -90,6 +91,16 @@ extern uint16_t dmabuffer_pong[ADC_BUFFER_SIZE]; // Pong buffer for DMA transfer
 
 extern uint16_t* active_dma_buffer;     // 当前DMA写入的缓冲区
 extern uint16_t* processing_buffer;     // 当前处理的缓冲区
+
+/* 时间控制变量 */
+extern uint32_t last_fft_update_time;
+extern uint32_t time_domain_sample_index;
+
+/* ADC采样控制变量 */
+extern uint32_t buffer_fill_count;         // 已采集的缓冲区数量
+extern uint32_t max_buffer_fill_count;     // 最大采集缓冲区数量，可配置
+extern uint8_t adc_sampling_active;        // ADC采样状态标志
+extern uint8_t auto_stop_enabled;          // 自动停止采样使能标志
 
 /* FFT相关变量定义 */
 extern arm_cfft_radix4_instance_f32 scfft;  //定义scfft结构
