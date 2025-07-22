@@ -1,5 +1,6 @@
 {
-    "files.associations": {
-        "stm32h7xx_hal.h": "c"
-    }
+  "files.associations": {
+    "stm32h7xx_hal.h": "c",
+    "adc_processing.h": "c"
+  }
 }

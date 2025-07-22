@@ -31,7 +31,6 @@ extern TIM_HandleTypeDef htim3;  /* 实际使用TIM3作为ADC触发源 */
 #define DEFAULT_SHI_COEFFICIENT  0.09f        // 默认神秘系数
 #define TIME_DOMAIN_SAMPLE_INTERVAL_US  50    // 时域采样间隔(微秒)
 #define ADC_REFERENCE_VOLTAGE    3.3f         // ADC参考电压
-
 /* Private types -------------------------------------------------------------*/
 /* ADC处理配置结构 */
 typedef struct {
@@ -91,10 +90,10 @@ static uint32_t last_fft_update_time = 0;
 static uint32_t time_domain_sample_index = 0;
 
 /* ADC采样控制变量 */
-static uint32_t buffer_fill_count = 0;         // 已采集的缓冲区数量
-static uint32_t max_buffer_fill_count = 5;     // 最大采集缓冲区数量，可配置
-static uint8_t adc_sampling_active = 1;        // ADC采样状态标志
-static uint8_t auto_stop_enabled = 1;          // 自动停止采样使能标志，默认开启
+static uint32_t buffer_fill_count = ADC_DEFAULT_BUFFER_COUNT;       // 已采集的缓冲区数量
+static uint32_t max_buffer_fill_count = ADC_DEFAULT_MAX_BUFFER_COUNT; // 最大采集缓冲区数量，可配置
+static uint8_t adc_sampling_active = ADC_SAMPLING_ACTIVE_DEFAULT;   // ADC采样状态标志
+static uint8_t auto_stop_enabled = ADC_AUTO_STOP_ENABLED;           // 自动停止采样使能标志
 
 /* Private function prototypes -----------------------------------------------*/
 /* 底层数据处理函数 */
@@ -113,8 +112,10 @@ static float CalculateDCComponent(uint16_t* data, uint32_t length);
 
 /**
  * @brief ADC处理模块初始化
- * @param max_buffers 最大采样缓冲区数量，设置为0则使用默认值(5)
- * @param enable_auto_stop 是否启用自动停止采样，0:禁用, 1:启用
+ * @param max_buffers 最大采样缓冲区数量，设置为0则使用默认值(ADC_DEFAULT_MAX_BUFFER_COUNT=1)
+ * @param enable_auto_stop 是否启用自动停止采样，0:禁用，1:启用
+ *        如果启用，当buffer_fill_count >= max_buffer_fill_count时会自动停止采样
+ * @note  默认配置为：采集1个缓冲区后自动停止
  * @retval None
  */
 void ADC_Processing_Init(uint32_t max_buffers, uint8_t enable_auto_stop)
@@ -132,18 +133,18 @@ void ADC_Processing_Init(uint32_t max_buffers, uint8_t enable_auto_stop)
   time_domain_sample_index = 0;
   
   /* 初始化采样控制变量 */
-  buffer_fill_count = 0;
-  adc_sampling_active = 1;
+  buffer_fill_count = ADC_DEFAULT_BUFFER_COUNT;
+  adc_sampling_active = ADC_SAMPLING_ACTIVE_DEFAULT;
   
   /* 设置最大缓冲区数量 */
   if (max_buffers > 0) {
     max_buffer_fill_count = max_buffers;
   } else {
-    max_buffer_fill_count = 5; /* 默认值 */
+    max_buffer_fill_count = ADC_DEFAULT_MAX_BUFFER_COUNT; /* 默认采集1个缓冲区后停止 */
   }
   
   /* 设置自动停止使能状态 */
-  auto_stop_enabled = enable_auto_stop ? 1 : 0;
+  auto_stop_enabled = enable_auto_stop ? ADC_AUTO_STOP_ENABLED : ADC_AUTO_STOP_DISABLED;
 
   #if USE_DUAL_ADC_INTERLEAVED || USE_DUAL_ADC_SIMULTANEOUS
     HAL_ADCEx_Calibration_Start(&hadc2, ADC_CALIB_FACTOR_LINEARITY_REGOFFSET, ADC_SINGLE_ENDED);
@@ -252,7 +253,6 @@ void ProcessCompleteBuffer(uint16_t* buffer)
                                adc2_fft_inputbuf, adc2_magnitude_array);
     #endif
   }
-  
   OutputFrequencySpectrum();
   
   /* 步骤5: 更新缓冲区计数 */
@@ -311,9 +311,7 @@ static void PrepareFFTInput(uint16_t* adc_data, uint32_t start_index, uint32_t d
   
   /* 确保只处理FFT_LENGTH长度的数据，避免超出支持范围 */
   uint32_t fft_samples = (available_samples < FFT_LENGTH) ? available_samples : FFT_LENGTH;
-  
-  printf("Prepare FFT input: start_idx=%lu, available=%lu, proc_len=%lu, FFT_LEN=%d\n", 
-         start_index, available_samples, fft_samples, FFT_LENGTH);
+
   
   if (processing_config.remove_dc) {
     /* 计算并移除直流分量 - 只对要处理的段计算DC值 */
@@ -322,7 +320,6 @@ static void PrepareFFTInput(uint16_t* adc_data, uint32_t start_index, uint32_t d
       dc_sum += adc_data[start_index + i];
     }
     float dc_component = dc_sum / fft_samples;
-    printf("直流分量: %.6f\n", dc_component);
     
     for(uint32_t i = 0; i < fft_samples; i++) {
       fft_buffer[2*i] = (adc_data[start_index + i] - dc_component) * ADC_REFERENCE_VOLTAGE / ADC_8BIT_RESOLUTION;
@@ -341,13 +338,6 @@ static void PrepareFFTInput(uint16_t* adc_data, uint32_t start_index, uint32_t d
     fft_buffer[2*i] = 0.0f;
     fft_buffer[2*i+1] = 0.0f;
   }
-  
-  /* 验证数据：输出前几个样本 */
-  printf("FFT输入样本 [%lu-%lu]: ", start_index, start_index + 4);
-  for(uint32_t i = 0; i < 5 && i < fft_samples; i++) {
-    printf("%.3f ", fft_buffer[2*i]);
-  }
-  printf("\n");
 }
 
 /**
@@ -358,10 +348,7 @@ static void PrepareFFTInput(uint16_t* adc_data, uint32_t start_index, uint32_t d
  */
 static void ExecuteFFTAndBuildSpectrum(float* fft_buffer, float* magnitude_buffer)
 {
-  uint32_t start_time = osKernelGetTickCount();
-  
-  printf("Start FFT processing: data_len=%d, FFT_buf=%p, mag_buf=%p\n", 
-         FFT_LENGTH, (void*)fft_buffer, (void*)magnitude_buffer);
+  // uint32_t start_time = osKernelGetTickCount();
   
   /* 执行FFT初始化 */
   arm_status status = arm_cfft_radix4_init_f32(&scfft, FFT_LENGTH, 0, 1);
@@ -381,21 +368,21 @@ static void ExecuteFFTAndBuildSpectrum(float* fft_buffer, float* magnitude_buffe
     magnitude_buffer[i] = sqrtf(real * real + imag * imag);
   }
   
-  uint32_t end_time = osKernelGetTickCount();
-  uint32_t tick_freq_ms = 1000 / osKernelGetTickFreq();
-  printf("FFT处理完成: 耗时约%lu毫秒\n", (end_time - start_time) * tick_freq_ms);
+  // uint32_t end_time = osKernelGetTickCount();
+  // uint32_t tick_freq_ms = 1000 / osKernelGetTickFreq();
+  // printf("FFT处理完成: 耗时约%lu毫秒\n", (end_time - start_time) * tick_freq_ms);
   
   /* 检查前10个频点是否都接近零 */
-  uint8_t all_zero = 1;
-  for(uint32_t i = 0; i < 10 && i < valid_bins; i++) {
-    if (magnitude_buffer[i] > 0.001f) {  // 阈值0.001
-      all_zero = 0;
-      break;
-    }
-  }
-  if (all_zero) {
-    printf("警告: 前10个频点幅度都接近零! 检查FFT计算.\n");
-  }
+  // uint8_t all_zero = 1;
+  // for(uint32_t i = 0; i < 10 && i < valid_bins; i++) {
+  //   if (magnitude_buffer[i] > 0.001f) {  // 阈值0.001
+  //     all_zero = 0;
+  //     break;
+  //   }
+  // }
+  // if (all_zero) {
+  //   printf("警告: 前10个频点幅度都接近零! 检查FFT计算.\n");
+  // }
 }
 
 /**
@@ -440,14 +427,6 @@ static void OutputFrequencySpectrum(void)
   #elif USE_DUAL_ADC_SIMULTANEOUS
     printf("=== ADC1/2 同步采样频谱数据 ===\n");
     
-    /* 找到最大幅度值 */
-    // float max_adc1, max_adc2;
-    // uint32_t max_idx_adc1, max_idx_adc2;
-    // arm_max_f32(adc1_magnitude_array, valid_bins, &max_adc1, &max_idx_adc1);
-    // arm_max_f32(adc2_magnitude_array, valid_bins, &max_adc2, &max_idx_adc2);
-    // printf("最大幅度: ADC1=%.6f (bin %lu), ADC2=%.6f (bin %lu)\n", 
-    //        max_adc1, max_idx_adc1, max_adc2, max_idx_adc2);
-
     for(uint32_t i = 0; i < valid_bins; i++) {
       float frequency = processing_config.shi_coefficient * (float)i *
                        processing_config.sampling_rate / FFT_LENGTH;
@@ -494,7 +473,7 @@ void ADC_Processing_StopSampling(void)
     __HAL_TIM_SET_COUNTER(&htim3, 0);
     
     /* 更新状态标志 */
-    adc_sampling_active = 0;
+    adc_sampling_active = ADC_SAMPLING_INACTIVE;
     
     printf("ADC sampling stopped after %lu buffers\n", buffer_fill_count);
   }
@@ -508,7 +487,7 @@ void ADC_Processing_ResumeSampling(void)
 {
   if (!adc_sampling_active) {
     /* 重置缓冲区计数 */
-    buffer_fill_count = 0;
+    buffer_fill_count = ADC_DEFAULT_BUFFER_COUNT;
     
     /* 重新启动DMA传输 */
     HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)active_dma_buffer, ADC_BUFFER_SIZE);
@@ -517,7 +496,7 @@ void ADC_Processing_ResumeSampling(void)
     HAL_TIM_Base_Start(&htim3);
     
     /* 更新状态标志 */
-    adc_sampling_active = 1;
+    adc_sampling_active = ADC_SAMPLING_ACTIVE_DEFAULT;
     
     printf("ADC sampling resumed\n");
   }
@@ -539,7 +518,7 @@ uint8_t ADC_Processing_IsActive(void)
  */
 void ADC_Processing_SetAutoStopEnabled(uint8_t enabled)
 {
-  auto_stop_enabled = enabled ? 1 : 0;
+  auto_stop_enabled = enabled ? ADC_AUTO_STOP_ENABLED : ADC_AUTO_STOP_DISABLED;
   printf("ADC auto-stop sampling %s\n", auto_stop_enabled ? "enabled" : "disabled");
 }
 
@@ -598,13 +577,6 @@ void ADC_Processing_TriggerFFT(uint16_t* adc_data, uint32_t start_index, uint32_
         printf("错误: 起始索引(%lu)超出数据总长度(%lu)\n", start_index, data_length);
         return;
     }
-    
-    /* 检查起始位置的ADC数据值 */
-    printf("ADC原始数据 [%lu-%lu]: ", start_index, start_index + 4);
-    for(uint32_t i = 0; i < 5 && (start_index + i) < data_length; i++) {
-        printf("%u ", adc_data[start_index + i]);
-    }
-    printf("\n");
     
     /* 准备FFT输入并执行FFT */
     PrepareFFTInput(adc_data, start_index, data_length, fft_buffer);

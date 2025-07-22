@@ -40,10 +40,18 @@ extern UART_HandleTypeDef huart1;
 #define USE_DUAL_ADC_INTERLEAVED 0 // 使用双ADC交错模式
 #define USE_DUAL_ADC_SIMULTANEOUS 1 // 使用双ADC同步采样模式
 
-#define ADC_BUFFER_SIZE 1024 * 16 
+#define ADC_BUFFER_SIZE 1024 * 16 // ADC缓冲区大小 - 16K样本
 #define ADC_8BIT_RESOLUTION 256.0f // 8位ADC分辨率
 
 #define FFT_LENGTH  4096 //FFT长度 - ARM radix-4 FFT支持的最大长度
+
+/* ADC采样控制参数 */
+#define ADC_DEFAULT_BUFFER_COUNT       0      // 默认已采集缓冲区数量
+#define ADC_DEFAULT_MAX_BUFFER_COUNT   1      // 默认最大采集缓冲区数量
+#define ADC_SAMPLING_ACTIVE_DEFAULT    1      // 默认ADC采样状态：活动
+#define ADC_SAMPLING_INACTIVE          0      // ADC采样状态：非活动
+#define ADC_AUTO_STOP_ENABLED          1      // 自动停止采样：启用
+#define ADC_AUTO_STOP_DISABLED         0      // 自动停止采样：禁用
 
 /* Exported types ------------------------------------------------------------*/
 /* 频谱数据结构 */
@@ -88,8 +96,8 @@ extern arm_cfft_radix4_instance_f32 scfft;  //定义scfft结构
 
 /* 交替采样模式的FFT数据结构 */
 #if USE_DUAL_ADC_INTERLEAVED
-extern float merged_fft_inputbuf[2 * FFT_LENGTH];    // 交替采样FFT输入数组（复数形式）
-extern float merged_magnitude_array[FFT_LENGTH/2];    // 交替采样幅度谱数组
+extern float merged_fft_inputbuf[2 * 2 * FFT_LENGTH];    // 交替采样FFT输入数组（复数形式）
+extern float merged_magnitude_array[FFT_LENGTH];    // 交替采样幅度谱数组
 
 /* 同步采样模式的FFT数据结构 */
 #elif USE_DUAL_ADC_SIMULTANEOUS
