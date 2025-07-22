@@ -41,7 +41,7 @@ extern TIM_HandleTypeDef htim3;  /* 实际使用TIM3作为ADC触发源和时间�
 #define USE_DUAL_ADC_INTERLEAVED 0 // 使用双ADC交错模式
 #define USE_DUAL_ADC_SIMULTANEOUS 1 // 使用双ADC同步采样模式
 
-#define ADC_BUFFER_SIZE 1024 * 16 // ADC缓冲区大小 - 16K样本
+#define ADC_BUFFER_SIZE 1024 * 16 // ADC缓冲区大小 - 4K样本
 #define ADC_8BIT_RESOLUTION 256.0f // 8位ADC分辨率
 
 #define FFT_LENGTH  4096 //FFT长度 - ARM radix-4 FFT支持的最大长度
@@ -126,6 +126,7 @@ void ADC_Processing_SetConfig(float sampling_rate, float shi_coefficient,
 void ADC_Processing_SetMaxBufferCount(uint32_t count);
 
 /* ADC采样控制接口 */
+void ADC_Processing_StartSampling(void);
 void ADC_Processing_StopSampling(void);
 void ADC_Processing_ResumeSampling(void);
 uint8_t ADC_Processing_IsActive(void);
@@ -158,10 +159,10 @@ void ADC_Processing_TriggerFFT(uint16_t* adc_data, uint32_t start_index, uint32_
 fundamental_result_t FindFundamentalComponent(float min_freq, float max_freq, float* magnitude_array);
 
 /* 内部处理函数声明 */
-static void ExtractDualADCData(uint16_t* dma_buffer);
-static void PrepareFFTInput(uint16_t* adc_data, uint32_t start_index, uint32_t data_length, float* fft_buffer);
-static void ExecuteFFTAndBuildSpectrum(float* fft_buffer, float* magnitude_buffer);
-static void OutputFrequencySpectrum(void);
+void ExtractDualADCData(uint16_t* dma_buffer);
+void PrepareFFTInput(uint16_t* adc_data, uint32_t start_index, uint32_t data_length, float* fft_buffer);
+void ExecuteFFTAndBuildSpectrum(float* fft_buffer, float* magnitude_buffer);
+void OutputFrequencySpectrum(void);
 
 /* 工具函数 */
 float ADC_ToVoltage(uint16_t adc_value);

@@ -97,16 +97,16 @@ uint8_t auto_stop_enabled = ADC_AUTO_STOP_ENABLED;           // 自动停止采�
 
 /* Private function prototypes -----------------------------------------------*/
 /* 底层数据处理函数 */
-static void ExtractDualADCData(uint16_t* dma_buffer);
-static void PrepareFFTInput(uint16_t* adc_data, uint32_t start_index, uint32_t data_length, float* fft_buffer);
-static void ExecuteFFTAndBuildSpectrum(float* fft_buffer, float* magnitude_buffer);
+void ExtractDualADCData(uint16_t* dma_buffer);  // Made public for task access
+void PrepareFFTInput(uint16_t* adc_data, uint32_t start_index, uint32_t data_length, float* fft_buffer);
+void ExecuteFFTAndBuildSpectrum(float* fft_buffer, float* magnitude_buffer);
 
 /* 数据输出函数 */
-static void OutputTimeDomainData(void);
-static void OutputFrequencySpectrum(void);
+void OutputTimeDomainData(void);
+void OutputFrequencySpectrum(void);
 
 /* 工具函数 */
-static float CalculateDCComponent(uint16_t* data, uint32_t length);
+float CalculateDCComponent(uint16_t* data, uint32_t length);
 
 /* Functions implementation --------------------------------------------------*/
 
@@ -184,7 +184,7 @@ void ProcessCompleteBuffer(uint16_t* buffer)
   ExtractDualADCData(buffer);
   
   /* 步骤3: 时域数据输出 */
-  OutputTimeDomainData();
+  // OutputTimeDomainData();
   
   /* 步骤4: 频域处理 (按配置的时间间隔执行) */
   uint32_t current_time = osKernelGetTickCount();  // 使用 CMSIS RTOS 时间戳
@@ -221,7 +221,7 @@ void ProcessCompleteBuffer(uint16_t* buffer)
  * @param dma_buffer DMA缓冲区指针
  * @retval None
  */
-static void ExtractDualADCData(uint16_t* dma_buffer)
+void ExtractDualADCData(uint16_t* dma_buffer)
 {
   #if USE_DUAL_ADC_INTERLEAVED 
     /* 交错模式：解包DMA数据到交替数组
@@ -251,7 +251,7 @@ static void ExtractDualADCData(uint16_t* dma_buffer)
  * @param fft_buffer 目标FFT缓冲区 (大小需为2*FFT_LENGTH)
  * @retval None
  */
-static void PrepareFFTInput(uint16_t* adc_data, uint32_t start_index, uint32_t data_length, float* fft_buffer)
+void PrepareFFTInput(uint16_t* adc_data, uint32_t start_index, uint32_t data_length, float* fft_buffer)
 {
   /* 确保索引不越界 */
   if (start_index >= data_length) {
@@ -299,7 +299,7 @@ static void PrepareFFTInput(uint16_t* adc_data, uint32_t start_index, uint32_t d
  * @param magnitude_buffer 输出幅度谱缓冲区
  * @retval None
  */
-static void ExecuteFFTAndBuildSpectrum(float* fft_buffer, float* magnitude_buffer)
+void ExecuteFFTAndBuildSpectrum(float* fft_buffer, float* magnitude_buffer)
 {
   // uint32_t start_time = osKernelGetTickCount();
   
@@ -342,7 +342,7 @@ static void ExecuteFFTAndBuildSpectrum(float* fft_buffer, float* magnitude_buffe
  * @brief 输出时域数据
  * @retval None
  */
-static void OutputTimeDomainData(void)
+void OutputTimeDomainData(void)
 {
   #if USE_DUAL_ADC_INTERLEAVED
     /* 输出交错采样数据 */
@@ -367,7 +367,7 @@ static void OutputTimeDomainData(void)
  * @brief 输出频谱数据
  * @retval None
  */
-static void OutputFrequencySpectrum(void)
+void OutputFrequencySpectrum(void)
 {
 
   /* 输出有效频谱范围 (0 到采样率/2) */
@@ -395,7 +395,7 @@ static void OutputFrequencySpectrum(void)
  * @param length 数据长度
  * @retval float 直流分量值
  */
-static float CalculateDCComponent(uint16_t* data, uint32_t length)
+float CalculateDCComponent(uint16_t* data, uint32_t length)
 {
   float dc_sum = 0.0f;
   for(uint32_t i = 0; i < length; i++) {
@@ -409,23 +409,62 @@ static float CalculateDCComponent(uint16_t* data, uint32_t length)
  * ============================================================================= */
 
 /**
+ * @brief 启动ADC采样
+ * 初始化DMA和定时器开始采样
+ * @retval None
+ */
+void ADC_Processing_StartSampling(void)
+{
+  printf("尝试启动ADC采样，当前状态: adc_sampling_active = %d\n", adc_sampling_active);
+  
+  if (!adc_sampling_active) {
+    /* 重置缓冲区计数 */
+    buffer_fill_count = ADC_DEFAULT_BUFFER_COUNT;
+    
+    /* 启动DMA传输 */
+    HAL_StatusTypeDef dma_status = HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)active_dma_buffer, ADC_BUFFER_SIZE);
+    printf("DMA启动状态: %d\n", dma_status);
+    
+    /* 启动定时器，开始ADC触发 */
+    HAL_StatusTypeDef tim_status = HAL_TIM_Base_Start(&htim3);
+    printf("定时器启动状态: %d\n", tim_status);
+    
+    /* 更新状态标志 */
+    adc_sampling_active = ADC_SAMPLING_ACTIVE_DEFAULT;
+    
+    printf("✓ ADC采样已启动，状态设置为: %d\n", adc_sampling_active);
+  } else {
+    printf("⚠ ADC已在运行中，跳过启动操作\n");
+  }
+}
+
+/**
  * @brief 停止ADC采样
  * 当达到设定的缓冲区采样次数时自动调用，也可手动调用
  * @retval None
  */
 void ADC_Processing_StopSampling(void)
 {
+  printf("尝试停止ADC采样，当前状态: adc_sampling_active = %d\n", adc_sampling_active);
+  
   if (adc_sampling_active) {
     /* 停止DMA传输 */
-    HAL_ADCEx_MultiModeStop_DMA(&hadc1);
+    HAL_StatusTypeDef dma_status = HAL_ADCEx_MultiModeStop_DMA(&hadc1);
+    printf("DMA停止状态: %d\n", dma_status);
     
     /* 停止定时器，停止ADC触发 */
-    HAL_TIM_Base_Stop(&htim3);
+    HAL_StatusTypeDef tim_status = HAL_TIM_Base_Stop(&htim3);
+    printf("定时器停止状态: %d\n", tim_status);
+    
     /* 复位定时器计数器 */
     __HAL_TIM_SET_COUNTER(&htim3, 0);
     
     /* 更新状态标志 */
     adc_sampling_active = ADC_SAMPLING_INACTIVE;
+    
+    printf("✓ ADC采样已停止，状态设置为: %d\n", adc_sampling_active);
+  } else {
+    printf("⚠ ADC已处于停止状态，跳过停止操作\n");
   }
 }
 
