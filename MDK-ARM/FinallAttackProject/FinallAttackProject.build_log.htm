@@ -30,63 +30,23 @@ Build target 'FinallAttackProject'
 compiling adc_processing_task.c...
 ..\Module\adc_processing_task.h(14): warning:  #1-D: last line of file ends without a newline
   #endif /* ADC_PROCESSING_TASK_H */
-..\Module\adc_processing_task.c(80): warning:  #870-D: invalid multibyte character sequence
-        printf("已处理缓冲区 #%lu，数据已提取�? adc1_data_8bit �? adc2_data_8bit\n", (unsigned long)buffer_fill_count);
-..\Module\adc_processing_task.c(80): warning:  #870-D: invalid multibyte character sequence
-        printf("已处理缓冲区 #%lu，数据已提取�? adc1_data_8bit �? adc2_data_8bit\n", (unsigned long)buffer_fill_count);
-..\Module\adc_processing_task.c(90): warning:  #870-D: invalid multibyte character sequence
+..\Module\adc_processing_task.c(84): warning:  #870-D: invalid multibyte character sequence
+          printf("已处理缓冲区 #%lu，数据已提取�? adc1_data_8bit �? adc2_data_8bit\n", (unsigned long)buffer_fill_count);
+..\Module\adc_processing_task.c(84): warning:  #870-D: invalid multibyte character sequence
+          printf("已处理缓冲区 #%lu，数据已提取�? adc1_data_8bit �? adc2_data_8bit\n", (unsigned long)buffer_fill_count);
+..\Module\adc_processing_task.c(95): warning:  #870-D: invalid multibyte character sequence
             printf("�? ADC/DMA/TIM 已停止\n");
-..\Module\adc_processing_task.c(91): warning:  #870-D: invalid multibyte character sequence
+..\Module\adc_processing_task.c(96): warning:  #870-D: invalid multibyte character sequence
             printf("�? adc1_data_8bit[%d] 数据已冻结\n", ADC_BUFFER_SIZE);
-..\Module\adc_processing_task.c(92): warning:  #870-D: invalid multibyte character sequence
+..\Module\adc_processing_task.c(97): warning:  #870-D: invalid multibyte character sequence
             printf("�? adc2_data_8bit[%d] 数据已冻结\n", ADC_BUFFER_SIZE);
-..\Module\adc_processing_task.c(112): warning:  #870-D: invalid multibyte character sequence
-            printf("等待3�?...\n");
-..\Module\adc_processing_task.c(122): warning:  #870-D: invalid multibyte character sequence
-                printf("=== 处理�? %d �? (样本 %d-%d) ===\n", 
-..\Module\adc_processing_task.c(122): warning:  #870-D: invalid multibyte character sequence
-                printf("=== 处理�? %d �? (样本 %d-%d) ===\n", 
-..\Module\adc_processing_task.c(148): warning:  #870-D: invalid multibyte character sequence
-                printf("�? %d 段处理完成\n", segment + 1);
-..\Module\adc_processing_task.c(151): warning:  #870-D: invalid multibyte character sequence
-                printf("等待3�?...\n");
-..\Module\adc_processing_task.c(160): warning:  #870-D: invalid multibyte character sequence
-            printf("等待5秒后重新开始采�?...\n");
-..\Module\adc_processing_task.c: 12 warnings, 0 errors
-compiling adc_processing.c...
-..\Module\adc_processing.c(309): warning:  #870-D: invalid multibyte character sequence
-      printf("错误: FFT初始化失�? (状�?=%d)\n", status);
-..\Module\adc_processing.c(309): warning:  #870-D: invalid multibyte character sequence
-      printf("错误: FFT初始化失�? (状�?=%d)\n", status);
-..\Module\adc_processing.c(418): warning:  #870-D: invalid multibyte character sequence
-    printf("尝试启动ADC采样，当前状�?: adc_sampling_active = %d\n", adc_sampling_active);
-..\Module\adc_processing.c(426): warning:  #870-D: invalid multibyte character sequence
-      printf("DMA启动状�?: %d\n", dma_status);
-..\Module\adc_processing.c(430): warning:  #870-D: invalid multibyte character sequence
-      printf("定时器启动状�?: %d\n", tim_status);
-..\Module\adc_processing.c(435): warning:  #870-D: invalid multibyte character sequence
-      printf("�? ADC采样已启动，状态设置为: %d\n", adc_sampling_active);
-..\Module\adc_processing.c(437): warning:  #870-D: invalid multibyte character sequence
-      printf("�? ADC已在运行中，跳过启动操作\n");
-..\Module\adc_processing.c(448): warning:  #870-D: invalid multibyte character sequence
-    printf("尝试停止ADC采样，当前状�?: adc_sampling_active = %d\n", adc_sampling_active);
-..\Module\adc_processing.c(453): warning:  #870-D: invalid multibyte character sequence
-      printf("DMA停止状�?: %d\n", dma_status);
-..\Module\adc_processing.c(457): warning:  #870-D: invalid multibyte character sequence
-      printf("定时器停止状�?: %d\n", tim_status);
-..\Module\adc_processing.c(465): warning:  #870-D: invalid multibyte character sequence
-      printf("�? ADC采样已停止，状态设置为: %d\n", adc_sampling_active);
-..\Module\adc_processing.c(467): warning:  #870-D: invalid multibyte character sequence
-      printf("�? ADC已处于停止状态，跳过停止操作\n");
-..\Module\adc_processing.c(556): warning:  #870-D: invalid multibyte character sequence
-      printf("触发FFT处理: 起始索引=%lu, 总数据长�?=%lu, 处理窗口大小=%lu\n", 
-..\Module\adc_processing.c(566): warning:  #870-D: invalid multibyte character sequence
-          printf("错误: 起始索引(%lu)超出数据总长�?(%lu)\n", start_index, data_length);
-..\Module\adc_processing.c: 14 warnings, 0 errors
+..\Module\adc_processing_task.c(143): warning:  #870-D: invalid multibyte character sequence
+            printf("等待2秒后重新开始采�?...\n");
+..\Module\adc_processing_task.c: 7 warnings, 0 errors
 linking...
-Program Size: Code=39264 RO-data=35840 RW-data=216 ZI-data=200776  
+Program Size: Code=39108 RO-data=35840 RW-data=216 ZI-data=200776  
 FromELF: creating hex file...
-"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 26 Warning(s).
+"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 7 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -109,7 +69,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:09
+Build Time Elapsed:  00:00:16
 </pre>
 </body>
 </html>

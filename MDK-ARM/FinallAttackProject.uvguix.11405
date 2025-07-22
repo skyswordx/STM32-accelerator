@@ -3732,9 +3732,9 @@
       </Doc>
       <Doc>
         <Name>..\Module\adc_processing_task.c</Name>
-        <ColumnNumber>0</ColumnNumber>
-        <TopLine>31</TopLine>
-        <CurrentLine>32</CurrentLine>
+        <ColumnNumber>9</ColumnNumber>
+        <TopLine>33</TopLine>
+        <CurrentLine>57</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>
         <PaneID>0</PaneID>

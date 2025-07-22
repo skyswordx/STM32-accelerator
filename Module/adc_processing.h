@@ -41,7 +41,7 @@ extern TIM_HandleTypeDef htim3;  /* 实际使用TIM3作为ADC触发源和时间�
 #define USE_DUAL_ADC_INTERLEAVED 0 // 使用双ADC交错模式
 #define USE_DUAL_ADC_SIMULTANEOUS 1 // 使用双ADC同步采样模式
 
-#define ADC_BUFFER_SIZE 1024 * 16 // ADC缓冲区大小 - 4K样本
+#define ADC_BUFFER_SIZE 1024 * 16 // ADC缓冲区大小 - 16K样本
 #define ADC_8BIT_RESOLUTION 256.0f // 8位ADC分辨率
 
 #define FFT_LENGTH  4096 //FFT长度 - ARM radix-4 FFT支持的最大长度
