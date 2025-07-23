@@ -16,6 +16,23 @@ uint8_t g_adc2_data_8bit[ADC_SAMPLE_SIZE]; // ADC2数据
 
 uint16_t g_adc_dma_transfer_flag = ADC_DMA_TRANSFER_NOT_COMPLETED;
 
+uint8_t g_sample_rate_count =0;
+
+/**
+ * @brief 采样率修改
+ * @warning 注意一定要在 timer stop 后使用
+ * @retval None
+ */
+void switch_timer_sampleRate(TIM_HandleTypeDef* htimer, uint32_t prescaler, uint32_t arr) {
+
+    const uint32_t tim_clk = 200000000; // 假设定时器时钟为200MHz
+
+    htimer->Instance->PSC = prescaler;
+    htimer->Instance->ARR = arr;
+    htimer->Instance->EGR = TIM_EVENTSOURCE_UPDATE;
+
+}
+
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
   if(hadc->Instance == ADC1)
@@ -41,7 +58,7 @@ void StartADCProcessingTask(void *argument) {
     HAL_ADC_Start(&hadc2);
     HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)g_adc_dma_buffer, ADC_SAMPLE_SIZE);
 
-    HAL_TIM_Base_Start(&htim3);
+    // HAL_TIM_Base_Start(&htim3);
     for (;;) {
         // 处理ADC数据
 
@@ -53,7 +70,11 @@ void StartADCProcessingTask(void *argument) {
                 while (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_RESET);
 
                 // printf("ADC started\n");
+                switch_timer_sampleRate(&htim3, 200*(1+g_sample_rate_count) -1, 10-1);
+        
                 HAL_TIM_Base_Start(&htim3);
+                g_sample_rate_count++;
+                
             }
         }
     

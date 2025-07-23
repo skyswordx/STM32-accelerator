@@ -1,6 +1,7 @@
 #ifndef MT_MY_ADC_TASK_H
 #define MT_MY_ADC_TASK_H
 
+#include "cmsis_os.h"
 #include "main.h"
 #include "stdio.h"
 #include "math.h"

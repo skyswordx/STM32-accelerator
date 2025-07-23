@@ -1,5 +1,18 @@
 finallattackproject\my_adc_task.o: ..\Module\ADC\my_adc_task.c
 finallattackproject\my_adc_task.o: ..\Module\ADC\my_adc_task.h
+finallattackproject\my_adc_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h
+finallattackproject\my_adc_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+finallattackproject\my_adc_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stddef.h
+finallattackproject\my_adc_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdint.h
+finallattackproject\my_adc_task.o: ../Core/Inc/FreeRTOSConfig.h
+finallattackproject\my_adc_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+finallattackproject\my_adc_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+finallattackproject\my_adc_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+finallattackproject\my_adc_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
+finallattackproject\my_adc_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+finallattackproject\my_adc_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+finallattackproject\my_adc_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
+finallattackproject\my_adc_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
 finallattackproject\my_adc_task.o: ../Core/Inc/main.h
 finallattackproject\my_adc_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h
 finallattackproject\my_adc_task.o: ../Core/Inc/stm32h7xx_hal_conf.h
@@ -8,7 +21,6 @@ finallattackproject\my_adc_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx
 finallattackproject\my_adc_task.o: ../Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h
 finallattackproject\my_adc_task.o: ../Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h750xx.h
 finallattackproject\my_adc_task.o: ../Drivers/CMSIS/Include/core_cm7.h
-finallattackproject\my_adc_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdint.h
 finallattackproject\my_adc_task.o: ../Drivers/CMSIS/Include/cmsis_version.h
 finallattackproject\my_adc_task.o: ../Drivers/CMSIS/Include/cmsis_compiler.h
 finallattackproject\my_adc_task.o: ../Drivers/CMSIS/Include/cmsis_armcc.h
@@ -16,7 +28,6 @@ finallattackproject\my_adc_task.o: ../Drivers/CMSIS/Include/mpu_armv7.h
 finallattackproject\my_adc_task.o: ../Drivers/CMSIS/Device/ST/STM32H7xx/Include/system_stm32h7xx.h
 finallattackproject\my_adc_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h
 finallattackproject\my_adc_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
-finallattackproject\my_adc_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stddef.h
 finallattackproject\my_adc_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\math.h
 finallattackproject\my_adc_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc_ex.h
 finallattackproject\my_adc_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_gpio.h
