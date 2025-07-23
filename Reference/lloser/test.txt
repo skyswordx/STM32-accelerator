@@ -1,0 +1,38 @@
+
+<!-- 
+在我reset开启系统后（其中系统一直接入信号发生器，发生器一直有输出），output频谱函数在一开始会输出好多0，但是之后的频谱没有输出那么多0，是否是因为DMA搬运了很多0导致的呢，但是我的初始化代码在 adc_processing_task.c中已经设置了先开定时器，再开dma，应该在初始几个缓存区不会搬运0，是否是FFT还没计算完呢，可以检查一下是否是当时FFT在计算中导致的。 -->
+
+
+<!-- 我想要分解一下  ProcessCompleteBuffer 这个函数的测量功能
+直接在 adc_processing_task 任务中的循环中，通过使用  ProcessCompleteBuffer 使用的函数接口，实现更精细的控制
+（如无必要，不必自己添加新的接口）
+- 先采样一个缓存区（16k）的ADCdata（即等待 adc1_data_8bit / adc2_data_8bit 填满）
+- 上面两个采集满了之后就停止采集
+- 接着利用 ADC value to Voltage 输出所有缓存区中的 ADCdata 作为时域波形
+- 延时3秒钟
+- 对这个ADCdata (adc1_data_8bit / adc2_data_8bit) 缓存区分 4 段，先对第一段进行FFT处理，计算每段的幅度谱
+- 然后同时用printf()输出这一段时域波形、幅度谱（只做ADC1的先）(只处理adc1_data_8bit)
+- 延时3秒钟
+- 接着对第二、三、四段进行FFT处理，计算每段的幅度谱并输出，输出后延时3秒钟
+- 接着串口打印完成信息
+
+可能需要修改一下相关的接口与标志变量 buffer_fill_count++ 等，实现更加灵活的 ADC 采样和处理。
+【直接在任务的循环中，删掉直接的简单 ProcessCompleteBuffer 接口。利用她使用的 api 与标志位进行添加逻辑】 -->
+
+如果是100k的采样率，采样10k的信号，ADC采样的存储深度为4096个采样点是否是太少了
+
+我想要严格控制 ADC DMA 采样，使得 ProcessCompleteBuffer 这个函数在提取ADC数据时，一次可以只处理一个缓存区的数据，而不是一次处理所有缓存区的数据。这个停止ADC、DMA、TIM的逻辑在哪里实现可以保证此时系统中的 一个缓存区（16k）的ADCdata（即等待 adc1_data_8bit / adc2_data_8bit 已经填满，并且不会被更新）我在想是不是可以再分解一下这个 ProcessCompleteBuffer 函数
+1. 其中的提取 ADC 缓存区数据部分与 buffer 更新部分（步骤1、2、5）在 adc_processing_task 中循环体执行
+2. 这里的 buffer_fill_count 由于只是保证读取完一个就停止，所以具体的 ADC 采样控制结构体不必搞那么复杂
+3. 其中的频域处理和时域输出部分（步骤3、4）在 adc_processing_task 中循环体中的停止ADC采样部分之后执行，即      /* 检查是否达到最大采样数量 - 直接访问变量实现更精细控制 */
+      if (auto_stop_enabled && adc_sampling_active && buffer_fill_count >= max_buffer_fill_count) 
+      {
+          /* 停止ADC采样 */
+          ADC_Processing_StopSampling();
+          // 这里添加处理操作
+      }
+
+
+我想修改一下这个任务的分段从FFT
+
+帮我修改一下这个task函数，要求我只要进入最大采样次数一次StopSample即可，注释掉后续的状态恢复，然后在StopSample后也不要

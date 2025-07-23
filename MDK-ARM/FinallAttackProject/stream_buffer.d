@@ -1,8 +1,8 @@
 finallattackproject\stream_buffer.o: ../Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c
-finallattackproject\stream_buffer.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stdint.h
-finallattackproject\stream_buffer.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\string.h
+finallattackproject\stream_buffer.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdint.h
+finallattackproject\stream_buffer.o: D:\KEIL\ARM\ARMCC\Bin\..\include\string.h
 finallattackproject\stream_buffer.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-finallattackproject\stream_buffer.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stddef.h
+finallattackproject\stream_buffer.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stddef.h
 finallattackproject\stream_buffer.o: ../Core/Inc/FreeRTOSConfig.h
 finallattackproject\stream_buffer.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 finallattackproject\stream_buffer.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h

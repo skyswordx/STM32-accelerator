@@ -28,8 +28,8 @@
 #include "AD9954.h"
 #include "INA226.h"
 #include "arm_math.h"
-#include "adc_processing.h"
-#include "adc_processing_task.h"
+
+#include "my_adc_task.h"
 
 /* USER CODE END Includes */
 
@@ -125,23 +125,6 @@ int fgetc(FILE * f)
   uint8_t ch = 0;
   HAL_UART_Receive(&huart1,&ch, 1, 0xffff);
   return ch;
-}
-
-/**
-  * @brief  ADC conversion complete callback in non-blocking mode
-  * @param  hadc: ADC handle
-  * @retval None
-  */
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
-{
-  /* ADC转换完成回调 */
-  if(hadc->Instance == ADC1)
-  {
-    /* 设置缓冲区交换标�?? */
-    buffer_swap_flag = 1;
-    /* 仅在中断中设置标志，避免在中断上下文中进行复杂操�????? */
-    adc_conversion_complete = 1;
-  }
 }
 /* USER CODE END 0 */
 
@@ -688,7 +671,7 @@ static void MX_TIM4_Init(void)
   htim4.Instance = TIM4;
   htim4.Init.Prescaler = 200-1;
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 50-1;
+  htim4.Init.Period = 10-1;
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
@@ -798,14 +781,28 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, LED_Board_Pin|PS0_Pin|AD9954_IOSY_Pin|AD9954_PWR_Pin
+                          |IOUPDATE_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, PS0_Pin|AD9954_IOSY_Pin|AD9954_PWR_Pin|IOUPDATE_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, AD9954_RES_Pin|S_DIO_Pin|S_SCLK_Pin|S_CS_Pin
                           |PS1_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : LED_Board_Pin */
+  GPIO_InitStruct.Pin = LED_Board_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LED_Board_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : Button_Board_Pin */
+  GPIO_InitStruct.Pin = Button_Board_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(Button_Board_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PD13 */
   GPIO_InitStruct.Pin = GPIO_PIN_13;
@@ -841,7 +838,7 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-/* ADC采样与频域处理相关函数已迁移到adc_processing.c */
+/* ADC采样与频域处睆相关函数已违移到adc_processing.c */
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */

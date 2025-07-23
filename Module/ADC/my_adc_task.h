@@ -6,9 +6,6 @@
 #include "math.h"
 #include "arm_math.h"
 
-
-
-
-void StartADCProcessingTask2(void *argument);
+void StartADCProcessingTask(void *argument);
 
 #endif /* MT_MY_ADC_TASK_H */

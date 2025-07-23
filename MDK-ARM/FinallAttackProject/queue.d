@@ -1,9 +1,9 @@
 finallattackproject\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/queue.c
-finallattackproject\queue.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stdlib.h
-finallattackproject\queue.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\string.h
+finallattackproject\queue.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdlib.h
+finallattackproject\queue.o: D:\KEIL\ARM\ARMCC\Bin\..\include\string.h
 finallattackproject\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-finallattackproject\queue.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stddef.h
-finallattackproject\queue.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stdint.h
+finallattackproject\queue.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stddef.h
+finallattackproject\queue.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdint.h
 finallattackproject\queue.o: ../Core/Inc/FreeRTOSConfig.h
 finallattackproject\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 finallattackproject\queue.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h

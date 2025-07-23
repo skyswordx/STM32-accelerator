@@ -29,7 +29,7 @@ void StartADCProcessingTask(void *argument)
   buffer_fill_count = 0;           // 从0开始计数
   adc_sampling_active = 1;         // 开始时激活采样
   max_buffer_fill_count = 1;       // 只采集一个缓冲区就停止
-  auto_stop_enabled = 0;           // 启用自动停止
+  auto_stop_enabled = 1;           // 启用自动停止
   
   #if USE_DUAL_ADC_INTERLEAVED || USE_DUAL_ADC_SIMULTANEOUS
     HAL_ADCEx_Calibration_Start(&hadc2, ADC_CALIB_FACTOR_LINEARITY_REGOFFSET, ADC_SINGLE_ENDED);
@@ -72,12 +72,58 @@ void StartADCProcessingTask(void *argument)
       if (adc_sampling_active) 
       {
         // ProcessCompleteBuffer(processing_buffer);
+        /* 步骤1: 缓存一致性处理 */
+        SCB_InvalidateDCache_by_Addr((uint32_t*)processing_buffer, ADC_BUFFER_SIZE * sizeof(uint16_t));
+        
+        /* 步骤2: 数据提取和转换 - 从DMA缓冲区提取到adc1_data_8bit和adc2_data_8bit */
+        ExtractDualADCData(processing_buffer);
+        
+        /* 步骤5: 更新缓冲区计数 */
+        buffer_fill_count++;
+        
+        printf("已处理缓冲区 #%lu，数据已提取到 adc1_data_8bit 和 adc2_data_8bit\n", (unsigned long)buffer_fill_count);
       }
       
       /* 检查是否达到最大采样数量并停止ADC采样 */
       if (auto_stop_enabled && adc_sampling_active && buffer_fill_count >= max_buffer_fill_count) {
         printf("已达到最大采样缓冲区数量，停止ADC采样\n");
         ADC_Processing_StopSampling();
+
+        
+          /* 步骤4: 频域处理 */
+          /* 执行FFT处理 */
+          #if USE_DUAL_ADC_SIMULTANEOUS
+          /* 处理ADC1数据 - 起始索引设为0，从头开始处理 */
+          ADC_Processing_TriggerFFT((uint16_t*)adc1_data_8bit, 0, ADC_BUFFER_SIZE, 
+                                  adc1_fft_inputbuf, adc1_magnitude_array);
+          
+          /* 处理ADC2数据 - 起始索引设为0，从头开始处理 */
+          ADC_Processing_TriggerFFT((uint16_t*)adc2_data_8bit, 0, ADC_BUFFER_SIZE, 
+                                  adc2_fft_inputbuf, adc2_magnitude_array);
+
+          #endif
+          for (int i = 0; i < FFT_LENGTH; i++) {
+            // 有效的频率范围是0到采样率/2，这一部分存在了 adcx_magnitude_array
+            // 和时域数据以及幅度一起输出
+            float voltage1 = ADC_ToVoltage(adc1_data_8bit[i]);
+            float voltage2 = ADC_ToVoltage(adc2_data_8bit[i]);
+            printf("ADC1(Time/Magni): %.4f, %.4f\n", voltage1, adc1_magnitude_array[i]);
+
+
+            if (i > FFT_LENGTH / 2) {
+              // 按照对称性进行输出 
+              printf("ADC1(Time/Magni): %.4f, %.4f\n", voltage1, adc1_magnitude_array[FFT_LENGTH - i]);
+            }
+          }
+          
+          /* 可选：重新开始采样或进入等待状态 */
+          printf("等待5秒后重新开始采样...\n");
+          osDelay(5000);
+
+          /* 重置状态，准备下一次采样 */
+          buffer_fill_count = 0;
+          /* 注意：不要手动设置adc_sampling_active，让StartSampling函数内部处理 */
+          ADC_Processing_StartSampling();
       }
     }
     osDelay(1);

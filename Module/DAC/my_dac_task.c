@@ -4,6 +4,15 @@ extern TIM_HandleTypeDef htim4;
 extern const uint16_t ch1_value[256];
 extern const uint16_t ch2_value[256];
 
+/**
+ * 需求：
+ * 可控波形（正弦波、方波、三角波等）
+ * 可控相位
+ * 可控输出波形频率
+ * - 输出波形的频率 = 定时器触发频率 / 波形点数
+ * - 可以结合定时器触发频率、灵活调整波形点数
+ */
+
 extern DAC_HandleTypeDef hdac1;
 
 void StartDACProcessingTask(void *argument) {
