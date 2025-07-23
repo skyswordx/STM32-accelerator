@@ -3741,9 +3741,9 @@
       </Doc>
       <Doc>
         <Name>..\Module\Frequency\my_freq_config.c</Name>
-        <ColumnNumber>19</ColumnNumber>
+        <ColumnNumber>11</ColumnNumber>
         <TopLine>15</TopLine>
-        <CurrentLine>16</CurrentLine>
+        <CurrentLine>20</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>
         <PaneID>0</PaneID>

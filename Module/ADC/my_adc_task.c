@@ -22,10 +22,9 @@ uint16_t g_adc_dma_transfer_flag = ADC_DMA_TRANSFER_NOT_COMPLETED;
 
 uint8_t g_sample_rate_count =0;
 
-fundamental_result_t g_ch1_fundamental; // 基波结果结构
-fundamental_result_t g_ch2_fundamental; // 基波结果结构
-arm_cfft_radix4_instance_f32 fft_instance_radix4; // FFT实例
-
+extern fundamental_result_t g_ch1_fundamental; // 基波结果结构
+extern fundamental_result_t g_ch2_fundamental; // 基波结果结构
+extern arm_cfft_radix4_instance_f32 fft_instance_radix4; // FFT实例
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
@@ -56,6 +55,7 @@ void StartADCProcessingTask(void *argument) {
     // uint8_t doBitReverse = 1;
     arm_status status = arm_cfft_radix4_init_f32(&fft_instance_radix4, ADC_SAMPLE_SIZE, 0, 1);
     // HAL_TIM_Base_Start(&htim3);
+
     for (;;) {
         // 处理ADC数据
 
@@ -85,13 +85,13 @@ void StartADCProcessingTask(void *argument) {
             }
 
             my_armcfft32_apply(g_adc1_data_8bit, &fft_instance_radix4, &g_ch1_fundamental);
-            my_armcfft32_apply(g_adc2_data_8bit, &fft_instance_radix4, &g_ch2_fundamental);
+            // my_armcfft32_apply(g_adc2_data_8bit, &fft_instance_radix4, &g_ch2_fundamental);
 
-            // printf("ADC1| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch1_fundamental.fundamental_frequency, g_ch1_fundamental.fundamental_vrms, g_ch1_fundamental.fundamental_phase_angle);
+            printf("ADC1| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch1_fundamental.fundamental_frequency, g_ch1_fundamental.fundamental_vrms, g_ch1_fundamental.fundamental_phase_angle);
             // printf("ADC2| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch2_fundamental.fundamental_frequency, g_ch2_fundamental.fundamental_vrms, g_ch2_fundamental.fundamental_phase_angle);
             // HAL_TIM_Base_Start(&htim3); // 重新启动定时器，继续ADC触发
 
-            printf("%.6f\n", g_ch1_fundamental.fundamental_vrms);
+            // printf("%.6f\n", g_ch1_fundamental.fundamental_vrms);
         }
         
         osDelay(1); // 延时1毫秒
