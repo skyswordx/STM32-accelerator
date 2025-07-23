@@ -51,9 +51,6 @@ void StartADCProcessingTask(void *argument) {
     HAL_ADC_Start(&hadc2);
     HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)g_adc_dma_buffer, ADC_SAMPLE_SIZE);
 
-    // uint8_t ifftFlag = 0;
-    // uint8_t doBitReverse = 1;
-    arm_status status = arm_cfft_radix4_init_f32(&fft_instance_radix4, ADC_SAMPLE_SIZE, 0, 1);
     // HAL_TIM_Base_Start(&htim3);
 
     for (;;) {
@@ -84,8 +81,10 @@ void StartADCProcessingTask(void *argument) {
                 // printf("ADC1/2:%.3f, %.3f, %lu\n", g_adc1_data_8bit[i], g_adc2_data_8bit[i], g_ADC_SAMPLE_RATE_Hz);
             }
 
-            my_armcfft32_apply(g_adc1_data_8bit, &fft_instance_radix4, &g_ch1_fundamental);
-            // my_armcfft32_apply(g_adc2_data_8bit, &fft_instance_radix4, &g_ch2_fundamental);
+            // my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental);
+            my_armrfft32_apply(g_adc2_data_8bit, &g_ch1_fundamental);
+
+            // my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental);
 
             printf("ADC1| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch1_fundamental.fundamental_frequency, g_ch1_fundamental.fundamental_vrms, g_ch1_fundamental.fundamental_phase_angle);
             // printf("ADC2| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch2_fundamental.fundamental_frequency, g_ch2_fundamental.fundamental_vrms, g_ch2_fundamental.fundamental_phase_angle);

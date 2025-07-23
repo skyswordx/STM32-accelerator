@@ -4,17 +4,58 @@ extern uint32_t g_ADC_SAMPLE_RATE_Hz; // 100kHz采样率
 
 float32_t g_fft_input_buffer[FFT_LENGTH * 2]; // FFT输入数组，大小为点数的两倍
 float32_t g_fft_output_buffer[FFT_LENGTH];    // FFT输出数组，大小等于点数，调用 arm_cfft_f32 后存储的是模值大小
-
-float32_t g_filtered_adc1_data[FFT_LENGTH]; // ADC1滤波后的数据
-float32_t g_filtered_adc2_data[FFT_LENGTH]; // ADC2滤波后的数据
-
-float32_t g_hanning_window[FFT_LENGTH]; // 汉宁窗系数
+float32_t g_single_magnitude_spectrum[FFT_LENGTH / 2]; // 单边幅度谱数组，大小为点数的一半
 
 fundamental_result_t g_ch1_fundamental; // 基波结果结构
 fundamental_result_t g_ch2_fundamental; // 基波结果结构
+
 arm_cfft_radix4_instance_f32 fft_instance_radix4; // FFT实例
-arm_fir_instance_f32 fir_instance;
 arm_rfft_fast_instance_f32 rfft_instance;
+
+/* 窗函数 + FIR滤波器 */
+float32_t g_filtered_adc_data[FFT_LENGTH]; // ADC1滤波后的数据
+float32_t g_windowed_adc_data[FFT_LENGTH]; // 窗函数处理后的信号
+
+float32_t g_hanning_window[FFT_LENGTH]; // 汉宁窗系数
+
+arm_fir_instance_f32 fir_instance;
+
+// --- FIR滤波器状态缓冲区 ---
+// CMSIS-DSP FIR需要一个状态缓冲区来存储历史数据
+// 大小为 (滤波器阶数 + 块大小 - 1)
+static float32_t fir_state[NUM_TAPS + FFT_LENGTH - 1];
+
+// --- FIR滤波器系数 (从MATLAB导出，时间反转) ---
+// CMSIS-DSP FIR函数要求系数是时间反转的 (用MATLAB的fliplr(b)获得)
+const float32_t fir_coeffs_reversed[] = {
+  0.0000000000f, -0.0031576157f, -0.0056705475f, -0.0074901581f,
+  -0.0085468292f, -0.0088310242f, -0.0083818436f, -0.0072841644f,
+  -0.0056695938f, -0.0036993027f, -0.0015525818f, 0.0005912781f,
+  0.0025644302f, 0.0042314529f, 0.0054845810f, 0.0062475204f,
+  0.0064764023f, 0.0061693192f, 0.0053644180f, 0.0041418076f,
+  0.0026130676f, 0.0009164810f, -0.0007948875f, -0.0023612976f,
+  -0.0036878586f, -0.0046882629f, -0.0053069592f, -0.0055170059f,
+  -0.0053215027f, -0.0047502518f, -0.0038585663f, -0.0027217865f,
+  -0.0014295578f, -0.0000819206f, 0.0012121201f, 0.0023491859f,
+  0.0032620430f, 0.0038878918f, 0.0041837692f, 0.0041289330f,
+  0.0037317276f, 0.0030288696f, 0.0020813942f, 0.0009660721f,
+  -0.0002231598f, -0.0013866425f, -0.0024399757f, -0.0032968521f,
+  -0.0038771630f, -0.0041165352f, -0.0039682388f, -0.0034055710f,
+  -0.0024213791f, -0.0010259151f, 0.0007538795f, 0.0028758049f,
+  0.0053052902f, 0.0079822540f, 0.0108385086f, 0.0137977600f,
+  0.0167789459f, 0.0196990967f, 0.0224733353f, 0.0250196457f,
+  0.0272645950f, 0.0291385651f, 0.0305817127f, 0.0315485001f,
+  0.0320081711f, 0.0319480896f, 0.0313739777f, 0.0303096771f,
+  0.0287914276f, 0.0268673897f, 0.0245971680f, 0.0220496655f,
+  0.0193028450f, 0.0164411068f, 0.0135518312f, 0.0107194185f,
+  0.0080198050f, 0.0055199862f, 0.0032738447f, 0.0013215542f,
+  -0.0003117323f, -0.0016161203f, -0.0026068687f, -0.0033011436f,
+  -0.0037278533f, -0.0039228201f, -0.0039248466f, -0.0037751794f,
+  -0.0035128000f, -0.0031735897f, -0.0027891994f, -0.0023868203f,
+  -0.0019888282f, -0.0016128421f, -0.0012711883f, -0.0009718537f,
+  -0.0007191181f, -0.0005131834f, -0.0003518164f, -0.0002306104f,
+  -0.0001438867f, -0.0000854731f, -0.0000492941f, -0.0000301011f,
+};
 
 
 float32_t caculate_DCcomponent(float32_t* data, uint32_t length) {
@@ -33,9 +74,13 @@ float32_t caculate_DCcomponent(float32_t* data, uint32_t length) {
  * @retval None
  * @note 该函数依赖两个全局缓冲区
  */
-void my_armcfft32_apply(float32_t* adc_input, const arm_cfft_radix4_instance_f32* fft_instance, fundamental_result_t* result)
+void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result)
 {
-    uint16_t fftLen = fft_instance->fftLen;
+    // uint8_t ifftFlag = 0;
+    // uint8_t doBitReverse = 1;
+    arm_status status = arm_cfft_radix4_init_f32(&fft_instance_radix4, FFT_LENGTH, 0, 1);
+
+    uint16_t fftLen = fft_instance_radix4.fftLen;
     uint16_t n;
     float32_t mean = caculate_DCcomponent(adc_input, fftLen);
 
@@ -46,7 +91,7 @@ void my_armcfft32_apply(float32_t* adc_input, const arm_cfft_radix4_instance_f32
     }
 
     // 执行FFT
-    arm_cfft_radix4_f32(fft_instance, g_fft_input_buffer);
+    arm_cfft_radix4_f32(&fft_instance_radix4, g_fft_input_buffer);
     // 计算模值
     arm_cmplx_mag_f32(g_fft_input_buffer, g_fft_output_buffer, fftLen);
 
@@ -74,9 +119,65 @@ void my_armcfft32_apply(float32_t* adc_input, const arm_cfft_radix4_instance_f32
 
 }
 
-void test(){
+void my_armrfft32_apply(float32_t* adc_input, fundamental_result_t* result){
     // 初始化FIR滤波器实例
     // 参数: 实例指针, 滤波器阶数, 反转的系数指针, 状态缓冲区指针, 块大小
-    // arm_fir_init_f32(&fir_instance, NUM_TAPS, (float32_t*)fir_coeffs_reversed, fir_state, N_SAMPLES);//系数在上面有定义，后续可以用MATLAB改一下
+    arm_fir_init_f32(&fir_instance, NUM_TAPS, (float32_t*)fir_coeffs_reversed, fir_state, FFT_LENGTH);//系数在上面有定义，后续可以用MATLAB改一下
+
+    // 应用FIR滤波器
+    // 参数: 实例指针, 输入数据指针, 输出数据指针, 块大小
+    arm_fir_f32(&fir_instance, adc_input, g_filtered_adc_data, FFT_LENGTH);
+
+    // --- 步骤 4: 生成并应用汉宁窗 ---
+    // 使用CMSIS-DSP函数生成汉宁窗
+    // arm_hamming_f32(g_hanning_window, FFT_LENGTH);
+
+    // 应用汉宁窗 (逐点相乘) 
+    for(uint32_t n = 0; n < FFT_LENGTH; n++) {
+        g_hanning_window[n] = 0.5f - 0.5f * arm_cos_f32(2 * PI * n / (FFT_LENGTH - 1));
+    }   //DSP库没有窗函数的定义，只能直接算。可能对于固定长度后续可以用SIMD加速
+    
+    // 应用汉宁窗
+    arm_mult_f32(g_filtered_adc_data, g_hanning_window, g_windowed_adc_data, FFT_LENGTH);
+
+    // --- 步骤 5: 执行FFT并计算幅度谱 ---
+    // 初始化实数FFT实例
+    arm_rfft_4096_fast_init_f32(&rfft_instance);//这里指定了长度，每次计算的时候内部会重新计算旋转因子，库函数中对于特定长度的FFT有特定的优化，可以考虑换成arm_rfft_4096_fast_init_f32
+
+    // 执行FFT。输入是实数，输出是打包的复数格式
+    // 参数: 实例指针, 输入数据指针, 输出数据指针, FFT方向标志(0=正向, 1=反向)
+    arm_rfft_fast_f32(&rfft_instance, g_windowed_adc_data, g_fft_output_buffer, 0);
+
+    // 计算复数FFT输出的幅度
+    // 参数: 输入(打包的复数), 输出(幅度), FFT大小
+    arm_cmplx_mag_f32(g_fft_output_buffer, g_single_magnitude_spectrum, FFT_LENGTH / 2);//对于N点实数FFT输出，由于其共轭对称，取numSamples = N/2
+
+    // --- 处理完成 ---
+    // 此时, 'magnitude_spectrum' 数组中包含了最终的单边幅度谱。
+    // 你可以通过调试器观察这个数组，或者通过UART/SWO将其发送到PC进行绘图验证。
+    // 注意：为了得到与MATLAB相同的物理幅度，还需要进行归一化。
+    // 例如，除以FFT_SIZE，并对除直流和奈奎斯特频率外的所有分量乘以2。
+
+    //在模值中寻找基波分量
+    float32_t fundamental_magnitude = 0.0f; // 基波幅度
+    uint16_t fundamental_index = 0; // 基波索引
+
+    for (uint16_t i = 0; i < FFT_LENGTH / 2 - 1; i++) {
+        if (g_single_magnitude_spectrum[i] > fundamental_magnitude) {
+            fundamental_index = i;
+            fundamental_magnitude = g_single_magnitude_spectrum[i];
+        }
+    }
+
+    float32_t fundamental_phase_angle = (atan2f(g_single_magnitude_spectrum[2 * fundamental_index + 1], g_single_magnitude_spectrum[2 * fundamental_index])) * (180.0f / PI) ;
+
+    result->fundamental_vpp = (fundamental_magnitude) * 2.0f / FFT_LENGTH; // 基波峰峰值
+    result->fundamental_vrms = result->fundamental_vpp * sqrtf(2.0f) / 2.0f; // 基波有效值
+    result->fundamental_frequency = fundamental_index * (g_ADC_SAMPLE_RATE_Hz / FFT_LENGTH); // 假设采样率为100kHz
+    result->fundamental_phase_angle = fundamental_phase_angle;
+
+    for (uint16_t i = 0; i < FFT_LENGTH / 2 - 1; i++) {
+        printf("Single-Sided Magnitude: %.6f\n", g_single_magnitude_spectrum[i]);
+    }
 
 }

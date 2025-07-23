@@ -16,11 +16,12 @@ typedef struct {
     float32_t fundamental_phase_angle;  // 基波相位（角度）
 } fundamental_result_t;
 
-void my_armcfft32_apply(float32_t* adc_input, const arm_cfft_radix4_instance_f32* fft_instance, fundamental_result_t* result);
+void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result);
+void my_armrfft32_apply(float32_t* adc_input, fundamental_result_t* result);
 
 /* FIR 低通滤波器 + 窗函数 */
 #define FIR_ORDER   100
-#define NUM_TAPS    (FIR_ORDER + 1)
+#define NUM_TAPS    (FIR_ORDER + 1) // number of taps
 
 
 #endif /* MY_FREQ_CONFIG_H */
