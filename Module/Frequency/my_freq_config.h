@@ -16,8 +16,8 @@ typedef struct {
     float32_t fundamental_phase_angle;  // 基波相位（角度）
 } fundamental_result_t;
 
-void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result);
-void my_armrfft32_apply(float32_t* adc_input, fundamental_result_t* result);
+void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint8_t enable_fir, uint8_t enable_window);
+void my_armrfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint8_t enable_fir, uint8_t enable_window);
 
 /* FIR 低通滤波器 + 窗函数 */
 #define FIR_ORDER   100

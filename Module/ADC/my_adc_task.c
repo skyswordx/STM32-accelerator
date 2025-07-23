@@ -81,10 +81,10 @@ void StartADCProcessingTask(void *argument) {
                 // printf("ADC1/2:%.3f, %.3f, %lu\n", g_adc1_data_8bit[i], g_adc2_data_8bit[i], g_ADC_SAMPLE_RATE_Hz);
             }
 
-            // my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental);
-            my_armrfft32_apply(g_adc2_data_8bit, &g_ch1_fundamental);
+            my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 0, 1); // 禁用FIR和窗函数
+            // my_armrfft32_apply(g_adc2_data_8bit, &g_ch1_fundamental, 1, 1); // 启用FIR和窗函数
 
-            // my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental);
+            // my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 0, 0);
 
             printf("ADC1| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch1_fundamental.fundamental_frequency, g_ch1_fundamental.fundamental_vrms, g_ch1_fundamental.fundamental_phase_angle);
             // printf("ADC2| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch2_fundamental.fundamental_frequency, g_ch2_fundamental.fundamental_vrms, g_ch2_fundamental.fundamental_phase_angle);

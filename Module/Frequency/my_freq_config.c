@@ -70,23 +70,50 @@ float32_t caculate_DCcomponent(float32_t* data, uint32_t length) {
 /**
  * @brief 应用FFT算法
  * @param adc_input 输入的ADC数据缓冲区(长度为 FFT_LENGTH)
- * @param fft_instance FFT实例结构体指针
+ * @param result 基波分析结果输出结构体指针
+ * @param enable_fir 是否启用FIR滤波器 (1=启用, 0=禁用)
+ * @param enable_window 是否启用窗函数 (1=启用, 0=禁用)
  * @retval None
  * @note 该函数依赖两个全局缓冲区
  */
-void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result)
+void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint8_t enable_fir, uint8_t enable_window)
 {
     // uint8_t ifftFlag = 0;
     // uint8_t doBitReverse = 1;
-    arm_status status = arm_cfft_radix4_init_f32(&fft_instance_radix4, FFT_LENGTH, 0, 1);
+    arm_cfft_radix4_init_f32(&fft_instance_radix4, FFT_LENGTH, 0, 1);
 
+    float32_t* processing_data = adc_input; // 默认使用原始数据
+
+    // --- 可选：FIR滤波步骤 ---
+    if (enable_fir) {
+        // 初始化FIR滤波器实例
+        arm_fir_init_f32(&fir_instance, NUM_TAPS, (float32_t*)fir_coeffs_reversed, fir_state, FFT_LENGTH);
+        
+        // 应用FIR滤波器
+        arm_fir_f32(&fir_instance, adc_input, g_filtered_adc_data, FFT_LENGTH);
+        processing_data = g_filtered_adc_data; // 使用滤波后的数据
+    } 
+
+    // --- 可选：窗函数步骤 ---
+    if (enable_window) {
+        // 生成汉宁窗
+        for(uint32_t n = 0; n < FFT_LENGTH; n++) {
+            g_hanning_window[n] = 0.5f - 0.5f * arm_cos_f32(2.0f * PI * n / (FFT_LENGTH - 1));
+        }
+        
+        // 应用窗函数
+        arm_mult_f32(processing_data, g_hanning_window, g_windowed_adc_data, FFT_LENGTH);
+        processing_data = g_windowed_adc_data; // 使用窗函数处理后的数据
+    } 
+    
+    // 使用处理后的数据进行后续FFT处理
     uint16_t fftLen = fft_instance_radix4.fftLen;
     uint16_t n;
-    float32_t mean = caculate_DCcomponent(adc_input, fftLen);
+    float32_t mean = caculate_DCcomponent(processing_data, fftLen);
 
     for( n = 0; n < fftLen; n++) {
-        // 将输入数据转换为复数格式，实部在偶数索引，虚部在奇数索引
-        g_fft_input_buffer[2 * n] = (adc_input[n] - mean); // 实部
+        // 将处理后的输入数据转换为复数格式，实部在偶数索引，虚部在奇数索引
+        g_fft_input_buffer[2 * n] = (processing_data[n] - mean); // 实部：使用处理后的数据
         g_fft_input_buffer[2 * n + 1] = 0.0f;     // 虚部
     }
 
@@ -112,41 +139,65 @@ void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result)
     result->fundamental_vrms = result->fundamental_vpp * sqrtf(2.0f) / 2.0f; // 基波有效值
     result->fundamental_frequency = fundamental_index * (g_ADC_SAMPLE_RATE_Hz / fftLen); // 假设采样率为100kHz
     result->fundamental_phase_angle = fundamental_phase_angle;
-
+  
+    printf("=== FFT Magnitude Results ===\n");
     for (uint16_t i = 0; i < fftLen; i++) {
         printf("FFT Magnitude: %.6f\n", g_fft_output_buffer[i]);
     }
 
+    // 可选：打印滤波后的数据进行调试
+    // printf("=== Filtered Data Debug ===\n");
+    // for (uint16_t i = 0; i < FFT_LENGTH; i++) {  // 只打印前10个样本
+    //     printf("Original/Filtered: %.6f, %.6f\n", adc_input[i], g_filtered_adc_data[i]);
+    // }
+
+    // 可选：打印加窗后的数据进行调试
+    printf("=== Windowed Data Debug ===\n");
+    for (uint16_t i = 0; i < FFT_LENGTH; i++) {  // 只打印前10个样本
+        // printf("Original:%.6f\n", adc_input[i]);
+        printf("Original/Windowed: %.6f, %.6f\n", adc_input[i], g_windowed_adc_data[i]);
+    }
+
 }
 
-void my_armrfft32_apply(float32_t* adc_input, fundamental_result_t* result){
-    // 初始化FIR滤波器实例
-    // 参数: 实例指针, 滤波器阶数, 反转的系数指针, 状态缓冲区指针, 块大小
-    arm_fir_init_f32(&fir_instance, NUM_TAPS, (float32_t*)fir_coeffs_reversed, fir_state, FFT_LENGTH);//系数在上面有定义，后续可以用MATLAB改一下
-
-    // 应用FIR滤波器
-    // 参数: 实例指针, 输入数据指针, 输出数据指针, 块大小
-    arm_fir_f32(&fir_instance, adc_input, g_filtered_adc_data, FFT_LENGTH);
-
-    // --- 步骤 4: 生成并应用汉宁窗 ---
-    // 使用CMSIS-DSP函数生成汉宁窗
-    // arm_hamming_f32(g_hanning_window, FFT_LENGTH);
-
-    // 应用汉宁窗 (逐点相乘) 
-    for(uint32_t n = 0; n < FFT_LENGTH; n++) {
-        g_hanning_window[n] = 0.5f - 0.5f * arm_cos_f32(2 * PI * n / (FFT_LENGTH - 1));
-    }   //DSP库没有窗函数的定义，只能直接算。可能对于固定长度后续可以用SIMD加速
+void my_armrfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint8_t enable_fir, uint8_t enable_window){
     
-    // 应用汉宁窗
-    arm_mult_f32(g_filtered_adc_data, g_hanning_window, g_windowed_adc_data, FFT_LENGTH);
+    float32_t* processing_data = adc_input; // 默认使用原始数据
+    
+    // --- 可选：FIR滤波步骤 ---
+    if (enable_fir) {
+        // 初始化FIR滤波器实例
+        // 参数: 实例指针, 滤波器阶数, 反转的系数指针, 状态缓冲区指针, 块大小
+        arm_fir_init_f32(&fir_instance, NUM_TAPS, (float32_t*)fir_coeffs_reversed, fir_state, FFT_LENGTH);//系数在上面有定义，后续可以用MATLAB改一下
 
-    // --- 步骤 5: 执行FFT并计算幅度谱 ---
+        // 应用FIR滤波器
+        // 参数: 实例指针, 输入数据指针, 输出数据指针, 块大小
+        arm_fir_f32(&fir_instance, adc_input, g_filtered_adc_data, FFT_LENGTH);
+        processing_data = g_filtered_adc_data; // 使用滤波后的数据
+
+    } 
+
+    // --- 可选：生成并应用汉宁窗 ---
+    if (enable_window) {
+        // 生成汉宁窗 (逐点相乘) 
+        for(uint32_t n = 0; n < FFT_LENGTH; n++) {
+            g_hanning_window[n] = 0.5f - 0.5f * arm_cos_f32(2.0f * PI * n / (FFT_LENGTH - 1));
+        }   //DSP库没有窗函数的定义，只能直接算。可能对于固定长度后续可以用SIMD加速
+        
+        // 应用汉宁窗
+        arm_mult_f32(processing_data, g_hanning_window, g_windowed_adc_data, FFT_LENGTH);
+        processing_data = g_windowed_adc_data; // 使用窗函数处理后的数据
+
+    } 
+    // 
+
+    // --- 执行FFT并计算幅度谱 ---
     // 初始化实数FFT实例
     arm_rfft_4096_fast_init_f32(&rfft_instance);//这里指定了长度，每次计算的时候内部会重新计算旋转因子，库函数中对于特定长度的FFT有特定的优化，可以考虑换成arm_rfft_4096_fast_init_f32
 
     // 执行FFT。输入是实数，输出是打包的复数格式
     // 参数: 实例指针, 输入数据指针, 输出数据指针, FFT方向标志(0=正向, 1=反向)
-    arm_rfft_fast_f32(&rfft_instance, g_windowed_adc_data, g_fft_output_buffer, 0);
+    arm_rfft_fast_f32(&rfft_instance, processing_data, g_fft_output_buffer, 0);
 
     // 计算复数FFT输出的幅度
     // 参数: 输入(打包的复数), 输出(幅度), FFT大小
@@ -162,7 +213,8 @@ void my_armrfft32_apply(float32_t* adc_input, fundamental_result_t* result){
     float32_t fundamental_magnitude = 0.0f; // 基波幅度
     uint16_t fundamental_index = 0; // 基波索引
 
-    for (uint16_t i = 0; i < FFT_LENGTH / 2 - 1; i++) {
+    for (uint16_t i = 1; i < FFT_LENGTH / 2 - 1; i++) {
+        // 注意：这里从1开始，跳过直流分量，避免其影响基波检测
         if (g_single_magnitude_spectrum[i] > fundamental_magnitude) {
             fundamental_index = i;
             fundamental_magnitude = g_single_magnitude_spectrum[i];
@@ -180,4 +232,15 @@ void my_armrfft32_apply(float32_t* adc_input, fundamental_result_t* result){
         printf("Single-Sided Magnitude: %.6f\n", g_single_magnitude_spectrum[i]);
     }
 
+    // 可选：打印滤波后的数据进行调试
+    // printf("=== Filtered Data Debug ===\n");
+    // for (uint16_t i = 0; i < FFT_LENGTH; i++) { 
+    //     printf("Original/Filtered: %.6f, %.6f\n", adc_input[i], g_filtered_adc_data[i]);
+    // }
+
+    // 可选：打印加窗后的数据进行调试
+    // printf("=== Windowed Data Debug ===\n");
+    // for (uint16_t i = 0; i < FFT_LENGTH; i++) {  // 只打印前10个样本
+    //     printf("Original/Windowed: %.6f, %.6f\n", adc_input[i], g_windowed_adc_data[i]);
+    // }
 }
