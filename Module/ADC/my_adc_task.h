@@ -8,6 +8,9 @@
 #include "arm_math.h"
 
 #include "my_timer_config.h"
+#include "my_freq_config.h"
+
+extern uint32_t g_ADC_SAMPLE_RATE_Hz;
 
 void StartADCProcessingTask(void *argument);
 
