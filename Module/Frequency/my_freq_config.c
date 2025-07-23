@@ -83,6 +83,7 @@ void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
     arm_cfft_radix4_init_f32(&fft_instance_radix4, FFT_LENGTH, 0, 1);
 
     float32_t* processing_data = adc_input; // 默认使用原始数据
+    uint32_t idx; // 预声明循环变量
 
     // --- 可选：FIR滤波步骤 ---
     if (enable_fir) {
@@ -94,11 +95,17 @@ void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
         processing_data = g_filtered_adc_data; // 使用滤波后的数据
     } 
 
+    // --- 滤除直流分量（在加窗前进行） ---
+    float32_t mean = caculate_DCcomponent(processing_data, FFT_LENGTH);
+    for(idx = 0; idx < FFT_LENGTH; idx++) {
+        processing_data[idx] = processing_data[idx] - mean; // 就地去除直流分量
+    }
+
     // --- 可选：窗函数步骤 ---
     if (enable_window) {
         // 生成汉宁窗
-        for(uint32_t n = 0; n < FFT_LENGTH; n++) {
-            g_hanning_window[n] = 0.5f - 0.5f * arm_cos_f32(2.0f * PI * n / (FFT_LENGTH - 1));
+        for(idx = 0; idx < FFT_LENGTH; idx++) {
+            g_hanning_window[idx] = 0.5f - 0.5f * arm_cos_f32(2.0f * PI * idx / (FFT_LENGTH - 1));
         }
         
         // 应用窗函数
@@ -109,11 +116,11 @@ void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
     // 使用处理后的数据进行后续FFT处理
     uint16_t fftLen = fft_instance_radix4.fftLen;
     uint16_t n;
-    float32_t mean = caculate_DCcomponent(processing_data, fftLen);
+    // 注意：此时已经去除了直流分量，不需要再次计算mean
 
     for( n = 0; n < fftLen; n++) {
         // 将处理后的输入数据转换为复数格式，实部在偶数索引，虚部在奇数索引
-        g_fft_input_buffer[2 * n] = (processing_data[n] - mean); // 实部：使用处理后的数据
+        g_fft_input_buffer[2 * n] = processing_data[n]; // 实部：使用已去直流的数据
         g_fft_input_buffer[2 * n + 1] = 0.0f;     // 虚部
     }
 
@@ -126,7 +133,7 @@ void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
     float32_t fundamental_magnitude = 0.0f; // 基波幅度
     uint16_t fundamental_index = 0; // 基波索引
 
-    for (uint16_t i = 0; i < fftLen / 2 - 1; i++) {
+    for (uint16_t i = 1; i < fftLen / 2 - 1; i++) {
         if (g_fft_output_buffer[i] > fundamental_magnitude) {
             fundamental_index = i;
             fundamental_magnitude = g_fft_output_buffer[i];
@@ -152,17 +159,18 @@ void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
     // }
 
     // 可选：打印加窗后的数据进行调试
-    printf("=== Windowed Data Debug ===\n");
-    for (uint16_t i = 0; i < FFT_LENGTH; i++) {  // 只打印前10个样本
-        // printf("Original:%.6f\n", adc_input[i]);
-        printf("Original/Windowed: %.6f, %.6f\n", adc_input[i], g_windowed_adc_data[i]);
-    }
+    // printf("=== Windowed Data Debug ===\n");
+    // for (uint16_t i = 0; i < FFT_LENGTH; i++) {  // 只打印前10个样本
+    //     // printf("Original:%.6f\n", adc_input[i]);
+    //     printf("Original/Windowed: %.6f, %.6f\n", adc_input[i], g_windowed_adc_data[i]);
+    // }
 
 }
 
 void my_armrfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint8_t enable_fir, uint8_t enable_window){
     
     float32_t* processing_data = adc_input; // 默认使用原始数据
+    uint32_t idx; // 预声明循环变量
     
     // --- 可选：FIR滤波步骤 ---
     if (enable_fir) {
@@ -174,20 +182,24 @@ void my_armrfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
         // 参数: 实例指针, 输入数据指针, 输出数据指针, 块大小
         arm_fir_f32(&fir_instance, adc_input, g_filtered_adc_data, FFT_LENGTH);
         processing_data = g_filtered_adc_data; // 使用滤波后的数据
-
     } 
+
+    // --- 滤除直流分量（在加窗前进行） ---
+    float32_t mean = caculate_DCcomponent(processing_data, FFT_LENGTH);
+    for(idx = 0; idx < FFT_LENGTH; idx++) {
+        processing_data[idx] = processing_data[idx] - mean; // 就地去除直流分量
+    }
 
     // --- 可选：生成并应用汉宁窗 ---
     if (enable_window) {
         // 生成汉宁窗 (逐点相乘) 
-        for(uint32_t n = 0; n < FFT_LENGTH; n++) {
-            g_hanning_window[n] = 0.5f - 0.5f * arm_cos_f32(2.0f * PI * n / (FFT_LENGTH - 1));
+        for(idx = 0; idx < FFT_LENGTH; idx++) {
+            g_hanning_window[idx] = 0.5f - 0.5f * arm_cos_f32(2.0f * PI * idx / (FFT_LENGTH - 1));
         }   //DSP库没有窗函数的定义，只能直接算。可能对于固定长度后续可以用SIMD加速
         
         // 应用汉宁窗
         arm_mult_f32(processing_data, g_hanning_window, g_windowed_adc_data, FFT_LENGTH);
         processing_data = g_windowed_adc_data; // 使用窗函数处理后的数据
-
     } 
     // 
 
