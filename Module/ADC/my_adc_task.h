@@ -2,7 +2,11 @@
 #define MT_MY_ADC_TASK_H
 
 #include "main.h"
-#include "my_adc_config.h"
+#include "stdio.h"
+#include "math.h"
+#include "arm_math.h"
+
+
 
 
 void StartADCProcessingTask2(void *argument);
