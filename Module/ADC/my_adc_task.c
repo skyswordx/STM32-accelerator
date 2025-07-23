@@ -18,20 +18,6 @@ uint16_t g_adc_dma_transfer_flag = ADC_DMA_TRANSFER_NOT_COMPLETED;
 
 uint8_t g_sample_rate_count =0;
 
-/**
- * @brief 采样率修改
- * @warning 注意一定要在 timer stop 后使用
- * @retval None
- */
-void switch_timer_sampleRate(TIM_HandleTypeDef* htimer, uint32_t prescaler, uint32_t arr) {
-
-    const uint32_t tim_clk = 200000000; // 假设定时器时钟为200MHz
-
-    htimer->Instance->PSC = prescaler;
-    htimer->Instance->ARR = arr;
-    htimer->Instance->EGR = TIM_EVENTSOURCE_UPDATE;
-
-}
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
@@ -70,10 +56,9 @@ void StartADCProcessingTask(void *argument) {
                 while (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_RESET);
 
                 // printf("ADC started\n");
-                switch_timer_sampleRate(&htim3, 200*(1+g_sample_rate_count) -1, 10-1);
-        
+                // switch_timer_sampleRate_Auto(&htim3, g_ADC_SAMPLE_RATE_Hz * (g_sample_rate_count + 1));
                 HAL_TIM_Base_Start(&htim3);
-                g_sample_rate_count++;
+                // g_sample_rate_count++;
                 
             }
         }
@@ -90,7 +75,7 @@ void StartADCProcessingTask(void *argument) {
                 g_adc1_data_8bit[i] = (uint8_t)(g_adc_dma_buffer[i] & 0xFF); // ADC1数据
                 g_adc2_data_8bit[i] = (uint8_t)((g_adc_dma_buffer[i] >> 8) & 0xFF); // ADC2数据
 
-                printf("ADC1/2:%d, %d\n", g_adc1_data_8bit[i], g_adc2_data_8bit[i]);
+                // printf("ADC1/2:%d, %d, %d\n", g_adc1_data_8bit[i], g_adc2_data_8bit[i], g_ADC_SAMPLE_RATE_Hz * (g_sample_rate_count));
             }
             // HAL_TIM_Base_Start(&htim3); // 重新启动定时器，继续ADC触发
         }

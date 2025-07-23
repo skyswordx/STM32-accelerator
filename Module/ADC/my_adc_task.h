@@ -7,6 +7,8 @@
 #include "math.h"
 #include "arm_math.h"
 
+#include "my_timer_config.h"
+
 void StartADCProcessingTask(void *argument);
 
 #endif /* MT_MY_ADC_TASK_H */

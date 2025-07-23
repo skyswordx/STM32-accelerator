@@ -59,3 +59,4 @@ finallattackproject\my_adc_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdio.h
 finallattackproject\my_adc_task.o: ../Drivers/CMSIS/DSP/Include/arm_math.h
 finallattackproject\my_adc_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\string.h
 finallattackproject\my_adc_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\float.h
+finallattackproject\my_adc_task.o: ..\Module\Timer\my_timer_config.h

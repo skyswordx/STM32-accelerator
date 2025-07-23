@@ -10,7 +10,7 @@
       <TargetName>FinallAttackProject</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pArmCC>5060960::V5.06 update 7 (build 960)::.\ARMCOMPLIER506</pArmCC>
+      <pArmCC>5060960::V5.06 update 7 (build 960)::.\ARMCC</pArmCC>
       <pCCUsed>5060960::V5.06 update 7 (build 960)::.\ARMCC</pCCUsed>
       <uAC6>0</uAC6>
       <TargetOption>
@@ -341,7 +341,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32H750xx,ARM_MATH_CM7,__CC_ARM,ARM_MATH_DSP,ARM_MATH_MATRIX_CHECK,ARM_MATH_ROUNDING</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32H7xx/Include;../Drivers/CMSIS/Include;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../Module;../Task;../Drivers/INA226;../Drivers/AD9954;../Drivers/CMSIS/DSP/Include;../Module/DAC;../Module/ADC</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32H7xx/Include;../Drivers/CMSIS/Include;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../Module;../Task;../Drivers/INA226;../Drivers/AD9954;../Drivers/CMSIS/DSP/Include;../Module/DAC;../Module/ADC;..\Module\Timer</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1503,6 +1503,16 @@
               <FileName>my_dac_task.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Module\DAC\my_dac_task.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Module/Timer</GroupName>
+          <Files>
+            <File>
+              <FileName>my_timer_config.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Module\Timer\my_timer_config.c</FilePath>
             </File>
           </Files>
         </Group>
