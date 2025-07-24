@@ -1,6 +1,6 @@
 #include "my_freq_config.h"
 
-extern uint32_t g_ADC_SAMPLE_RATE_Hz; // 100kHz采样率
+extern uint32_t g_ADC_SAMPLE_RATE_Hz; // 2MHz采样率
 
 float32_t g_fft_input_buffer[FFT_LENGTH * 2]; // FFT输入数组，大小为点数的两倍
 float32_t g_fft_output_buffer[FFT_LENGTH];    // FFT输出数组，大小等于点数，调用 arm_cfft_f32 后存储的是模值大小
@@ -158,14 +158,14 @@ void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
     
     result->fundamental_vpp = corrected_magnitude * 2.0f / fftLen; // 基波峰峰值（已补偿）
     result->fundamental_vrms = result->fundamental_vpp * sqrtf(2.0f) / 2.0f; // 基波有效值（已补偿）
-    result->fundamental_frequency = fundamental_index * (g_ADC_SAMPLE_RATE_Hz / fftLen); // 假设采样率为200kHz
+    result->fundamental_frequency = fundamental_index * (g_ADC_SAMPLE_RATE_Hz / fftLen); // 假设采样率为2MHz
     result->fundamental_phase_angle = fundamental_phase_angle;
 
     // printf("Raw magnitude: %.6f, Corrected magnitude: %.6f\n", fundamental_magnitude, corrected_magnitude);
-  
+
     // printf("=== FFT Magnitude Results ===\n");
-    // for (uint16_t i = 0; i < fftLen; i++) {
-    //     printf("FFT Magnitude: %.6f\n", g_fft_output_buffer[i]);
+    // for (uint16_t i = 0; i < fftLen; i++) {     
+    //     printf("%.6f,%.6f\n", ((float)(i * g_ADC_SAMPLE_RATE_Hz / fftLen)), g_fft_output_buffer[i]);
     // }
 
     // 可选：打印滤波后的数据进行调试
@@ -181,6 +181,13 @@ void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
     //     printf("Original/Windowed: %.6f, %.6f\n", adc_input[i], g_windowed_adc_data[i]);
     // }
 
+    // 可选：打印相位谱
+    // float32_t phase = 0.0f;
+    // printf("=== Phase Spectrum Debug ===\n");
+    // for (uint16_t i = 0; i < FFT_LENGTH; i++) {
+    //     phase = atan2f(g_fft_input_buffer[2 * i + 1], g_fft_input_buffer[2 * i]) * (180.0f / PI);
+    //     printf("%.6f,%.6f\n", (i * g_ADC_SAMPLE_RATE_Hz / FFT_LENGTH), phase);
+    // }
 }
 
 void my_armrfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint8_t enable_fir, uint8_t enable_window){

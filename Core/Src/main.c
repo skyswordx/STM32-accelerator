@@ -28,8 +28,9 @@
 #include "AD9954.h"
 #include "INA226.h"
 #include "arm_math.h"
-
+#include "my_uart_task.h"
 #include "my_adc_task.h"
+#include "my_dac_task.h"
 
 /* USER CODE END Includes */
 
@@ -89,6 +90,14 @@ const osThreadAttr_t DACProcessingTask_attributes = {
   .priority = (osPriority_t) osPriorityAboveNormal,
 };
 
+osThreadId_t UARTProcessingTaskHandle;
+const osThreadAttr_t UARTProcessingTask_attributes = {
+  .name = "UARTProcessingTask",
+  .stack_size = 128 * 8,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -126,6 +135,9 @@ int fgetc(FILE * f)
   HAL_UART_Receive(&huart1,&ch, 1, 0xffff);
   return ch;
 }
+
+
+
 /* USER CODE END 0 */
 
 /**
@@ -212,6 +224,8 @@ int main(void)
   /* add threads, ... */
   ADCProcessingTaskHandle = osThreadNew(StartADCProcessingTask, NULL, &ADCProcessingTask_attributes);
   DACProcessingTaskHandle = osThreadNew(StartDACProcessingTask, NULL, &DACProcessingTask_attributes);
+  UARTProcessingTaskHandle = osThreadNew(StartUARTProcessingTask, NULL, &UARTProcessingTask_attributes);
+
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
@@ -624,7 +638,7 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 100-1;
+  htim3.Init.Prescaler = 10-1;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim3.Init.Period = 10-1;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;

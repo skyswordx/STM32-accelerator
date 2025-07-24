@@ -60,5 +60,6 @@ finallattackproject\my_adc_task.o: ../Drivers/CMSIS/DSP/Include/arm_math.h
 finallattackproject\my_adc_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\string.h
 finallattackproject\my_adc_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\float.h
 finallattackproject\my_adc_task.o: ../Module/Timer/my_timer_config.h
-finallattackproject\my_adc_task.o: ../Module/Frequency/my_freq_config.h
 finallattackproject\my_adc_task.o: ../Module/ADC/my_adc_task.h
+finallattackproject\my_adc_task.o: ../Module/Frequency/my_freq_config.h
+finallattackproject\my_adc_task.o: ../Module/UART/my_uart_task.h

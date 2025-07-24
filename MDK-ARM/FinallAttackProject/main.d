@@ -60,7 +60,10 @@ finallattackproject\main.o: ../Drivers/INA226/INA226.h
 finallattackproject\main.o: ../Drivers/CMSIS/DSP/Include/arm_math.h
 finallattackproject\main.o: D:\KEIL\ARM\ARMCC\Bin\..\include\string.h
 finallattackproject\main.o: D:\KEIL\ARM\ARMCC\Bin\..\include\float.h
+finallattackproject\main.o: ../Module/UART/my_uart_task.h
 finallattackproject\main.o: ../Module/ADC/my_adc_task.h
 finallattackproject\main.o: ../Module/Timer/my_timer_config.h
-finallattackproject\main.o: ../Module/Frequency/my_freq_config.h
 finallattackproject\main.o: ../Module/ADC/my_adc_task.h
+finallattackproject\main.o: ../Module/Frequency/my_freq_config.h
+finallattackproject\main.o: ../Module/DAC/my_dac_task.h
+finallattackproject\main.o: ../Module/DAC/my_dac_config.h

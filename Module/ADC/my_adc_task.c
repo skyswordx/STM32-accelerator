@@ -1,5 +1,5 @@
 #include "my_adc_task.h"
-
+#include "my_uart_task.h"
 
 extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
@@ -9,7 +9,8 @@ extern TIM_HandleTypeDef htim3;  /* 实际使用TIM3作为ADC触发源和时间�
 #define ADC_SAMPLE_SIZE (4096)
 #define ADC_DMA_TRANSFER_COMPLETED 1
 #define ADC_DMA_TRANSFER_NOT_COMPLETED 0
-uint32_t g_ADC_SAMPLE_RATE_Hz = 200000; // 200kHz采样率
+extern uint32_t g_desired_ADC_sample_rate_Hz;
+uint32_t g_ADC_SAMPLE_RATE_Hz = 2000000; // 2MHz采样率
 
 #define ADC_REF_VOLTAGE 3.3f // ADC参考电压
 #define ADC_RESOLUTION_8BIT 256.0f // 2^8=256
@@ -20,7 +21,7 @@ float32_t g_adc2_data_8bit[ADC_SAMPLE_SIZE]; // ADC2数据
 
 uint16_t g_adc_dma_transfer_flag = ADC_DMA_TRANSFER_NOT_COMPLETED;
 
-uint8_t g_sample_rate_count =0;
+uint8_t g_sample_rate_update_flag = 0;
 
 extern fundamental_result_t g_ch1_fundamental; // 基波结果结构
 extern fundamental_result_t g_ch2_fundamental; // 基波结果结构
@@ -53,6 +54,8 @@ void StartADCProcessingTask(void *argument) {
 
     // HAL_TIM_Base_Start(&htim3);
 
+    uint8_t orign_flag = 0;
+
     for (;;) {
         // 处理ADC数据
 
@@ -63,7 +66,9 @@ void StartADCProcessingTask(void *argument) {
                 HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13); // 切换 LED 状态
                 while (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_RESET);
 
-                HAL_TIM_Base_Start(&htim3);     
+                switch_timer_sampleRate_Auto(&htim3, g_desired_ADC_sample_rate_Hz, g_desired_ADC_sample_rate_Hz / 100);
+
+                HAL_TIM_Base_Start(&htim3);
             }
         }
     
@@ -81,19 +86,34 @@ void StartADCProcessingTask(void *argument) {
                 // printf("ADC1/2:%.3f, %.3f, %lu\n", g_adc1_data_8bit[i], g_adc2_data_8bit[i], g_ADC_SAMPLE_RATE_Hz);
             }
 
-            my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 0, 1); // 禁用FIR和窗函数
-            // my_armrfft32_apply(g_adc2_data_8bit, &g_ch1_fundamental, 1, 1); // 启用FIR和窗函数
+            if(orign_flag == 0){
+                my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 0, 1); // 禁用FIR和窗函数
+                // my_armrfft32_apply(g_adc2_data_8bit, &g_ch1_fundamental, 1, 1); // 启用FIR和窗函数
 
-            // my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 0, 0);
+                // my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 0, 0);
 
-            printf("%.3f %.6f\n", (float32_t)(g_ch1_fundamental.fundamental_frequency/1000.0f), g_ch1_fundamental.fundamental_vrms);
-            // printf("ADC1| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch1_fundamental.fundamental_frequency, g_ch1_fundamental.fundamental_vrms, g_ch1_fundamental.fundamental_phase_angle);
-            // printf("ADC2| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch2_fundamental.fundamental_frequency, g_ch2_fundamental.fundamental_vrms, g_ch2_fundamental.fundamental_phase_angle);
-            // HAL_TIM_Base_Start(&htim3); // 重新启动定时器，继续ADC触发
+                printf("%d Hz %.6f V\n", (g_ch1_fundamental.fundamental_frequency), g_ch1_fundamental.fundamental_vrms);
+                
+                // printf("ADC1| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch1_fundamental.fundamental_frequency, g_ch1_fundamental.fundamental_vrms, g_ch1_fundamental.fundamental_phase_angle);
+                // printf("ADC2| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch2_fundamental.fundamental_frequency, g_ch2_fundamental.fundamental_vrms, g_ch2_fundamental.fundamental_phase_angle);
+                // HAL_TIM_Base_Start(&htim3); // 重新启动定时器，继续ADC触发
 
-            // printf("%.6f\n", g_ch1_fundamental.fundamental_vrms);
+                // printf("%.6f\n", g_ch1_fundamental.fundamental_vrms);
+            }
+
+            // if (!g_sample_rate_update_flag) {
+            //     // 第一次采样后自适应设置采样率
+            //     my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 0, 1);
+            //     adaptive_set_sample_rate_Manual(&htim3, g_ch1_fundamental.fundamental_frequency);
+            //     g_sample_rate_update_flag = 1; // 标记已自适应
+            //     printf("[coarse] ADC1| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch1_fundamental.fundamental_frequency, g_ch1_fundamental.fundamental_vrms, g_ch1_fundamental.fundamental_phase_angle);
+            // } else {
+            //     // 后续采样只做频率分析，不再切换采样率
+            //     my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 0, 1);
+            //     printf("[fine] ADC1| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch1_fundamental.fundamental_frequency, g_ch1_fundamental.fundamental_vrms, g_ch1_fundamental.fundamental_phase_angle);
+            // }
         }
-        
-        osDelay(1); // 延时1毫秒
+
+        osDelay(100); // 延时100毫秒
     }
 }
