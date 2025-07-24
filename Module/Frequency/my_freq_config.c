@@ -84,6 +84,7 @@ void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
 
     float32_t* processing_data = adc_input; // 默认使用原始数据
     uint32_t idx; // 预声明循环变量
+    float32_t window_compensation_factor = 1.0f; // 窗函数补偿系数，初始为1
 
     // --- 可选：FIR滤波步骤 ---
     if (enable_fir) {
@@ -104,13 +105,23 @@ void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
     // --- 可选：窗函数步骤 ---
     if (enable_window) {
         // 生成汉宁窗
+        float32_t window_sum = 0.0f; // 用于计算窗函数的和
         for(idx = 0; idx < FFT_LENGTH; idx++) {
             g_hanning_window[idx] = 0.5f - 0.5f * arm_cos_f32(2.0f * PI * idx / (FFT_LENGTH - 1));
+            window_sum += g_hanning_window[idx]; // 累加窗函数值
         }
+        
+        // 计算汉宁窗的补偿系数
+        // 对于汉宁窗，理论补偿系数约为2.0，但这里用实际计算值更准确
+        window_compensation_factor = (float32_t)((FFT_LENGTH / window_sum) * (HANNING_WINDOW_FACTOR / 2.0f) );
         
         // 应用窗函数
         arm_mult_f32(processing_data, g_hanning_window, g_windowed_adc_data, FFT_LENGTH);
         processing_data = g_windowed_adc_data; // 使用窗函数处理后的数据
+        
+        printf("Window applied: compensation factor = %.6f\n", window_compensation_factor);
+    } else {
+        printf("No window applied: compensation factor = %.6f\n", window_compensation_factor);
     } 
     
     // 使用处理后的数据进行后续FFT处理
@@ -142,15 +153,20 @@ void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
 
     float32_t fundamental_phase_angle = (atan2f(g_fft_input_buffer[2 * fundamental_index + 1], g_fft_input_buffer[2 * fundamental_index])) * (180.0f / PI) ;
 
-    result->fundamental_vpp = (fundamental_magnitude) * 2.0f / fftLen; // 基波峰峰值
-    result->fundamental_vrms = result->fundamental_vpp * sqrtf(2.0f) / 2.0f; // 基波有效值
+    // 应用窗函数补偿系数来修正幅度
+    float32_t corrected_magnitude = fundamental_magnitude * window_compensation_factor;
+    
+    result->fundamental_vpp = corrected_magnitude * 2.0f / fftLen; // 基波峰峰值（已补偿）
+    result->fundamental_vrms = result->fundamental_vpp * sqrtf(2.0f) / 2.0f; // 基波有效值（已补偿）
     result->fundamental_frequency = fundamental_index * (g_ADC_SAMPLE_RATE_Hz / fftLen); // 假设采样率为100kHz
     result->fundamental_phase_angle = fundamental_phase_angle;
+
+    printf("Raw magnitude: %.6f, Corrected magnitude: %.6f\n", fundamental_magnitude, corrected_magnitude);
   
-    printf("=== FFT Magnitude Results ===\n");
-    for (uint16_t i = 0; i < fftLen; i++) {
-        printf("FFT Magnitude: %.6f\n", g_fft_output_buffer[i]);
-    }
+    // printf("=== FFT Magnitude Results ===\n");
+    // for (uint16_t i = 0; i < fftLen; i++) {
+    //     printf("FFT Magnitude: %.6f\n", g_fft_output_buffer[i]);
+    // }
 
     // 可选：打印滤波后的数据进行调试
     // printf("=== Filtered Data Debug ===\n");
@@ -171,6 +187,7 @@ void my_armrfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
     
     float32_t* processing_data = adc_input; // 默认使用原始数据
     uint32_t idx; // 预声明循环变量
+    float32_t window_compensation_factor = 1.0f; // 窗函数补偿系数，初始为1
     
     // --- 可选：FIR滤波步骤 ---
     if (enable_fir) {
@@ -193,13 +210,22 @@ void my_armrfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
     // --- 可选：生成并应用汉宁窗 ---
     if (enable_window) {
         // 生成汉宁窗 (逐点相乘) 
+        float32_t window_sum = 0.0f; // 用于计算窗函数的和
         for(idx = 0; idx < FFT_LENGTH; idx++) {
             g_hanning_window[idx] = 0.5f - 0.5f * arm_cos_f32(2.0f * PI * idx / (FFT_LENGTH - 1));
+            window_sum += g_hanning_window[idx]; // 累加窗函数值
         }   //DSP库没有窗函数的定义，只能直接算。可能对于固定长度后续可以用SIMD加速
+        
+        // 计算汉宁窗的补偿系数
+        window_compensation_factor = (float32_t)FFT_LENGTH / window_sum;
         
         // 应用汉宁窗
         arm_mult_f32(processing_data, g_hanning_window, g_windowed_adc_data, FFT_LENGTH);
         processing_data = g_windowed_adc_data; // 使用窗函数处理后的数据
+        
+        printf("Window applied: compensation factor = %.6f\n", window_compensation_factor);
+    } else {
+        printf("No window applied: compensation factor = %.6f\n", window_compensation_factor);
     } 
     // 
 
@@ -235,10 +261,15 @@ void my_armrfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
 
     float32_t fundamental_phase_angle = (atan2f(g_single_magnitude_spectrum[2 * fundamental_index + 1], g_single_magnitude_spectrum[2 * fundamental_index])) * (180.0f / PI) ;
 
-    result->fundamental_vpp = (fundamental_magnitude) * 2.0f / FFT_LENGTH; // 基波峰峰值
-    result->fundamental_vrms = result->fundamental_vpp * sqrtf(2.0f) / 2.0f; // 基波有效值
+    // 应用窗函数补偿系数来修正幅度
+    float32_t corrected_magnitude = fundamental_magnitude * window_compensation_factor;
+    
+    result->fundamental_vpp = corrected_magnitude * 2.0f / FFT_LENGTH; // 基波峰峰值（已补偿）
+    result->fundamental_vrms = result->fundamental_vpp * sqrtf(2.0f) / 2.0f; // 基波有效值（已补偿）
     result->fundamental_frequency = fundamental_index * (g_ADC_SAMPLE_RATE_Hz / FFT_LENGTH); // 假设采样率为100kHz
     result->fundamental_phase_angle = fundamental_phase_angle;
+
+    printf("Raw magnitude: %.6f, Corrected magnitude: %.6f\n", fundamental_magnitude, corrected_magnitude);
 
     for (uint16_t i = 0; i < FFT_LENGTH / 2 - 1; i++) {
         printf("Single-Sided Magnitude: %.6f\n", g_single_magnitude_spectrum[i]);
