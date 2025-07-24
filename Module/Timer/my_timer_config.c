@@ -50,33 +50,31 @@ HAL_StatusTypeDef switch_timer_sampleRate_Auto(TIM_HandleTypeDef* htimer, uint32
             uint32_t error = (actual_freq > desired_sample_rate) ?
                             (actual_freq - desired_sample_rate) :
                             (desired_sample_rate - actual_freq);
-            // 如果误差小于阈值且比之前的更好
-            if (error < error_threshold && error < min_error) {
+            // 记录最小误差组合
+            if (error < min_error) {
                 min_error = error;
                 best_prescaler = psc - 1;
                 best_arr = arr_reg;
+            }
+            // 只要有满足阈值的组合，标记found
+            if (error < error_threshold) {
                 found = 1;
-                if (error == 0) {
-                    break;
-                }
             }
         }
     }
-    
-    // 如果找到合适的参数，设置定时器并返回成功
+
+    htimer->Instance->PSC = best_prescaler;
+    htimer->Instance->ARR = best_arr;
+    htimer->Instance->EGR = 0x01;
+    g_ADC_SAMPLE_RATE_Hz = tim_clk / ((best_prescaler + 1) * (best_arr + 1));
     if (found) {
-        htimer->Instance->PSC = best_prescaler;
-        htimer->Instance->ARR = best_arr;
-        htimer->Instance->EGR = 0x01;
-
-        g_ADC_SAMPLE_RATE_Hz = tim_clk / ((best_prescaler + 1) * (best_arr + 1));
-
         printf("Finall timer sample rate to %lu Hz (PSC=%lu, ARR=%lu)\n",
                g_ADC_SAMPLE_RATE_Hz, best_prescaler, best_arr);
         return HAL_OK;
     } else {
-        printf("Error: No suitable prescaler/ARR found < %lu Hz for desired sample rate %lu Hz\n", error_threshold, desired_sample_rate);
-        return HAL_ERROR;
+        printf("Warning: Cannot set timer to desired sample rate %lu Hz within threshold %lu Hz. Set to closest possible: %lu Hz (min error: %lu Hz, PSC=%lu, ARR=%lu)\n",
+               desired_sample_rate, error_threshold, g_ADC_SAMPLE_RATE_Hz, min_error, best_prescaler, best_arr);
+        return HAL_OK;
     }
 }
 
