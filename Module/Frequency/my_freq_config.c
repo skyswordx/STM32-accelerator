@@ -119,9 +119,9 @@ void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
         arm_mult_f32(processing_data, g_hanning_window, g_windowed_adc_data, FFT_LENGTH);
         processing_data = g_windowed_adc_data; // 使用窗函数处理后的数据
         
-        printf("Window applied: compensation factor = %.6f\n", window_compensation_factor);
+        // printf("Window applied: compensation factor = %.6f\n", window_compensation_factor);
     } else {
-        printf("No window applied: compensation factor = %.6f\n", window_compensation_factor);
+        // printf("No window applied: compensation factor = %.6f\n", window_compensation_factor);
     } 
     
     // 使用处理后的数据进行后续FFT处理
@@ -161,7 +161,7 @@ void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
     result->fundamental_frequency = fundamental_index * (g_ADC_SAMPLE_RATE_Hz / fftLen); // 假设采样率为200kHz
     result->fundamental_phase_angle = fundamental_phase_angle;
 
-    printf("Raw magnitude: %.6f, Corrected magnitude: %.6f\n", fundamental_magnitude, corrected_magnitude);
+    // printf("Raw magnitude: %.6f, Corrected magnitude: %.6f\n", fundamental_magnitude, corrected_magnitude);
   
     // printf("=== FFT Magnitude Results ===\n");
     // for (uint16_t i = 0; i < fftLen; i++) {

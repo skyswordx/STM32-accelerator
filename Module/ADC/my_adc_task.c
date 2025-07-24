@@ -86,7 +86,8 @@ void StartADCProcessingTask(void *argument) {
 
             // my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 0, 0);
 
-            printf("ADC1| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch1_fundamental.fundamental_frequency, g_ch1_fundamental.fundamental_vrms, g_ch1_fundamental.fundamental_phase_angle);
+            printf("%.3f %.6f\n", (float32_t)(g_ch1_fundamental.fundamental_frequency/1000.0f), g_ch1_fundamental.fundamental_vrms);
+            // printf("ADC1| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch1_fundamental.fundamental_frequency, g_ch1_fundamental.fundamental_vrms, g_ch1_fundamental.fundamental_phase_angle);
             // printf("ADC2| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch2_fundamental.fundamental_frequency, g_ch2_fundamental.fundamental_vrms, g_ch2_fundamental.fundamental_phase_angle);
             // HAL_TIM_Base_Start(&htim3); // 重新启动定时器，继续ADC触发
 
