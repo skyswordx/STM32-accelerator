@@ -23,7 +23,7 @@ void my_armrfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
 #define FIR_ORDER   100
 #define NUM_TAPS    (FIR_ORDER + 1) // number of taps
 
-#define HANNING_WINDOW_FACTOR 2.325475f // 汉宁窗补偿系数
+#define HANNING_WINDOW_FACTOR 2.0f // 汉宁窗补偿系数 2.325475f
 
 
 
