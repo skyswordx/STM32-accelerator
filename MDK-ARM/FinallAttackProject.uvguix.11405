@@ -3723,9 +3723,9 @@
       </Doc>
       <Doc>
         <Name>..\Module\ADC\my_adc_task.c</Name>
-        <ColumnNumber>7</ColumnNumber>
-        <TopLine>69</TopLine>
-        <CurrentLine>95</CurrentLine>
+        <ColumnNumber>5</ColumnNumber>
+        <TopLine>70</TopLine>
+        <CurrentLine>96</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>
         <PaneID>0</PaneID>

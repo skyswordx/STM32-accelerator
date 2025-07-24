@@ -88,11 +88,14 @@ void StartADCProcessingTask(void *argument) {
 
             if(orign_flag == 0){
                 my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 0, 1); // 禁用FIR和窗函数
+                
                 // my_armrfft32_apply(g_adc2_data_8bit, &g_ch1_fundamental, 1, 1); // 启用FIR和窗函数
 
-                // my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 0, 0);
+                my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 0, 1);
 
-                printf("%d Hz %.6f V\n", (g_ch1_fundamental.fundamental_frequency), g_ch1_fundamental.fundamental_vrms);
+                printf("ADC1 %d Hz %.6f V\n", (g_ch1_fundamental.fundamental_frequency), g_ch1_fundamental.fundamental_vrms);
+                printf("ADC2 %d Hz %.6f V\n", (g_ch2_fundamental.fundamental_frequency), g_ch2_fundamental.fundamental_vrms);
+                printf("ADC phase angle: %.2f\n", (g_ch1_fundamental.fundamental_phase_angle - g_ch2_fundamental.fundamental_phase_angle ));
                 
                 // printf("ADC1| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch1_fundamental.fundamental_frequency, g_ch1_fundamental.fundamental_vrms, g_ch1_fundamental.fundamental_phase_angle);
                 // printf("ADC2| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch2_fundamental.fundamental_frequency, g_ch2_fundamental.fundamental_vrms, g_ch2_fundamental.fundamental_phase_angle);
