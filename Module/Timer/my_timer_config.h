@@ -10,7 +10,7 @@
 #include "my_adc_task.h"
 
 // 动态采样率调整的配置参数
-#define FFT_POINTS               4096        // FFT点数
+//   4096   FFT点数
 #define MIN_CYCLES_IN_FFT        2           // FFT窗口内最少周期数
 #define MIN_POINTS_PER_CYCLE     20          // 每周期最少采样点数
 #define COARSE_SAMPLE_RATE       250000      // 粗测初始采样率 (250kHz)

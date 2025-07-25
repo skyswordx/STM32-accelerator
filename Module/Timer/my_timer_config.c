@@ -90,7 +90,7 @@ HAL_StatusTypeDef adaptive_set_sample_rate_Auto(TIM_HandleTypeDef* htimer, uint3
 
     // 计算采样率下界和上界
     uint32_t lower_bound = MIN_POINTS_PER_CYCLE * measured_freq;
-    uint32_t upper_bound = (FFT_POINTS * measured_freq) / MIN_CYCLES_IN_FFT;
+    uint32_t upper_bound = (FFT_LENGTH * measured_freq) / MIN_CYCLES_IN_FFT;
 
     if (lower_bound > upper_bound) {
         printf("Error: lower_bound %lu exceeds upper_bound %lu for measured frequency %lu Hz\n",
@@ -106,7 +106,7 @@ HAL_StatusTypeDef adaptive_set_sample_rate_Auto(TIM_HandleTypeDef* htimer, uint3
         if (points_per_cycle < MIN_POINTS_PER_CYCLE) continue;
 
         // 2. 检查FFT窗口内周期数
-        uint32_t cycles_in_window = (FFT_POINTS * measured_freq) / Fs;
+        uint32_t cycles_in_window = (FFT_LENGTH * measured_freq) / Fs;
         if (cycles_in_window < MIN_CYCLES_IN_FFT) continue;
 
         // 3. 检查奈奎斯特定理
