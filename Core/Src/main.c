@@ -377,7 +377,7 @@ static void MX_ADC1_Init(void)
     Error_Handler();
   }
   hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
-  hadc1.Init.Resolution = ADC_RESOLUTION_8B;
+  hadc1.Init.Resolution = ADC_RESOLUTION_14B;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
   {
     Error_Handler();
@@ -386,7 +386,7 @@ static void MX_ADC1_Init(void)
   /** Configure the ADC multi-mode
   */
   multimode.Mode = ADC_DUALMODE_REGSIMULT;
-  multimode.DualModeData = ADC_DUALMODEDATAFORMAT_8_BITS;
+  multimode.DualModeData = ADC_DUALMODEDATAFORMAT_32_10_BITS;
   multimode.TwoSamplingDelay = ADC_TWOSAMPLINGDELAY_1CYCLE;
   if (HAL_ADCEx_MultiModeConfigChannel(&hadc1, &multimode) != HAL_OK)
   {
@@ -449,7 +449,7 @@ static void MX_ADC2_Init(void)
     Error_Handler();
   }
   hadc2.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
-  hadc2.Init.Resolution = ADC_RESOLUTION_8B;
+  hadc2.Init.Resolution = ADC_RESOLUTION_14B;
   if (HAL_ADC_Init(&hadc2) != HAL_OK)
   {
     Error_Handler();

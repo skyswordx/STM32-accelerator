@@ -18,7 +18,7 @@ void StartDDSProcessingTask(void const * argument)
     for(;;)
     {
         AD9954_Set_Fre(delta_frequency); // 设置频率为1kHz
-        printf("DDS Frequency set to: %lu Hz\n", delta_frequency);
+        // printf("DDS Frequency set to: %lu Hz\n", delta_frequency);
         delta_frequency += 1000; // 每次增加1kHz
         if (delta_frequency > 10000000) { // 如果超过10MHz，重置为1kHz
             delta_frequency = 1000;

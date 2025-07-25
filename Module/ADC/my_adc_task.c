@@ -14,10 +14,48 @@ uint32_t g_ADC_SAMPLE_RATE_Hz = 2000000; // 2MHz采样率
 
 #define ADC_REF_VOLTAGE 3.3f // ADC参考电压
 #define ADC_RESOLUTION_8BIT 256.0f // 2^8=256
+#define ADC_RESOLUTION_10BIT 1024.0f // 2^10=1024
+#define ADC_RESOLUTION_12BIT 4096.0f // 2^12=4096
+#define ADC_RESOLUTION_14BIT 16384.0f // 2^14=16384
+#define ADC_RESOLUTION_16BIT 65536.0f // 2^16=65536
 
-uint16_t g_adc_dma_buffer[ADC_SAMPLE_SIZE] __attribute__((aligned(32))); // DMA对齐缓冲区
+/**
+ * 1. 在 cubemx 中同时更改 2 个 ADC 的分辨率
+ * 2. 在 cubemx 中更改 DMA 传输位数
+ */
+
+#define ADC_RESOLUTION 14
+#if ADC_RESOLUTION == 8
+    #define ADC_RESOLUTION_FACTOR ADC_RESOLUTION_8BIT
+    uint16_t g_adc_dma_buffer[ADC_SAMPLE_SIZE] __attribute__((aligned(32))); // DMA对齐缓冲区
+    uint8_t g_right_shift = 8; // 双 ADC 8 位模式数据右移 8 位
+    uint8_t g_and_mask = 0xFF; // 双 ADC 8 位模式数据掩码 8 个 1
+#elif ADC_RESOLUTION == 10
+    #define ADC_RESOLUTION_FACTOR ADC_RESOLUTION_10BIT
+    uint32_t g_adc_dma_buffer[ADC_SAMPLE_SIZE] __attribute__((aligned(32))); // DMA对齐缓冲区
+    uint16_t g_right_shift = 16; // 双 ADC 10 位模式数据右移 16 位
+    uint16_t g_and_mask = 0x03FF; // 双 ADC 10 位模式数据掩码 10 个 1
+#elif ADC_RESOLUTION == 12
+    #define ADC_RESOLUTION_FACTOR ADC_RESOLUTION_12BIT
+    uint32_t g_adc_dma_buffer[ADC_SAMPLE_SIZE] __attribute__((aligned(32))); // DMA对齐缓冲区
+    uint16_t g_right_shift = 16; // 双 ADC 12 位模式数据右移 16 位
+    uint16_t g_and_mask = 0x0FFF; // 双 ADC 12 位模式数据掩码 12 个 1
+#elif ADC_RESOLUTION == 14
+    #define ADC_RESOLUTION_FACTOR ADC_RESOLUTION_14BIT
+    uint32_t g_adc_dma_buffer[ADC_SAMPLE_SIZE] __attribute__((aligned(32))); // DMA对齐缓冲区
+    uint16_t g_right_shift = 16; // 双 ADC 14 位模式数据右移 16 位
+    uint16_t g_and_mask = 0x3FFF; // 双 ADC 14 位模式数据掩码 12 + 2 个 1
+#elif ADC_RESOLUTION == 16
+    #define ADC_RESOLUTION_FACTOR ADC_RESOLUTION_16BIT
+    uint32_t g_adc_dma_buffer[ADC_SAMPLE_SIZE] __attribute__((aligned(32))); // DMA对齐缓冲区
+    uint16_t g_right_shift = 16; // 双 ADC 16 位模式数据右移 16 位
+    uint16_t g_and_mask = 0xFFFF; // 双 ADC 16 位模式数据掩码 16 个 1
+#endif
+
 float32_t g_adc1_data_8bit[ADC_SAMPLE_SIZE]; // ADC1数据
 float32_t g_adc2_data_8bit[ADC_SAMPLE_SIZE]; // ADC2数据
+// uint16_t debug1[ADC_SAMPLE_SIZE]; // 用于调试的ADC1数据
+// uint16_t debug2[ADC_SAMPLE_SIZE]; // 用于调试的ADC2数据
 
 uint16_t g_adc_dma_transfer_flag = ADC_DMA_TRANSFER_NOT_COMPLETED;
 
@@ -81,17 +119,20 @@ void StartADCProcessingTask(void *argument) {
             
 
             for (uint32_t i = 0; i < ADC_SAMPLE_SIZE; i++) {
-                g_adc1_data_8bit[i] = (float32_t)((g_adc_dma_buffer[i] & 0xFF) * ADC_REF_VOLTAGE / ADC_RESOLUTION_8BIT); // ADC1数据
-                g_adc2_data_8bit[i] = (float32_t)(((g_adc_dma_buffer[i] >> 8) & 0xFF) * ADC_REF_VOLTAGE / ADC_RESOLUTION_8BIT); // ADC2数据
+                // debug1[i] = (uint16_t)(g_adc_dma_buffer[i] & g_and_mask); // ADC1数据
+                // debug2[i] = (uint16_t)((g_adc_dma_buffer[i] >> g_right_shift) & g_and_mask); // ADC2数据
+
+                g_adc1_data_8bit[i] = (float32_t)((g_adc_dma_buffer[i] & g_and_mask) * ADC_REF_VOLTAGE / ADC_RESOLUTION_FACTOR); // ADC1数据
+                g_adc2_data_8bit[i] = (float32_t)(((g_adc_dma_buffer[i] >> g_right_shift) & g_and_mask) * ADC_REF_VOLTAGE / ADC_RESOLUTION_FACTOR); // ADC2数据
                 // printf("ADC1/2:%.3f, %.3f, %lu\n", g_adc1_data_8bit[i], g_adc2_data_8bit[i], g_ADC_SAMPLE_RATE_Hz);
             }
 
             if(orign_flag == 0){
-                my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 0, 1); // 禁用FIR和窗函数
+                my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 1, 1, INTERPOLATION_PARABOLIC); // 启用FIR和窗函数，并使用汉宁窗专用插值
                 
-                // my_armrfft32_apply(g_adc2_data_8bit, &g_ch1_fundamental, 1, 1); // 启用FIR和窗函数
+                // my_armrfft32_apply(g_adc2_data_8bit, &g_ch1_fundamental, 1, 1, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
 
-                my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 0, 1);
+                my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 1, 1, INTERPOLATION_PARABOLIC); // 启用FIR和窗函数，并使用汉宁窗专用插值
 
                 printf("ADC1 %d Hz %.6f V\n", (g_ch1_fundamental.fundamental_frequency), g_ch1_fundamental.fundamental_vrms);
                 printf("ADC2 %d Hz %.6f V\n", (g_ch2_fundamental.fundamental_frequency), g_ch2_fundamental.fundamental_vrms);
@@ -103,18 +144,6 @@ void StartADCProcessingTask(void *argument) {
 
                 // printf("%.6f\n", g_ch1_fundamental.fundamental_vrms);
             }
-
-            // if (!g_sample_rate_update_flag) {
-            //     // 第一次采样后自适应设置采样率
-            //     my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 0, 1);
-            //     adaptive_set_sample_rate_Manual(&htim3, g_ch1_fundamental.fundamental_frequency);
-            //     g_sample_rate_update_flag = 1; // 标记已自适应
-            //     printf("[coarse] ADC1| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch1_fundamental.fundamental_frequency, g_ch1_fundamental.fundamental_vrms, g_ch1_fundamental.fundamental_phase_angle);
-            // } else {
-            //     // 后续采样只做频率分析，不再切换采样率
-            //     my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 0, 1);
-            //     printf("[fine] ADC1| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch1_fundamental.fundamental_frequency, g_ch1_fundamental.fundamental_vrms, g_ch1_fundamental.fundamental_phase_angle);
-            // }
         }
 
         osDelay(100); // 延时100毫秒
