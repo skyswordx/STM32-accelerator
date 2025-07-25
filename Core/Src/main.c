@@ -32,7 +32,7 @@
 #include "my_adc_task.h"
 #include "my_dac_task.h"
 #include "my_dds_task.h"
-#include "my_zlcr_task.h"
+#include "my_zlcr_config.h"
 
 /* USER CODE END Includes */
 
@@ -104,12 +104,6 @@ const osThreadAttr_t DDSProcessingTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
 };
 
-osThreadId_t ZLCRProcessingTaskHandle;
-const osThreadAttr_t ZLCRProcessingTask_attributes = {
-  .name = "ZLCRProcessingTask",
-  .stack_size = 128 * 8,
-  .priority = (osPriority_t) osPriorityNormal,
-};
 
 
 /* USER CODE END PV */
@@ -235,7 +229,7 @@ int main(void)
   DACProcessingTaskHandle = osThreadNew(StartDACProcessingTask, NULL, &DACProcessingTask_attributes);
   UARTProcessingTaskHandle = osThreadNew(StartUARTProcessingTask, NULL, &UARTProcessingTask_attributes);
   DDSProcessingTaskHandle = osThreadNew(StartDDSProcessingTask, NULL, &DDSProcessingTask_attributes);
-  ZLCRProcessingTaskHandle = osThreadNew(StartZLCRProcessingTask, NULL, &ZLCRProcessingTask_attributes);
+
 
   /* USER CODE END RTOS_THREADS */
 
@@ -799,11 +793,15 @@ static void MX_GPIO_Init(void)
 /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_2|GPIO_PIN_4|GPIO_PIN_6|GPIO_PIN_0, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, LED_Board_Pin|GPIO_PIN_11|GPIO_PIN_12, GPIO_PIN_RESET);
@@ -814,6 +812,13 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
                           |GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : PE2 PE4 PE6 PE0 */
+  GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_4|GPIO_PIN_6|GPIO_PIN_0;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LED_Board_Pin PC11 PC12 */
   GPIO_InitStruct.Pin = LED_Board_Pin|GPIO_PIN_11|GPIO_PIN_12;

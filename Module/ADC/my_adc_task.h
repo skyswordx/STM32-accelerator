@@ -10,6 +10,12 @@
 #include "my_timer_config.h"
 #include "my_freq_config.h"
 
+// ADC工作模式枚举类型
+typedef enum {
+    ADC_MODE_NORMAL = 0,     // 正常模式
+    ADC_MODE_SWEEP           // 扫频模式
+} adc_mode_t;
+
 extern uint32_t g_ADC_SAMPLE_RATE_Hz;
 
 void StartADCProcessingTask(void *argument);

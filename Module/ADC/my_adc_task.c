@@ -60,13 +60,15 @@ float32_t g_adc2_data_8bit[ADC_SAMPLE_SIZE]; // ADC2数据
 uint16_t g_adc_dma_transfer_flag = ADC_DMA_TRANSFER_NOT_COMPLETED;
 
 uint8_t g_sample_rate_update_flag = 0;
-uint8_t g_all_fundamental_update_flag = 0; // 所有基波更新标志
+uint8_t g_sweep_start_flag = 0; // 所有基波更新标志
 
 
 extern fundamental_result_t g_ch1_fundamental; // ADC1 通道 基波结果结构
 extern fundamental_result_t g_ch2_fundamental; // ADC2 通道 基波结果结构
 
 extern arm_cfft_radix4_instance_f32 fft_instance_radix4; // FFT实例
+
+
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
@@ -95,9 +97,11 @@ void StartADCProcessingTask(void *argument) {
 
     // HAL_TIM_Base_Start(&htim3);
 
-    uint8_t orign_flag = 0;
+    // ADC工作模式，默认为正常模式
+    adc_mode_t adc_mode = ADC_MODE_SWEEP;
 
     for (;;) {
+
         // 处理ADC数据
 
         /* GPIO 按键 */
@@ -106,10 +110,19 @@ void StartADCProcessingTask(void *argument) {
             if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_RESET){
                 HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13); // 切换 LED 状态
                 while (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_RESET);
-
-                switch_timer_sampleRate_Auto(&htim3, g_desired_ADC_sample_rate_Hz, g_desired_ADC_sample_rate_Hz / 100);
-
-                HAL_TIM_Base_Start(&htim3);
+                
+                // 根据ADC工作模式执行相应的处理逻辑
+                if (adc_mode == ADC_MODE_SWEEP) {
+                    // 扫频处理逻辑
+                    // 这里调用ZLCR配置中的频率点生成函数
+                    // 然后设置DDS频率并采集数据
+                    g_sweep_start_flag = 1; // 设置扫频开始标志
+                    printf("Entering sweep mode...\n");
+                } else {
+                    // 原有的处理逻辑（正常模式）
+                    switch_timer_sampleRate_Auto(&htim3, g_desired_ADC_sample_rate_Hz, g_desired_ADC_sample_rate_Hz / 100);
+                    HAL_TIM_Base_Start(&htim3);
+                }
             }
         }
     
@@ -120,7 +133,7 @@ void StartADCProcessingTask(void *argument) {
             /* Dcache 缓存一致性处理 */
             SCB_InvalidateDCache_by_Addr((uint32_t*)g_adc_dma_buffer, ADC_SAMPLE_SIZE * sizeof(uint16_t));
             
-
+            /* 提取 ADC 数据 */
             for (uint32_t i = 0; i < ADC_SAMPLE_SIZE; i++) {
                 // debug1[i] = (uint16_t)(g_adc_dma_buffer[i] & g_and_mask); // ADC1数据
                 // debug2[i] = (uint16_t)((g_adc_dma_buffer[i] >> g_right_shift) & g_and_mask); // ADC2数据
@@ -130,7 +143,7 @@ void StartADCProcessingTask(void *argument) {
                 // printf("ADC1/2:%.3f, %.3f, %lu\n", g_adc1_data_8bit[i], g_adc2_data_8bit[i], g_ADC_SAMPLE_RATE_Hz);
             }
 
-            if(orign_flag == 0){
+            if(adc_mode == ADC_MODE_NORMAL){
                 my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 1, 1, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
                 
                 // my_armrfft32_apply(g_adc2_data_8bit, &g_ch1_fundamental, 1, 1, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
@@ -141,13 +154,30 @@ void StartADCProcessingTask(void *argument) {
                 printf("ADC2 %d Hz %.6f V\n", (g_ch2_fundamental.fundamental_frequency), g_ch2_fundamental.fundamental_vrms);
                 printf("ADC phase angle: %.2f\n", (g_ch1_fundamental.fundamental_phase_angle - g_ch2_fundamental.fundamental_phase_angle ));
                 
-                g_all_fundamental_update_flag = 1; // 所有基波更新标志
                 // printf("ADC1| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch1_fundamental.fundamental_frequency, g_ch1_fundamental.fundamental_vrms, g_ch1_fundamental.fundamental_phase_angle);
                 // printf("ADC2| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch2_fundamental.fundamental_frequency, g_ch2_fundamental.fundamental_vrms, g_ch2_fundamental.fundamental_phase_angle);
                 // HAL_TIM_Base_Start(&htim3); // 重新启动定时器，继续ADC触发
 
                 // printf("%.6f\n", g_ch1_fundamental.fundamental_vrms);
             }
+        }
+
+        if ( g_sweep_start_flag == 1 && adc_mode == ADC_MODE_SWEEP) {
+            // 扫频模式下的处理逻辑
+            // 这里可以调用ZLCR配置中的频率点生成函数
+            // 然后设置DDS频率并采集数据
+            
+            // 示例：假设我们有一个函数来生成频率点
+            // uint32_t freq_array[100];
+            // generate_frequency_points(&sweep_config, freq_array);
+            
+            // 设置DDS频率
+            // set_dds_frequency(freq_array[current_index]);
+            
+            // 采集数据
+            // 这里可以调用ADC采样函数
+            
+            printf("Sweep mode processing...\n");
         }
 
         osDelay(100); // 延时100毫秒
