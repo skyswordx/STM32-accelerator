@@ -60,9 +60,12 @@ float32_t g_adc2_data_8bit[ADC_SAMPLE_SIZE]; // ADC2数据
 uint16_t g_adc_dma_transfer_flag = ADC_DMA_TRANSFER_NOT_COMPLETED;
 
 uint8_t g_sample_rate_update_flag = 0;
+uint8_t g_all_fundamental_update_flag = 0; // 所有基波更新标志
 
-extern fundamental_result_t g_ch1_fundamental; // 基波结果结构
-extern fundamental_result_t g_ch2_fundamental; // 基波结果结构
+
+extern fundamental_result_t g_ch1_fundamental; // ADC1 通道 基波结果结构
+extern fundamental_result_t g_ch2_fundamental; // ADC2 通道 基波结果结构
+
 extern arm_cfft_radix4_instance_f32 fft_instance_radix4; // FFT实例
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
@@ -128,16 +131,17 @@ void StartADCProcessingTask(void *argument) {
             }
 
             if(orign_flag == 0){
-                my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 1, 1, INTERPOLATION_PARABOLIC); // 启用FIR和窗函数，并使用汉宁窗专用插值
+                my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 1, 1, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
                 
                 // my_armrfft32_apply(g_adc2_data_8bit, &g_ch1_fundamental, 1, 1, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
 
-                my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 1, 1, INTERPOLATION_PARABOLIC); // 启用FIR和窗函数，并使用汉宁窗专用插值
+                my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 1, 1, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
 
                 printf("ADC1 %d Hz %.6f V\n", (g_ch1_fundamental.fundamental_frequency), g_ch1_fundamental.fundamental_vrms);
                 printf("ADC2 %d Hz %.6f V\n", (g_ch2_fundamental.fundamental_frequency), g_ch2_fundamental.fundamental_vrms);
                 printf("ADC phase angle: %.2f\n", (g_ch1_fundamental.fundamental_phase_angle - g_ch2_fundamental.fundamental_phase_angle ));
                 
+                g_all_fundamental_update_flag = 1; // 所有基波更新标志
                 // printf("ADC1| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch1_fundamental.fundamental_frequency, g_ch1_fundamental.fundamental_vrms, g_ch1_fundamental.fundamental_phase_angle);
                 // printf("ADC2| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch2_fundamental.fundamental_frequency, g_ch2_fundamental.fundamental_vrms, g_ch2_fundamental.fundamental_phase_angle);
                 // HAL_TIM_Base_Start(&htim3); // 重新启动定时器，继续ADC触发

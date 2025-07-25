@@ -32,6 +32,7 @@
 #include "my_adc_task.h"
 #include "my_dac_task.h"
 #include "my_dds_task.h"
+#include "my_zlcr_task.h"
 
 /* USER CODE END Includes */
 
@@ -102,6 +103,14 @@ const osThreadAttr_t DDSProcessingTask_attributes = {
   .stack_size = 128 * 8,
   .priority = (osPriority_t) osPriorityNormal,
 };
+
+osThreadId_t ZLCRProcessingTaskHandle;
+const osThreadAttr_t ZLCRProcessingTask_attributes = {
+  .name = "ZLCRProcessingTask",
+  .stack_size = 128 * 8,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+
 
 /* USER CODE END PV */
 
@@ -226,6 +235,7 @@ int main(void)
   DACProcessingTaskHandle = osThreadNew(StartDACProcessingTask, NULL, &DACProcessingTask_attributes);
   UARTProcessingTaskHandle = osThreadNew(StartUARTProcessingTask, NULL, &UARTProcessingTask_attributes);
   DDSProcessingTaskHandle = osThreadNew(StartDDSProcessingTask, NULL, &DDSProcessingTask_attributes);
+  ZLCRProcessingTaskHandle = osThreadNew(StartZLCRProcessingTask, NULL, &ZLCRProcessingTask_attributes);
 
   /* USER CODE END RTOS_THREADS */
 
