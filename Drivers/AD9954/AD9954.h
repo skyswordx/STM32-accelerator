@@ -30,27 +30,37 @@
 #ifdef AD9954_SOFTWARE_SPI
 // GPIO端口定义
 #define AD9954_CS_PORT      GPIOA
-#define AD9954_CS_PIN       GPIO_PIN_11
-#define AD9954_SCLK_PORT    GPIOA
-#define AD9954_SCLK_PIN     GPIO_PIN_10
-#define AD9954_SDIO_PORT    GPIOA
-#define AD9954_SDIO_PIN     GPIO_PIN_9
+#define AD9954_CS_PIN       GPIO_PIN_15
+
+#define AD9954_SCLK_PORT    GPIOC
+#define AD9954_SCLK_PIN     GPIO_PIN_11
+
+#define AD9954_SDIO_PORT    GPIOD
+#define AD9954_SDIO_PIN     GPIO_PIN_0
+
 #define AD9954_OSK_PORT     GPIOD
-#define AD9954_OSK_PIN      GPIO_PIN_13
-#define PS1_PORT            GPIOA
-#define PS1_PIN             GPIO_PIN_12
-#define PS0_PORT            GPIOC
-#define PS0_PIN             GPIO_PIN_6
-#define IOUPDATE_PORT       GPIOC
-#define IOUPDATE_PIN        GPIO_PIN_9
-#define AD9954_SDO_PORT     GPIOD
-#define AD9954_SDO_PIN      GPIO_PIN_14
+#define AD9954_OSK_PIN      GPIO_PIN_2
+
+#define PS0_PORT            GPIOD
+#define PS0_PIN             GPIO_PIN_4
+
+#define PS1_PORT            GPIOD
+#define PS1_PIN             GPIO_PIN_5
+
+#define IOUPDATE_PORT       GPIOD
+#define IOUPDATE_PIN        GPIO_PIN_6
+
+#define AD9954_SDO_PORT     GPIOC // 输入引脚
+#define AD9954_SDO_PIN      GPIO_PIN_10
+
 #define AD9954_IOSY_PORT    GPIOC
-#define AD9954_IOSY_PIN     GPIO_PIN_7
-#define AD9954_RES_PORT     GPIOA
-#define AD9954_RES_PIN      GPIO_PIN_8
-#define AD9954_PWR_PORT     GPIOC
-#define AD9954_PWR_PIN      GPIO_PIN_8
+#define AD9954_IOSY_PIN     GPIO_PIN_12
+
+#define AD9954_RES_PORT     GPIOD
+#define AD9954_RES_PIN      GPIO_PIN_1
+
+#define AD9954_PWR_PORT     GPIOD
+#define AD9954_PWR_PIN      GPIO_PIN_3
 
 // HAL API 宏定义
 #define AD9954_CS(x)        HAL_GPIO_WritePin(AD9954_CS_PORT, AD9954_CS_PIN, (x) ? GPIO_PIN_SET : GPIO_PIN_RESET)

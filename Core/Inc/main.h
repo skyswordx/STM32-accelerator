@@ -61,26 +61,6 @@ void Error_Handler(void);
 #define LED_Board_GPIO_Port GPIOC
 #define Button_Board_Pin GPIO_PIN_1
 #define Button_Board_GPIO_Port GPIOC
-#define S_SDO_Pin GPIO_PIN_14
-#define S_SDO_GPIO_Port GPIOD
-#define PS0_Pin GPIO_PIN_6
-#define PS0_GPIO_Port GPIOC
-#define AD9954_IOSY_Pin GPIO_PIN_7
-#define AD9954_IOSY_GPIO_Port GPIOC
-#define AD9954_PWR_Pin GPIO_PIN_8
-#define AD9954_PWR_GPIO_Port GPIOC
-#define IOUPDATE_Pin GPIO_PIN_9
-#define IOUPDATE_GPIO_Port GPIOC
-#define AD9954_RES_Pin GPIO_PIN_8
-#define AD9954_RES_GPIO_Port GPIOA
-#define S_DIO_Pin GPIO_PIN_9
-#define S_DIO_GPIO_Port GPIOA
-#define S_SCLK_Pin GPIO_PIN_10
-#define S_SCLK_GPIO_Port GPIOA
-#define S_CS_Pin GPIO_PIN_11
-#define S_CS_GPIO_Port GPIOA
-#define PS1_Pin GPIO_PIN_12
-#define PS1_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
 

@@ -31,13 +31,12 @@
 #include "my_uart_task.h"
 #include "my_adc_task.h"
 #include "my_dac_task.h"
+#include "my_dds_task.h"
 
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
-#define USE_AD9954 0 // 使用AD9954 DDS芯片
 
 /* USER CODE END PTD */
 
@@ -97,6 +96,12 @@ const osThreadAttr_t UARTProcessingTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
 };
 
+osThreadId_t DDSProcessingTaskHandle;
+const osThreadAttr_t DDSProcessingTask_attributes = {
+  .name = "DDSProcessingTask",
+  .stack_size = 128 * 8,
+  .priority = (osPriority_t) osPriorityNormal,
+};
 
 /* USER CODE END PV */
 
@@ -189,12 +194,7 @@ int main(void)
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
   
-  #if USE_AD9954
-    AD9954_Init();
-    AD9954_Set_Fre(1000.0);
-    AD9954_Set_Amp(16383);
-    AD9954_Set_Phase(0);
-  #endif
+
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -225,6 +225,7 @@ int main(void)
   ADCProcessingTaskHandle = osThreadNew(StartADCProcessingTask, NULL, &ADCProcessingTask_attributes);
   DACProcessingTaskHandle = osThreadNew(StartDACProcessingTask, NULL, &DACProcessingTask_attributes);
   UARTProcessingTaskHandle = osThreadNew(StartUARTProcessingTask, NULL, &UARTProcessingTask_attributes);
+  DDSProcessingTaskHandle = osThreadNew(StartDDSProcessingTask, NULL, &DDSProcessingTask_attributes);
 
   /* USER CODE END RTOS_THREADS */
 
@@ -795,22 +796,21 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, LED_Board_Pin|PS0_Pin|AD9954_IOSY_Pin|AD9954_PWR_Pin
-                          |IOUPDATE_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, LED_Board_Pin|GPIO_PIN_11|GPIO_PIN_12, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, AD9954_RES_Pin|S_DIO_Pin|S_SCLK_Pin|S_CS_Pin
-                          |PS1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
+                          |GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : LED_Board_Pin */
-  GPIO_InitStruct.Pin = LED_Board_Pin;
+  /*Configure GPIO pins : LED_Board_Pin PC11 PC12 */
+  GPIO_InitStruct.Pin = LED_Board_Pin|GPIO_PIN_11|GPIO_PIN_12;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LED_Board_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pin : Button_Board_Pin */
   GPIO_InitStruct.Pin = Button_Board_Pin;
@@ -818,34 +818,27 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(Button_Board_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PD13 */
-  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  /*Configure GPIO pin : PA15 */
+  GPIO_InitStruct.Pin = GPIO_PIN_15;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PC10 */
+  GPIO_InitStruct.Pin = GPIO_PIN_10;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PD0 PD1 PD2 PD3
+                           PD4 PD5 PD6 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
+                          |GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : S_SDO_Pin */
-  GPIO_InitStruct.Pin = S_SDO_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(S_SDO_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : PS0_Pin AD9954_IOSY_Pin AD9954_PWR_Pin IOUPDATE_Pin */
-  GPIO_InitStruct.Pin = PS0_Pin|AD9954_IOSY_Pin|AD9954_PWR_Pin|IOUPDATE_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : AD9954_RES_Pin S_DIO_Pin S_SCLK_Pin S_CS_Pin
-                           PS1_Pin */
-  GPIO_InitStruct.Pin = AD9954_RES_Pin|S_DIO_Pin|S_SCLK_Pin|S_CS_Pin
-                          |PS1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */

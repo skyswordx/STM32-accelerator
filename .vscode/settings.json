@@ -9,6 +9,7 @@
     "my_freq_config.h": "c",
     "math.h": "c",
     "stdio.h": "c",
-    "my_uart_task.h": "c"
+    "my_uart_task.h": "c",
+    "my_dds_task.h": "c"
   }
 }
