@@ -1,8 +1,8 @@
 finallattackproject\timers.o: ../Middlewares/Third_Party/FreeRTOS/Source/timers.c
-finallattackproject\timers.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stdlib.h
+finallattackproject\timers.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdlib.h
 finallattackproject\timers.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-finallattackproject\timers.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stddef.h
-finallattackproject\timers.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stdint.h
+finallattackproject\timers.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stddef.h
+finallattackproject\timers.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdint.h
 finallattackproject\timers.o: ../Core/Inc/FreeRTOSConfig.h
 finallattackproject\timers.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 finallattackproject\timers.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h

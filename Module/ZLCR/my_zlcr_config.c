@@ -8,13 +8,19 @@
 #include "AD9954.h"
 
 // 全局频率数组，用于不同扫描场景
+uint32_t g_sweep_freq_array[SWEEP_MAX_POINTS];           // 扫频频率数组
+sweep_point_result_t g_sweep_result_array[SWEEP_MAX_POINTS]; // 扫频结果数组
+uint32_t g_sweep_current_index = 0;                      // 当前扫频点索引
+uint32_t g_sweep_total_points = 0;                       // 总扫频点数
 
+// DDS设备实例
+dds_device_t g_dds_device;
 
 #define Rx 220 // 模拟前端的电阻是220欧姆
 
 sweep_point_result_t g_current_freq_result;
 
-void my_zlcr_get_impedance(const fundamental_result_t *ch1_fundamental, const fundamental_result_t *ch2_fundamental, 
+void my_zlcr_get_impedance(const fundamental_result_t *ch1_fundamental, const fundamental_result_t *ch2_fundamental,
                            sweep_point_result_t *current_freq_result) {
     // 计算阻抗
     /* (Vch2 / Rx) = (Vch1 / Rz) 借此反推 Rz 得到阻抗 */
@@ -104,5 +110,106 @@ void generate_logarithmic_frequency_points(uint32_t start_freq, uint32_t stop_fr
     for (uint32_t i = 0; i < points; i++) {
         freq_array[i] = (uint32_t)(expf(log_start + i * log_step) + 0.5f); // 四舍五入
     }
+}
+
+// AD9833 DDS设备初始化函数
+void ad9833_init(void) {
+    AD9833_Init_GPIO();
+}
+
+// AD9833 DDS设备设置频率函数
+void ad9833_set_frequency(double frequency) {
+    // AD9833默认使用正弦波模式，相位为0
+    AD9833_WaveSeting(frequency, 0, SIN_WAVE, 0);
+}
+
+// AD9954 DDS设备初始化函数
+void ad9954_init(void) {
+    AD9954_GPIO_Init();
+    AD9954_Init();
+}
+
+// AD9954 DDS设备设置频率函数
+void ad9954_set_frequency(double frequency) {
+    AD9954_Set_Fre(frequency);
+}
+
+// 初始化DDS设备
+void my_zlcr_dds_init(void) {
+    // 默认使用AD9833，如果要使用AD9954，需要修改这里
+    g_dds_device.init = ad9833_init;
+    g_dds_device.set_frequency = ad9833_set_frequency;
+    
+    // 初始化DDS设备
+    if (g_dds_device.init != NULL) {
+        g_dds_device.init();
+    }
+}
+
+// 初始化扫频配置
+void my_zlcr_sweep_init(const sweep_config_t *config) {
+    // 重置索引
+    g_sweep_current_index = 0;
+    g_sweep_total_points = 0;
+    
+    // 根据扫频模式生成频率点
+    switch (config->mode) {
+        case SWEEP_MODE_LINEAR:
+            g_sweep_total_points = config->points;
+            if (g_sweep_total_points > SWEEP_MAX_POINTS) {
+                g_sweep_total_points = SWEEP_MAX_POINTS;
+            }
+            generate_linear_frequency_points(config->start_freq, config->stop_freq, g_sweep_total_points, g_sweep_freq_array);
+            break;
+            
+        case SWEEP_MODE_LOG:
+            g_sweep_total_points = config->points;
+            if (g_sweep_total_points > SWEEP_MAX_POINTS) {
+                g_sweep_total_points = SWEEP_MAX_POINTS;
+            }
+            generate_logarithmic_frequency_points(config->start_freq, config->stop_freq, g_sweep_total_points, g_sweep_freq_array);
+            break;
+            
+        case SWEEP_MODE_DECADE:
+            g_sweep_total_points = SWEEP_MAX_POINTS; // 先设置为最大值
+            generate_decade_frequency_points(config->start_freq, config->stop_freq, config->points_per_decade, g_sweep_freq_array, &g_sweep_total_points);
+            break;
+            
+        default:
+            // 默认使用线性扫频
+            g_sweep_total_points = config->points;
+            if (g_sweep_total_points > SWEEP_MAX_POINTS) {
+                g_sweep_total_points = SWEEP_MAX_POINTS;
+            }
+            generate_linear_frequency_points(config->start_freq, config->stop_freq, g_sweep_total_points, g_sweep_freq_array);
+            break;
+    }
+}
+
+// 开始扫频
+void my_zlcr_sweep_start(void) {
+    // 重置索引
+    g_sweep_current_index = 0;
+    
+    // 如果有频率点，则设置第一个频率
+    if (g_sweep_total_points > 0 && g_dds_device.set_frequency != NULL) {
+        g_dds_device.set_frequency((double)g_sweep_freq_array[0]);
+    }
+}
+
+// 切换到下一个频率点
+void my_zlcr_sweep_next(void) {
+    // 增加索引
+    g_sweep_current_index++;
+    
+    // 如果还没到末尾，则设置下一个频率
+    if (g_sweep_current_index < g_sweep_total_points && g_dds_device.set_frequency != NULL) {
+        g_dds_device.set_frequency((double)g_sweep_freq_array[g_sweep_current_index]);
+    }
+}
+
+// 检查扫频是否完成
+uint8_t my_zlcr_sweep_is_complete(void) {
+    return (g_sweep_current_index >= g_sweep_total_points) ? 1 : 0;
 }
 
