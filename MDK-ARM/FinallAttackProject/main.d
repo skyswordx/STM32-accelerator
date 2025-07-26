@@ -7,7 +7,7 @@ finallattackproject\main.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_de
 finallattackproject\main.o: ../Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h
 finallattackproject\main.o: ../Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h750xx.h
 finallattackproject\main.o: ../Drivers/CMSIS/Include/core_cm7.h
-finallattackproject\main.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stdint.h
+finallattackproject\main.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdint.h
 finallattackproject\main.o: ../Drivers/CMSIS/Include/cmsis_version.h
 finallattackproject\main.o: ../Drivers/CMSIS/Include/cmsis_compiler.h
 finallattackproject\main.o: ../Drivers/CMSIS/Include/cmsis_armcc.h
@@ -15,8 +15,8 @@ finallattackproject\main.o: ../Drivers/CMSIS/Include/mpu_armv7.h
 finallattackproject\main.o: ../Drivers/CMSIS/Device/ST/STM32H7xx/Include/system_stm32h7xx.h
 finallattackproject\main.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h
 finallattackproject\main.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
-finallattackproject\main.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stddef.h
-finallattackproject\main.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\math.h
+finallattackproject\main.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stddef.h
+finallattackproject\main.o: D:\KEIL\ARM\ARMCC\Bin\..\include\math.h
 finallattackproject\main.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc_ex.h
 finallattackproject\main.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_gpio.h
 finallattackproject\main.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_gpio_ex.h
@@ -54,12 +54,12 @@ finallattackproject\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/m
 finallattackproject\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
 finallattackproject\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
 finallattackproject\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
-finallattackproject\main.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stdio.h
+finallattackproject\main.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdio.h
 finallattackproject\main.o: ../Drivers/AD9954/AD9954.h
 finallattackproject\main.o: ../Drivers/INA226/INA226.h
 finallattackproject\main.o: ../Drivers/CMSIS/DSP/Include/arm_math.h
-finallattackproject\main.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\string.h
-finallattackproject\main.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\float.h
+finallattackproject\main.o: D:\KEIL\ARM\ARMCC\Bin\..\include\string.h
+finallattackproject\main.o: D:\KEIL\ARM\ARMCC\Bin\..\include\float.h
 finallattackproject\main.o: ../Module/UART/my_uart_task.h
 finallattackproject\main.o: ../Module/ADC/my_adc_task.h
 finallattackproject\main.o: ../Module/Timer/my_timer_config.h
@@ -69,3 +69,4 @@ finallattackproject\main.o: ../Module/ZLCR/my_zlcr_config.h
 finallattackproject\main.o: ../Module/DAC/my_dac_task.h
 finallattackproject\main.o: ../Module/DAC/my_dac_config.h
 finallattackproject\main.o: ../Module/DDS/my_dds_task.h
+finallattackproject\main.o: ..\Drivers\AD9833\AD9833.h

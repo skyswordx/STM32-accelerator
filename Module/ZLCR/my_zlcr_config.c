@@ -6,6 +6,7 @@
 
 #include "AD9833.h"
 #include "AD9954.h"
+#define  PHASE_THRESHOLD 5.0f
 
 // 全局频率数组，用于不同扫描场景
 uint32_t g_sweep_freq_array[SWEEP_MAX_POINTS];           // 扫频频率数组
@@ -29,7 +30,7 @@ void my_zlcr_get_impedance(const fundamental_result_t *ch1_fundamental, const fu
     float32_t Vch2 = ch2_fundamental->fundamental_vrms; // ADC2通道的基波有效值
 
     current_freq_result->magnitude = (Rx * Vch1) / Vch2;
-    current_freq_result->phase = ch1_fundamental->fundamental_phase_angle - ch2_fundamental->fundamental_phase_angle; // 相位差
+    current_freq_result->phase = ((ch1_fundamental->fundamental_phase_angle - ch2_fundamental->fundamental_phase_angle) - 180.0f); // 相位差
     current_freq_result->frequency = (ch1_fundamental->fundamental_frequency + ch2_fundamental->fundamental_frequency) / 2.0f; // 频率
 
 }
@@ -213,3 +214,50 @@ uint8_t my_zlcr_sweep_is_complete(void) {
     return (g_sweep_current_index >= g_sweep_total_points) ? 1 : 0;
 }
 
+
+/**
+ * @brief 根据扫频点结果计算电容或电感值
+ * @param result 扫频点测量结果
+ * @return 计算得到的电容(法拉)或电感(亨利)值，如果无法判断则返回0
+ *
+ * @details
+ * 假设现在测得的阻抗是纯电容/纯电感，此时的幅值就为虚部的绝对值，利用公式反推 C 与 L 的值
+ * - 对于电容: Zc = 1 / (2 * π * f * C) => C = 1 / (2 * π * f * |Z|)
+ * - 对于电感: Zl = 2 * π * f * L => L = |Z| / (2 * π * f)
+ */
+float32_t my_zlcr_get_capacitance_or_inductance(const sweep_point_result_t *result) {
+    if (result->magnitude == 0 || result->frequency == 0) {
+        return 0.0f; // 避免除零错误
+    }
+    
+    // 如果阻抗是纯电容
+    if (result->phase < (-90.0f + PHASE_THRESHOLD)) {
+        return 1.0f / (2.0f * PI * result->frequency * result->magnitude);
+    }
+    
+    // 如果阻抗是纯电感
+    if (result->phase > (90.0f - PHASE_THRESHOLD)) {
+        return result->magnitude / (2.0f * PI * result->frequency);
+    }
+    
+    return 0.0f; // 如果既不是纯电容也不是纯电感，返回0
+}
+
+
+/**
+ * 
+有个别电桥可能副参数显示的种类不够全。比如有的只能显示D值，Q值，显示不了ESR。
+实际上这三个参数知道一个，另外两个通过公式就能算出来。D值和Q值互为倒数，这个最简单！ESR和D值Q值换算稍微复杂点。网上查了一下，公式如下。
+
+公式一：|Z| = 1 / ( 2πf C)
+
+其中，|Z|为电抗的绝对值，单位Ω；f为频率，单位Hz；C为容量，单位元F。
+
+公式二：Q = |Z| / ESR
+
+其中，Q代表“质量因素”，无量纲；|Z|为电抗的绝对值，单位Ω；ESR为等效串联电阻，单位Ω。
+
+两个公式合并可以得到：
+Q值=1/2πfc*ESR
+D值=2πfc*ESR
+ */

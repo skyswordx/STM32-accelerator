@@ -10,6 +10,7 @@
 #include "stdint.h"
 
 #include "AD9954.h"
+#include "AD9833.h"
 
 void StartDDSProcessingTask(void const * argument);
 

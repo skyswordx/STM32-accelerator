@@ -4,22 +4,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-
-// 卡尔曼滤波器结构体
-typedef struct {
-    float q; // 过程噪声协方差
-    float r; // 测量噪声协方差
-    float x; // 状态估计值
-    float p; // 估计误差协方差
-    float k; // 卡尔曼增益
-    bool initialized; // 初始化标志
-} KalmanFilter_t;
-
-void KalmanFilter_Init(KalmanFilter_t *kf, float process_noise, float measurement_noise);
-float KalmanFilter_Update(KalmanFilter_t *kf, float measurement);
-void KalmanFilter_Reset(KalmanFilter_t *kf);
-void KalmanFilter_SetProcessNoise(KalmanFilter_t *kf, float process_noise);
-void KalmanFilter_SetMeasurementNoise(KalmanFilter_t *kf, float measurement_noise);
+#include "my_kalman_filter.h"
 
 // PID 控制器过程变量
 typedef struct {
@@ -37,7 +22,7 @@ typedef struct {
     float CONTROLLER_OUTPUT_MAX;
     float CONTROLLER_OUTPUT_MIN;
     float kp, ki, kd;
-    KalmanFilter_t kalman_filter;
+    kalman_filter_t kalman_filter;
     bool enable_kalman_filter;
     float (*read_sensor)(void); // 读取传感器数据的函数指针
     float (*convert_output)(float); // 转换控制器输出的函数指针

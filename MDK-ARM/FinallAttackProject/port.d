@@ -1,7 +1,7 @@
 finallattackproject\port.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/port.c
 finallattackproject\port.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-finallattackproject\port.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stddef.h
-finallattackproject\port.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stdint.h
+finallattackproject\port.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stddef.h
+finallattackproject\port.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdint.h
 finallattackproject\port.o: ../Core/Inc/FreeRTOSConfig.h
 finallattackproject\port.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 finallattackproject\port.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h

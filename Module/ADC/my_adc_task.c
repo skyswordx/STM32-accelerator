@@ -113,8 +113,8 @@ void StartADCProcessingTask(void *argument) {
 
     // HAL_TIM_Base_Start(&htim3);
 
-    // ADC工作模式，默认为扫频模式
-    adc_mode_t adc_mode = ADC_MODE_SWEEP;
+    // ADC工作模式，默认为正常模式
+    adc_mode_t adc_mode = ADC_MODE_NORMAL;
 
     for (;;) {
 
@@ -193,11 +193,8 @@ void StartADCProcessingTask(void *argument) {
                 printf("ADC2 %d Hz %.6f V\n", (g_ch2_fundamental.fundamental_frequency), g_ch2_fundamental.fundamental_vrms);
                 printf("ADC phase angle: %.2f\n", (g_ch1_fundamental.fundamental_phase_angle - g_ch2_fundamental.fundamental_phase_angle ));
                 
-                // printf("ADC1| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch1_fundamental.fundamental_frequency, g_ch1_fundamental.fundamental_vrms, g_ch1_fundamental.fundamental_phase_angle);
-                // printf("ADC2| Freq: %d Hz, Vrms: %.6f, Phase: %.2f\n", g_ch2_fundamental.fundamental_frequency, g_ch2_fundamental.fundamental_vrms, g_ch2_fundamental.fundamental_phase_angle);
-                // HAL_TIM_Base_Start(&htim3); // 重新启动定时器，继续ADC触发
-
-                // printf("%.6f\n", g_ch1_fundamental.fundamental_vrms);
+                my_zlcr_get_impedance(&g_ch1_fundamental, &g_ch2_fundamental, &g_current_freq_result); // 获取当前频率下的阻抗信息
+                printf("Frequency: %d Hz, Impedance: %.2f Ohm, Phase: %.2f deg\n", g_current_freq_result.frequency, g_current_freq_result.magnitude, g_current_freq_result.phase);
             }
 
             if (adc_mode == ADC_MODE_SWEEP && g_sweep_in_progress) {

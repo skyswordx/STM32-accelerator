@@ -3,48 +3,7 @@
 #include <stddef.h>
 
 #include <stdbool.h>
-
-// 卡尔曼滤波器相关函数
-void KalmanFilter_Init(KalmanFilter_t *kf, float process_noise, float measurement_noise) {
-    if (!kf) return;
-    kf->q = process_noise;
-    kf->r = measurement_noise;
-    kf->x = 0.0f;
-    kf->p = 1.0f;
-    kf->k = 0.0f;
-    kf->initialized = false;
-}
-
-float KalmanFilter_Update(KalmanFilter_t *kf, float measurement) {
-    if (!kf) return measurement;
-    if (!kf->initialized) {
-        kf->x = measurement;
-        kf->initialized = true;
-        return kf->x;
-    }
-    kf->p = kf->p + kf->q;
-    kf->k = kf->p / (kf->p + kf->r);
-    kf->x = kf->x + kf->k * (measurement - kf->x);
-    kf->p = (1.0f - kf->k) * kf->p;
-    return kf->x;
-}
-
-void KalmanFilter_Reset(KalmanFilter_t *kf) {
-    if (!kf) return;
-    kf->x = 0.0f;
-    kf->p = 1.0f;
-    kf->initialized = false;
-}
-
-void KalmanFilter_SetProcessNoise(KalmanFilter_t *kf, float process_noise) {
-    if (!kf) return;
-    kf->q = process_noise;
-}
-
-void KalmanFilter_SetMeasurementNoise(KalmanFilter_t *kf, float measurement_noise) {
-    if (!kf) return;
-    kf->r = measurement_noise;
-}
+#include "my_kalman_filter.h"
 
 // PID 控制器相关函数
 void PID_controller_init(PID_controller_t *pid, float output_max, float output_min, float kp, float ki, float kd) {
@@ -60,7 +19,7 @@ void PID_controller_init(PID_controller_t *pid, float output_max, float output_m
     pid->kp = kp;
     pid->ki = ki;
     pid->kd = kd;
-    KalmanFilter_Init(&pid->kalman_filter, 0.002f, 0.0005f);
+    kalman_filter_init(&pid->kalman_filter, 0.002f, 0.0005f);
     pid->enable_kalman_filter = true;
     pid->read_sensor = NULL;
     pid->convert_output = NULL;
@@ -68,15 +27,15 @@ void PID_controller_init(PID_controller_t *pid, float output_max, float output_m
 
 void PID_controller_set_kalmanFilter(PID_controller_t *pid, float process_noise, float measurement_noise) {
     if (!pid) return;
-    KalmanFilter_SetProcessNoise(&pid->kalman_filter, process_noise);
-    KalmanFilter_SetMeasurementNoise(&pid->kalman_filter, measurement_noise);
+    kalman_filter_set_process_noise(&pid->kalman_filter, process_noise);
+    kalman_filter_set_measurement_noise(&pid->kalman_filter, measurement_noise);
 }
 
 void PID_controller_enable_kalmanFilter(PID_controller_t *pid, bool enable) {
     if (!pid) return;
     pid->enable_kalman_filter = enable;
     if (!enable) {
-        KalmanFilter_Reset(&pid->kalman_filter);
+        kalman_filter_reset(&pid->kalman_filter);
     }
 }
 
@@ -90,7 +49,7 @@ void PID_controller_start(PID_controller_t *pid) {
     if (pid->read_sensor) {
         float raw_measurement = pid->read_sensor();
         if (pid->enable_kalman_filter) {
-            pid->process_variable.measure = KalmanFilter_Update(&pid->kalman_filter, raw_measurement);
+            pid->process_variable.measure = kalman_filter_update(&pid->kalman_filter, raw_measurement);
         } else {
             pid->process_variable.measure = raw_measurement;
         }
