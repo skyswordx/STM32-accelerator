@@ -10,14 +10,14 @@
       <TargetName>FinallAttackProject</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pArmCC>5060960::V5.06 update 7 (build 960)::.\ARMCC</pArmCC>
-      <pCCUsed>5060960::V5.06 update 7 (build 960)::.\ARMCC</pCCUsed>
+      <pArmCC>5060960::V5.06 update 7 (build 960)::.\ARMCOMPLIER506</pArmCC>
+      <pCCUsed>5060960::V5.06 update 7 (build 960)::.\ARMCOMPLIER506</pCCUsed>
       <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
           <Device>STM32H750VBTx</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32H7xx_DFP.4.1.0</PackID>
+          <PackID>Keil.STM32H7xx_DFP.3.1.1</PackID>
           <PackURL>https://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000-0x2001FFFF) IRAM2(0x24000000-0x2407FFFF) IROM(0x8000000-0x801FFFF) CLOCK(12000000) FPU3(DFPU) CPUTYPE("Cortex-M7") ELITTLE TZ</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -341,7 +341,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32H750xx,ARM_MATH_CM7,__CC_ARM,ARM_MATH_DSP,ARM_MATH_MATRIX_CHECK,ARM_MATH_ROUNDING</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32H7xx/Include;../Drivers/CMSIS/Include;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../Module;../Task;../Drivers/INA226;../Drivers/AD9954;../Drivers/CMSIS/DSP/Include;../Module/DAC;../Module/ADC;../Module/Timer;../Module/Frequency;../Module/UART;../Module/PID;../Module/DDS;../Module/ZLCR;..\Drivers\AD9833;..\Module\CZT;..\Module\DILA;..\Module\Quinn;..\Module\KalmanFilter</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32H7xx/Include;../Drivers/CMSIS/Include;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../Module;../Task;../Drivers/INA226;../Drivers/AD9954;../Drivers/CMSIS/DSP/Include;../Module/DAC;../Module/ADC;../Module/Timer;../Module/Frequency;../Module/UART;../Module/PID;../Module/DDS;../Module/ZLCR;..\Drivers\AD9833;..\Module\CZT;..\Module\DILA;..\Module\Quinn;..\Module\KalmanFilter;..\Module\SineDetectTiming</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1613,6 +1613,16 @@
               <FileName>my_kalman_filter.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Module\KalmanFilter\my_kalman_filter.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Module/SineDetectTiming</GroupName>
+          <Files>
+            <File>
+              <FileName>my_sine_detect.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Module\SineDetectTiming\my_sine_detect.c</FilePath>
             </File>
           </Files>
         </Group>

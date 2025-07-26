@@ -1,0 +1,10 @@
+finallattackproject\my_sine_detect.o: ..\Module\SineDetectTiming\my_sine_detect.c
+finallattackproject\my_sine_detect.o: ..\Module\SineDetectTiming\my_sine_detect.h
+finallattackproject\my_sine_detect.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stdint.h
+finallattackproject\my_sine_detect.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stdbool.h
+finallattackproject\my_sine_detect.o: ../Drivers/CMSIS/DSP/Include/arm_math.h
+finallattackproject\my_sine_detect.o: ../Drivers/CMSIS/Include/cmsis_compiler.h
+finallattackproject\my_sine_detect.o: ../Drivers/CMSIS/Include/cmsis_armcc.h
+finallattackproject\my_sine_detect.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\string.h
+finallattackproject\my_sine_detect.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\math.h
+finallattackproject\my_sine_detect.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\float.h

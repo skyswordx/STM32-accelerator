@@ -2,6 +2,7 @@
 #include "my_uart_task.h"
 #include "my_zlcr_config.h"  // 添加 ZLCR 配置头文件
 #include "my_freq_config.h"  // 添加频率配置头文件，用于窗函数类型定义
+#include "my_sine_detect.h"  // 添加正弦波检测模块头文件
 #include <stdint.h>          // 确保包含标准整数类型定义
 
 extern ADC_HandleTypeDef hadc1;
@@ -65,6 +66,9 @@ uint16_t g_adc_dma_transfer_flag = ADC_DMA_TRANSFER_NOT_COMPLETED;
 uint8_t g_sample_rate_update_flag = 0;
 uint8_t g_sweep_start_flag = 0; // 扫频开始标志
 uint8_t g_sweep_in_progress = 0; // 扫频进行中标志
+
+// 正弦波检测模块启用标志
+uint8_t g_sine_detect_enabled = 0; // 默认禁用
 
 // 扫频配置参数
 #define SWEEP_START_FREQ 1000    // 起始频率 1kHz
@@ -199,6 +203,46 @@ void StartADCProcessingTask(void *argument) {
                 printf("Frequency: %d Hz, Impedance: %.2f Ohm, Phase: %.2f deg\n", g_current_freq_result.frequency, g_current_freq_result.magnitude, g_current_freq_result.phase);
                 
                 my_zlcr_get_capacitance_or_inductance(&g_current_freq_result, &g_current_impedance_result); // 获取电容或电感信息
+                
+                // 如果启用了正弦波检测模块，则进行检测
+                if (g_sine_detect_enabled) {
+                    // 初始化正弦波检测模块配置
+                    sine_detect_config_t config;
+                    config.sample_rate = g_ADC_SAMPLE_RATE_Hz;
+                    config.data_length = ADC_SAMPLE_SIZE;
+                    config.enable_filter = 1; // 启用滤波
+                    config.filter_length = 5; // 滤波器长度为5
+                    
+                    // 初始化模块
+                    if (my_sine_detect_init(&config) == 0) {
+                        // 处理ADC数据
+                        sine_detect_result_t result;
+                        if (my_sine_detect_process(g_adc1_data_8bit, &result) == 0) {
+                            // 打印检测结果
+                            printf("Sine wave detection results:\n");
+                            printf("  Peak count: %lu\n", result.peak_count);
+                            printf("  Edge count: %lu\n", result.edge_count);
+                            printf("  Signal midpoint: %.6f\n", result.signal_midpoint);
+                            
+                            // 打印峰值信息
+                            for (uint32_t i = 0; i < result.peak_count && i < 10; i++) { // 限制打印前10个峰值
+                                printf("  Peak %lu: amplitude=%.6f, position=%.6f, index=%lu, is_positive=%d\n",
+                                       i, result.peaks[i].amplitude, result.peaks[i].position,
+                                       result.peaks[i].index, result.peaks[i].is_positive);
+                            }
+                            
+                            // 打印边沿信息
+                            for (uint32_t i = 0; i < result.edge_count && i < 10; i++) { // 限制打印前10个边沿
+                                printf("  Edge %lu: position=%.6f, index=%lu, is_rising=%d\n",
+                                       i, result.edges[i].position, result.edges[i].index,
+                                       result.edges[i].is_rising);
+                            }
+                        }
+                        
+                        // 释放模块资源
+                        my_sine_detect_deinit();
+                    }
+                }
             }
 
             if (adc_mode == ADC_MODE_SWEEP && g_sweep_in_progress) {

@@ -2,8 +2,8 @@ finallattackproject\my_adc_task.o: ..\Module\ADC\my_adc_task.c
 finallattackproject\my_adc_task.o: ..\Module\ADC\my_adc_task.h
 finallattackproject\my_adc_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h
 finallattackproject\my_adc_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-finallattackproject\my_adc_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stddef.h
-finallattackproject\my_adc_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdint.h
+finallattackproject\my_adc_task.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stddef.h
+finallattackproject\my_adc_task.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stdint.h
 finallattackproject\my_adc_task.o: ../Core/Inc/FreeRTOSConfig.h
 finallattackproject\my_adc_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 finallattackproject\my_adc_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
@@ -28,7 +28,7 @@ finallattackproject\my_adc_task.o: ../Drivers/CMSIS/Include/mpu_armv7.h
 finallattackproject\my_adc_task.o: ../Drivers/CMSIS/Device/ST/STM32H7xx/Include/system_stm32h7xx.h
 finallattackproject\my_adc_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h
 finallattackproject\my_adc_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
-finallattackproject\my_adc_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\math.h
+finallattackproject\my_adc_task.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\math.h
 finallattackproject\my_adc_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc_ex.h
 finallattackproject\my_adc_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_gpio.h
 finallattackproject\my_adc_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_gpio_ex.h
@@ -55,12 +55,14 @@ finallattackproject\my_adc_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx
 finallattackproject\my_adc_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim_ex.h
 finallattackproject\my_adc_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h
 finallattackproject\my_adc_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h
-finallattackproject\my_adc_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdio.h
+finallattackproject\my_adc_task.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stdio.h
 finallattackproject\my_adc_task.o: ../Drivers/CMSIS/DSP/Include/arm_math.h
-finallattackproject\my_adc_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\string.h
-finallattackproject\my_adc_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\float.h
+finallattackproject\my_adc_task.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\string.h
+finallattackproject\my_adc_task.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\float.h
 finallattackproject\my_adc_task.o: ../Module/Timer/my_timer_config.h
 finallattackproject\my_adc_task.o: ../Module/ADC/my_adc_task.h
 finallattackproject\my_adc_task.o: ../Module/Frequency/my_freq_config.h
 finallattackproject\my_adc_task.o: ../Module/ZLCR/my_zlcr_config.h
 finallattackproject\my_adc_task.o: ../Module/UART/my_uart_task.h
+finallattackproject\my_adc_task.o: ..\Module\SineDetectTiming\my_sine_detect.h
+finallattackproject\my_adc_task.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stdbool.h
