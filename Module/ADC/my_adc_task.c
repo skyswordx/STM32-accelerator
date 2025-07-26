@@ -1,6 +1,7 @@
 #include "my_adc_task.h"
 #include "my_uart_task.h"
 #include "my_zlcr_config.h"  // 添加 ZLCR 配置头文件
+#include "my_freq_config.h"  // 添加频率配置头文件，用于窗函数类型定义
 #include <stdint.h>          // 确保包含标准整数类型定义
 
 extern ADC_HandleTypeDef hadc1;
@@ -182,11 +183,11 @@ void StartADCProcessingTask(void *argument) {
             }
 
             if(adc_mode == ADC_MODE_NORMAL){
-                my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 1, 1, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
+                my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 1, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
                 
-                // my_armrfft32_apply(g_adc2_data_8bit, &g_ch1_fundamental, 1, 1, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
+                // my_armrfft32_apply(g_adc2_data_8bit, &g_ch1_fundamental, 1, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
 
-                my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 1, 1, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
+                my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 1, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
 
                 printf("ADC1 %d Hz %.6f V\n", (g_ch1_fundamental.fundamental_frequency), g_ch1_fundamental.fundamental_vrms);
                 printf("ADC2 %d Hz %.6f V\n", (g_ch2_fundamental.fundamental_frequency), g_ch2_fundamental.fundamental_vrms);
@@ -205,8 +206,8 @@ void StartADCProcessingTask(void *argument) {
                 /* 进入这个部分，意味着当前频率点的采集已经完成 */
 
                 /* 需要调用 my_armcfft32_apply 函数进行频域分析 */
-                my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 1, 1, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
-                my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 1, 1, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
+                my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 1, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
+                my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 1, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
 
                 /* 然后利用频域分析结果 g_ch1_fundamental 和 g_ch2_fundamental ，利用 my_zlrc_config 中的接口，得到当前频率下的阻抗信息 */
                 my_zlcr_get_impedance(&g_ch1_fundamental, &g_ch2_fundamental, &g_current_freq_result); // 获取当前频率下的阻抗信息

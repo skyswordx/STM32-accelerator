@@ -104,6 +104,7 @@ float32_t g_filtered_adc_data[FFT_LENGTH]; // ADC1滤波后的数据
 float32_t g_windowed_adc_data[FFT_LENGTH]; // 窗函数处理后的信号
 
 float32_t g_hanning_window[FFT_LENGTH]; // 汉宁窗系数
+float32_t g_flat_top_window[FFT_LENGTH]; // 平顶窗系数
 
 arm_fir_instance_f32 fir_instance;
 
@@ -143,6 +144,13 @@ const float32_t fir_coeffs_reversed[101] = {
   -0.0000000000f
 };
 
+// --- 平顶窗系数定义 ---
+#define FLAT_TOP_A0 1.000000000000000f
+#define FLAT_TOP_A1 1.930000000000000f
+#define FLAT_TOP_A2 1.290000000000000f
+#define FLAT_TOP_A3 0.388000000000000f
+#define FLAT_TOP_A4 0.032000000000000f
+
 
 float32_t caculate_DCcomponent(float32_t* data, uint32_t length) {
     float32_t mean = 0.0f;
@@ -154,22 +162,85 @@ float32_t caculate_DCcomponent(float32_t* data, uint32_t length) {
 }
 
 /**
- * @brief 应用FFT算法
+ * @brief 生成指定类型的窗函数
+ * @param window_type 窗函数类型
+ * @param window_buffer 窗函数系数存储缓冲区
+ * @param length 窗函数长度
+ * @return 窗函数的补偿系数
+ */
+float32_t generate_window(window_type_t window_type, float32_t* window_buffer, uint32_t length) {
+    float32_t window_compensation_factor = 1.0f; // 默认补偿系数
+    float32_t window_sum = 0.0f; // 窗函数系数和
+    
+    switch (window_type) {
+        case WINDOW_NONE:
+            // 无窗函数，所有系数为1
+            for (uint32_t i = 0; i < length; i++) {
+                window_buffer[i] = 1.0f;
+            }
+            window_compensation_factor = 1.0f;
+            break;
+            
+        case WINDOW_HANNING:
+            // 生成汉宁窗
+            for (uint32_t i = 0; i < length; i++) {
+                window_buffer[i] = 0.5f - 0.5f * arm_cos_f32(2.0f * PI * i / (length - 1));
+                window_sum += window_buffer[i];
+            }
+            // 计算汉宁窗补偿系数
+            window_compensation_factor = (float32_t)(length / window_sum) * (HANNING_WINDOW_FACTOR / 2.0f);
+            break;
+            
+        case WINDOW_FLAT_TOP:
+            // 生成平顶窗 (ISO 18431-2标准)
+            for (uint32_t i = 0; i < length; i++) {
+                float32_t w = 2.0f * PI * i / (length - 1);
+                window_buffer[i] = FLAT_TOP_A0
+                                 - FLAT_TOP_A1 * arm_cos_f32(w)
+                                 + FLAT_TOP_A2 * arm_cos_f32(2 * w)
+                                 - FLAT_TOP_A3 * arm_cos_f32(3 * w)
+                                 + FLAT_TOP_A4 * arm_cos_f32(4 * w);
+                window_sum += window_buffer[i];
+            }
+            // 计算平顶窗补偿系数
+            window_compensation_factor = (float32_t)(length / window_sum) * FLAT_TOP_WINDOW_FACTOR;
+            break;
+            
+        default:
+            // 默认使用无窗函数
+            for (uint32_t i = 0; i < length; i++) {
+                window_buffer[i] = 1.0f;
+            }
+            window_compensation_factor = 1.0f;
+            break;
+    }
+    
+    return window_compensation_factor;
+}
+
+/**
+ * @brief 应用复数FFT算法进行频谱分析
  * @param adc_input 输入的ADC数据缓冲区(长度为 FFT_LENGTH)
  * @param result 基波分析结果输出结构体指针
  * @param enable_fir 是否启用FIR滤波器 (1=启用, 0=禁用)
- * @param enable_window 是否启用窗函数 (1=启用, 0=禁用)
+ * @param window_type 窗函数类型:
+ *                    - WINDOW_NONE: 不应用窗函数
+ *                    - WINDOW_HANNING: 应用汉宁窗
+ *                    - WINDOW_FLAT_TOP: 应用平顶窗(适合高精度幅度测量)
+ * @param interpolation_mode 频谱插值模式:
+ *                          - INTERPOLATION_DISABLED: 不使用插值
+ *                          - INTERPOLATION_PARABOLIC: 二次抛物线插值
+ *                          - INTERPOLATION_HANNING_SPECIAL: 汉宁窗专用插值
  * @retval None
  * @note 该函数依赖两个全局缓冲区
  */
-void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint8_t enable_fir, uint8_t enable_window, spectral_interpolation_mode_t interpolation_mode)
+void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint8_t enable_fir, window_type_t window_type, spectral_interpolation_mode_t interpolation_mode)
 {
     // uint8_t ifftFlag = 0;
     // uint8_t doBitReverse = 1;
     arm_cfft_radix4_init_f32(&fft_instance_radix4, FFT_LENGTH, 0, 1);
 
     float32_t* processing_data = adc_input; // 默认使用原始数据
-    uint32_t idx; // 预声明循环变量
     float32_t window_compensation_factor = 1.0f; // 窗函数补偿系数，初始为1
 
     // --- 可选：FIR滤波步骤 ---
@@ -184,26 +255,17 @@ void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
 
     // --- 滤除直流分量（在加窗前进行） ---
     float32_t mean = caculate_DCcomponent(processing_data, FFT_LENGTH);
-    for(idx = 0; idx < FFT_LENGTH; idx++) {
+    for(uint32_t idx = 0; idx < FFT_LENGTH; idx++) {
         processing_data[idx] = processing_data[idx] - mean; // 就地去除直流分量
     }
 
     // --- 可选：窗函数步骤 ---
-    if (enable_window) {
-        // 生成汉宁窗
-        float32_t window_sum = 0.0f; // 用于计算窗函数的和
-        for(idx = 0; idx < FFT_LENGTH; idx++) {
-            g_hanning_window[idx] = 0.5f - 0.5f * arm_cos_f32(2.0f * PI * idx / (FFT_LENGTH - 1));
-            window_sum += g_hanning_window[idx]; // 累加窗函数值
-        }
-        
-        // 计算汉宁窗的补偿系数
-        // 对于汉宁窗，理论补偿系数约为2.0，但这里用实际计算值更准确
-        // window_compensation_factor = (float32_t)((FFT_LENGTH / window_sum)  );
-        window_compensation_factor = (float32_t)((FFT_LENGTH / window_sum)  * (HANNING_WINDOW_FACTOR / 2.0f) );
+    if (window_type != WINDOW_NONE) {
+        // 生成指定类型的窗函数
+        window_compensation_factor = generate_window(window_type, g_windowed_adc_data, FFT_LENGTH);
         
         // 应用窗函数
-        arm_mult_f32(processing_data, g_hanning_window, g_windowed_adc_data, FFT_LENGTH);
+        arm_mult_f32(processing_data, g_windowed_adc_data, g_windowed_adc_data, FFT_LENGTH);
         processing_data = g_windowed_adc_data; // 使用窗函数处理后的数据
         
         // printf("Window applied: compensation factor = %.6f\n", window_compensation_factor);
@@ -311,10 +373,24 @@ void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
     // }
 }
 
-void my_armrfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint8_t enable_fir, uint8_t enable_window, spectral_interpolation_mode_t interpolation_mode){
+/**
+ * @brief 应用实数FFT算法进行频谱分析
+ * @param adc_input 输入的ADC数据缓冲区(长度为 FFT_LENGTH)
+ * @param result 基波分析结果输出结构体指针
+ * @param enable_fir 是否启用FIR滤波器 (1=启用, 0=禁用)
+ * @param window_type 窗函数类型:
+ *                    - WINDOW_NONE: 不应用窗函数
+ *                    - WINDOW_HANNING: 应用汉宁窗
+ *                    - WINDOW_FLAT_TOP: 应用平顶窗(适合高精度幅度测量)
+ * @param interpolation_mode 频谱插值模式:
+ *                          - INTERPOLATION_DISABLED: 不使用插值
+ *                          - INTERPOLATION_PARABOLIC: 二次抛物线插值
+ *                          - INTERPOLATION_HANNING_SPECIAL: 汉宁窗专用插值
+ * @retval None
+ */
+void my_armrfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint8_t enable_fir, window_type_t window_type, spectral_interpolation_mode_t interpolation_mode){
     
     float32_t* processing_data = adc_input; // 默认使用原始数据
-    uint32_t idx; // 预声明循环变量
     float32_t window_compensation_factor = 1.0f; // 窗函数补偿系数，初始为1
     
     // --- 可选：FIR滤波步骤 ---
@@ -331,29 +407,22 @@ void my_armrfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
 
     // --- 滤除直流分量（在加窗前进行） ---
     float32_t mean = caculate_DCcomponent(processing_data, FFT_LENGTH);
-    for(idx = 0; idx < FFT_LENGTH; idx++) {
+    for(uint32_t idx = 0; idx < FFT_LENGTH; idx++) {
         processing_data[idx] = processing_data[idx] - mean; // 就地去除直流分量
     }
 
-    // --- 可选：生成并应用汉宁窗 ---
-    if (enable_window) {
-        // 生成汉宁窗 (逐点相乘)
-        float32_t window_sum = 0.0f; // 用于计算窗函数的和
-        for(idx = 0; idx < FFT_LENGTH; idx++) {
-            g_hanning_window[idx] = 0.5f - 0.5f * arm_cos_f32(2.0f * PI * idx / (FFT_LENGTH - 1));
-            window_sum += g_hanning_window[idx]; // 累加窗函数值
-        }   //DSP库没有窗函数的定义，只能直接算。可能对于固定长度后续可以用SIMD加速
+    // --- 可选：窗函数步骤 ---
+    if (window_type != WINDOW_NONE) {
+        // 生成指定类型的窗函数
+        window_compensation_factor = generate_window(window_type, g_windowed_adc_data, FFT_LENGTH);
         
-        // 计算汉宁窗的补偿系数
-        window_compensation_factor = (float32_t)FFT_LENGTH / window_sum;
-        
-        // 应用汉宁窗
-        arm_mult_f32(processing_data, g_hanning_window, g_windowed_adc_data, FFT_LENGTH);
+        // 应用窗函数
+        arm_mult_f32(processing_data, g_windowed_adc_data, g_windowed_adc_data, FFT_LENGTH);
         processing_data = g_windowed_adc_data; // 使用窗函数处理后的数据
         
-        printf("Window applied: compensation factor = %.6f\n", window_compensation_factor);
+        // printf("Window applied: compensation factor = %.6f\n", window_compensation_factor);
     } else {
-        printf("No window applied: compensation factor = %.6f\n", window_compensation_factor);
+        // printf("No window applied: compensation factor = %.6f\n", window_compensation_factor);
     }
     //
 
