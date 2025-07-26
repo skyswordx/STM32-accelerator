@@ -118,7 +118,7 @@ void StartADCProcessingTask(void *argument) {
                     // 然后设置DDS频率并采集数据
                     g_sweep_start_flag = 1; // 设置扫频开始标志
                     printf("Entering sweep mode...\n");
-                } else {
+                } else if (adc_mode == ADC_MODE_NORMAL) {
                     // 原有的处理逻辑（正常模式）
                     switch_timer_sampleRate_Auto(&htim3, g_desired_ADC_sample_rate_Hz, g_desired_ADC_sample_rate_Hz / 100);
                     HAL_TIM_Base_Start(&htim3);
@@ -159,6 +159,20 @@ void StartADCProcessingTask(void *argument) {
                 // HAL_TIM_Base_Start(&htim3); // 重新启动定时器，继续ADC触发
 
                 // printf("%.6f\n", g_ch1_fundamental.fundamental_vrms);
+            }
+
+            if (adc_mode == ADC_MODE_SWEEP) {
+                // 扫频模式下
+                /* 在一段频率中，每一个频率点的 ADC 数据都会被采集 */
+                /* 进入这个部分，意味着当前频率点的采集已经完成 */
+
+                /* 需要调用 my_armcfft32_apply 函数进行频域分析 */
+                my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 1, 1, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
+                my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 1, 1, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
+
+                /* 然后利用频域分析结果 g_ch1_fundamental 和 g_ch2_fundamental ，利用 my_zlrc_config 中的接口，得到当前频率下的阻抗信息 */
+                my_zlrc_get_impedance(&g_ch1_fundamental, &g_ch2_fundamental);
+
             }
         }
 

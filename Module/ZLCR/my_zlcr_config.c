@@ -9,18 +9,35 @@
 
 // 全局频率数组，用于不同扫描场景
 // 快速概览场景 (10-20点)
-static uint32_t g_quick_view_freq_array[20];
+uint32_t g_quick_view_freq_array[20];
 
 // 标准特性表征场景 (50-200点)
-static uint32_t g_standard_freq_array[200];
+uint32_t g_standard_freq_array[200];
 
 // 精细分析场景 (200-1000点)
-static uint32_t g_fine_analysis_freq_array[1000];
+uint32_t g_fine_analysis_freq_array[1000];
 
 // 谐振点查找场景 (分两步扫描)
-static uint32_t g_resonant_search_coarse_array[50];  // 宽带粗扫
-static uint32_t g_resonant_search_fine_array[400];   // 窄带精扫
+uint32_t g_resonant_search_coarse_array[50];  // 宽带粗扫
+uint32_t g_resonant_search_fine_array[400];   // 窄带精扫
 
+#define Rx 220 // 模拟前端的电阻是220欧姆
+
+sweep_point_result_t g_current_freq_result;
+
+void my_zlcr_get_impedance(const fundamental_result_t *ch1_fundamental, const fundamental_result_t *ch2_fundamental, 
+                           sweep_point_result_t *current_freq_result) {
+    // 计算阻抗
+    /* (Vch2 / Rx) = (Vch1 / Rz) 借此反推 Rz 得到阻抗 */
+    // 计算阻抗 Rz = (Rx * Vch1) / Vch2
+    float32_t Vch1 = ch1_fundamental->fundamental_vrms; // ADC1通道的基波有效值
+    float32_t Vch2 = ch2_fundamental->fundamental_vrms; // ADC2通道的基波有效值
+
+    current_freq_result->magnitude = (Rx * Vch1) / Vch2;
+    current_freq_result->phase = ch1_fundamental->fundamental_phase_angle - ch2_fundamental->fundamental_phase_angle; // 相位差
+    current_freq_result->frequency = (ch1_fundamental->fundamental_frequency + ch2_fundamental->fundamental_frequency) / 2.0f; // 频率
+
+}
 
 // 频率点生成函数 - 多十倍频扫描
 void generate_decade_frequency_points(uint32_t start_freq, uint32_t stop_freq, uint32_t points_per_decade, uint32_t* freq_array, uint32_t* generated_points) {
@@ -100,82 +117,3 @@ void generate_logarithmic_frequency_points(uint32_t start_freq, uint32_t stop_fr
     }
 }
 
-// 频率点生成函数 - 根据配置生成频率点
-void generate_frequency_points(sweep_config_t* config) {
-    // 根据扫描策略选择合适的频率数组
-    switch (config->strategy) {
-        case STRATEGY_QUICK_VIEW:
-            config->freq_array = g_quick_view_freq_array;
-            config->array_length = sizeof(g_quick_view_freq_array) / sizeof(g_quick_view_freq_array[0]);
-            break;
-            
-        case STRATEGY_STANDARD:
-            config->freq_array = g_standard_freq_array;
-            config->array_length = sizeof(g_standard_freq_array) / sizeof(g_standard_freq_array[0]);
-            break;
-            
-        case STRATEGY_FINE_ANALYSIS:
-            config->freq_array = g_fine_analysis_freq_array;
-            config->array_length = sizeof(g_fine_analysis_freq_array) / sizeof(g_fine_analysis_freq_array[0]);
-            break;
-            
-        case STRATEGY_RESONANT_SEARCH:
-            // 对于谐振点查找，我们使用粗扫数组
-            config->freq_array = g_resonant_search_coarse_array;
-            config->array_length = sizeof(g_resonant_search_coarse_array) / sizeof(g_resonant_search_coarse_array[0]);
-            break;
-            
-        default:
-            // 默认使用标准数组
-            config->freq_array = g_standard_freq_array;
-            config->array_length = sizeof(g_standard_freq_array) / sizeof(g_standard_freq_array[0]);
-            break;
-    }
-    
-    // 确保数组长度不小于配置的点数
-    if (config->array_length < config->points) {
-        config->points = config->array_length;
-    }
-    
-    // 根据扫描类型生成频率点
-    if (config->type == SWEEP_LINEAR) {
-        generate_linear_frequency_points(config->start_freq, config->stop_freq, config->points, config->freq_array);
-    } else {
-        generate_logarithmic_frequency_points(config->start_freq, config->stop_freq, config->points, config->freq_array);
-    }
-}
-// 根据扫描策略设置默认点数
-void set_default_points_by_strategy(sweep_config_t* config) {
-    switch (config->strategy) {
-        case STRATEGY_QUICK_VIEW:
-            config->points = 20;  // 快速概览使用20个点
-            break;
-            
-        case STRATEGY_STANDARD:
-            config->points = 100; // 标准特性表征使用100个点
-            break;
-            
-        case STRATEGY_FINE_ANALYSIS:
-            config->points = 500; // 精细分析使用500个点
-            break;
-            
-        case STRATEGY_RESONANT_SEARCH:
-            config->points = 50;  // 谐振点查找粗扫使用50个点
-            break;
-            
-        default:
-            config->points = 100; // 默认使用100个点
-            break;
-    }
-    
-    // 确保点数不超过数组容量
-    if (config->strategy == STRATEGY_QUICK_VIEW && config->points > 20) {
-        config->points = 20;
-    } else if (config->strategy == STRATEGY_STANDARD && config->points > 201) {
-        config->points = 201;
-    } else if (config->strategy == STRATEGY_FINE_ANALYSIS && config->points > 1000) {
-        config->points = 1000;
-    } else if (config->strategy == STRATEGY_RESONANT_SEARCH && config->points > 50) {
-        config->points = 50;
-    }
-}

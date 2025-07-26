@@ -9,6 +9,7 @@
 
 #include "my_timer_config.h"
 #include "my_freq_config.h"
+#include "my_zlcr_config.h"
 
 // ADC工作模式枚举类型
 typedef enum {
