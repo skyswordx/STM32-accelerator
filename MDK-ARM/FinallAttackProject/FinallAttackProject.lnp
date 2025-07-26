@@ -53,7 +53,8 @@
 "finallattackproject\my_uart_task.o"
 "finallattackproject\my_pid_config.o"
 "finallattackproject\my_dds_task.o"
-"finallattackproject\my_zlcr_task.o"
+"finallattackproject\my_zlcr_config.o"
+"finallattackproject\ad9833.o"
 --library_type=microlib --strict --scatter "FinallAttackProject\FinallAttackProject.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

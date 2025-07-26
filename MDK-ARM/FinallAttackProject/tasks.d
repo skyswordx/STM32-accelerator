@@ -1,9 +1,9 @@
 finallattackproject\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c
-finallattackproject\tasks.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdlib.h
-finallattackproject\tasks.o: D:\KEIL\ARM\ARMCC\Bin\..\include\string.h
+finallattackproject\tasks.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stdlib.h
+finallattackproject\tasks.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\string.h
 finallattackproject\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-finallattackproject\tasks.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stddef.h
-finallattackproject\tasks.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdint.h
+finallattackproject\tasks.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stddef.h
+finallattackproject\tasks.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stdint.h
 finallattackproject\tasks.o: ../Core/Inc/FreeRTOSConfig.h
 finallattackproject\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 finallattackproject\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
