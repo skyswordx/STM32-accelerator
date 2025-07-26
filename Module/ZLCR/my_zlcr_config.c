@@ -8,18 +8,7 @@
 #include "AD9954.h"
 
 // 全局频率数组，用于不同扫描场景
-// 快速概览场景 (10-20点)
-uint32_t g_quick_view_freq_array[20];
 
-// 标准特性表征场景 (50-200点)
-uint32_t g_standard_freq_array[200];
-
-// 精细分析场景 (200-1000点)
-uint32_t g_fine_analysis_freq_array[1000];
-
-// 谐振点查找场景 (分两步扫描)
-uint32_t g_resonant_search_coarse_array[50];  // 宽带粗扫
-uint32_t g_resonant_search_fine_array[400];   // 窄带精扫
 
 #define Rx 220 // 模拟前端的电阻是220欧姆
 

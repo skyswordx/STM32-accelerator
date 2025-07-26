@@ -68,7 +68,7 @@ extern fundamental_result_t g_ch2_fundamental; // ADC2 通道 基波结果结构
 
 extern arm_cfft_radix4_instance_f32 fft_instance_radix4; // FFT实例
 
-
+extern sweep_point_result_t g_current_freq_result;
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
@@ -118,6 +118,21 @@ void StartADCProcessingTask(void *argument) {
                     // 然后设置DDS频率并采集数据
                     g_sweep_start_flag = 1; // 设置扫频开始标志
                     printf("Entering sweep mode...\n");
+
+                    /* 在这里使用一个在 my_zlcr_config.c 的接口生成扫频点 */
+                    // 参数：起始频率
+                    // 参数：终止频率
+                    // 参数：对数扫频/十倍频扫描/线性扫频
+
+
+                    /* 在这里利用初始化 DDS */
+                    // 这里可以使用函数指针和结构体，在 my_zlcr_config.h 中定义一个 DDS 配置结构体，成员是抽象出来的 DDS 初始化函数指针。
+                    // 用于在当前文件绑定实际使用的 DDS：9833
+
+                    /* 使用 DDS 输出扫频数组中第一个频率点 */
+
+                    /* 等待 DDS 输出稳定之后，用 timer3 启动定时器开启 ADC 采样 */
+
                 } else if (adc_mode == ADC_MODE_NORMAL) {
                     // 原有的处理逻辑（正常模式）
                     switch_timer_sampleRate_Auto(&htim3, g_desired_ADC_sample_rate_Hz, g_desired_ADC_sample_rate_Hz / 100);
@@ -165,35 +180,29 @@ void StartADCProcessingTask(void *argument) {
                 // 扫频模式下
                 /* 在一段频率中，每一个频率点的 ADC 数据都会被采集 */
                 /* 进入这个部分，意味着当前频率点的采集已经完成 */
+                // 特别地，第一个频率点在按键按下那会就触发 ADC 采样了，此时第一次进来这里对应的就是第一个频率点的采集完成
 
                 /* 需要调用 my_armcfft32_apply 函数进行频域分析 */
                 my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 1, 1, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
                 my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 1, 1, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
 
                 /* 然后利用频域分析结果 g_ch1_fundamental 和 g_ch2_fundamental ，利用 my_zlrc_config 中的接口，得到当前频率下的阻抗信息 */
-                my_zlrc_get_impedance(&g_ch1_fundamental, &g_ch2_fundamental);
+                my_zlrc_get_impedance(&g_ch1_fundamental, &g_ch2_fundamental, &g_current_freq_result); // 获取当前频率下的阻抗信息
 
+                /* 为了绘制扫频得到的幅频和相频特性，需要将结果保存到对应的数组中 */
+                // 这里可以将 g_current_freq_result 中的幅值和相位保存到，对应的全局数组中（要在 my_zlcr_config.c 中定义、在当前文件 extern）
+                // 全局数组的大小有多种选择，分别对应于不同的测量场景（如 多10倍频扫描、测电阻模式、测电容、测电感模式）
+
+
+                /* 存储完当前频率点测得的未知阻抗信息之后，要切换 DDS 的输出信号频率，测量下一个频率点的阻抗特性 */
+                // 这里可以使用函数指针和结构体，在 my_zlcr_config.h 中定义一个 DDS 配置结构体，成员是抽象出来的 DDS 设置输出频率波形的函数指针。
+                // 用于在当前文件绑定实际使用的 DDS：9833
+                // 用 DDS 设置下一个频率，带输出稳定之后，利用 timer3 触发 ADC 采样，采集下一个频率点的 ADC 数据
+
+                /* 之后依次存储 g_current_freq_result 中的幅值和相位到对应的全局数组中。直到数组存满，扫频完成，打印输出本次的结果数组 */
+                // 扫频完成后，就不再使用 timer3 触发 ADC 了
             }
         }
-
-        if ( g_sweep_start_flag == 1 && adc_mode == ADC_MODE_SWEEP) {
-            // 扫频模式下的处理逻辑
-            // 这里可以调用ZLCR配置中的频率点生成函数
-            // 然后设置DDS频率并采集数据
-            
-            // 示例：假设我们有一个函数来生成频率点
-            // uint32_t freq_array[100];
-            // generate_frequency_points(&sweep_config, freq_array);
-            
-            // 设置DDS频率
-            // set_dds_frequency(freq_array[current_index]);
-            
-            // 采集数据
-            // 这里可以调用ADC采样函数
-            
-            printf("Sweep mode processing...\n");
-        }
-
-        osDelay(100); // 延时100毫秒
+       osDelay(100); // 延时100毫秒
     }
 }
