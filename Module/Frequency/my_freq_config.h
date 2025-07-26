@@ -7,7 +7,7 @@
 #include "stdint.h"
 #include "math.h"
 #include "arm_math.h"
-#include "my_adc_task.h"
+
 
 #define FFT_LENGTH (4096) // FFT点数
 

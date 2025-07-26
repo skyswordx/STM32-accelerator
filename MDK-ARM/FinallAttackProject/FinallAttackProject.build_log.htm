@@ -32,7 +32,7 @@ compiling my_adc_task.c...
   #endif /* MT_MY_ADC_TASK_H */
 ../Module/Frequency/my_freq_config.h(45): warning:  #1-D: last line of file ends without a newline
   #endif /* MY_FREQ_CONFIG_H */
-../Module/ZLCR/my_zlcr_config.h(63): warning:  #1-D: last line of file ends without a newline
+../Module/ZLCR/my_zlcr_config.h(62): warning:  #1-D: last line of file ends without a newline
   #endif // MY_ZLCR_TASK_H
 ..\Module\ADC\my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
   #endif /* MT_MY_ADC_TASK_H */
@@ -41,52 +41,6 @@ compiling my_adc_task.c...
 ..\Module\ADC\my_adc_task.c(247): warning:  #1-D: last line of file ends without a newline
   }
 ..\Module\ADC\my_adc_task.c: 6 warnings, 0 errors
-compiling my_freq_config.c...
-../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
-  #endif /* MT_MY_ADC_TASK_H */
-../Module/Frequency/my_freq_config.h(45): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-../Module/ZLCR/my_zlcr_config.h(51): error:  #20: identifier "fundamental_result_t" is undefined
-  void my_zlcr_get_impedance(const fundamental_result_t *ch1_fundamental, const fundamental_result_t *ch2_fundamental,
-../Module/ZLCR/my_zlcr_config.h(51): error:  #20: identifier "fundamental_result_t" is undefined
-  void my_zlcr_get_impedance(const fundamental_result_t *ch1_fundamental, const fundamental_result_t *ch2_fundamental,
-../Module/ZLCR/my_zlcr_config.h(63): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_ZLCR_TASK_H
-../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
-  #endif /* MT_MY_ADC_TASK_H */
-..\Module\Frequency\my_freq_config.h(45): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-..\Module\Frequency\my_freq_config.c: 5 warnings, 2 errors
-compiling my_zlcr_config.c...
-../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
-  #endif /* MT_MY_ADC_TASK_H */
-../Module/Frequency/my_freq_config.h(45): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-../Module/ZLCR/my_zlcr_config.h(63): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_ZLCR_TASK_H
-../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
-  #endif /* MT_MY_ADC_TASK_H */
-..\Module\ZLCR\my_zlcr_config.h(63): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_ZLCR_TASK_H
-..\Module\ZLCR\my_zlcr_config.c(66): warning:  #223-D: function "generate_logarithmic_frequency_points" declared implicitly
-                  generate_logarithmic_frequency_points(decade_start, decade_stop, points_in_decade, &freq_array[total_points]);
-..\Module\ZLCR\my_zlcr_config.c(72): warning:  #223-D: function "generate_logarithmic_frequency_points" declared implicitly
-                      generate_logarithmic_frequency_points(decade_start, decade_stop, remaining_points, &freq_array[total_points]);
-..\Module\ZLCR\my_zlcr_config.c(98): warning:  #159-D: declaration is incompatible with previous "generate_logarithmic_frequency_points"  (declared at line 66)
-  void generate_logarithmic_frequency_points(uint32_t start_freq, uint32_t stop_freq, uint32_t points, uint32_t* freq_array) {
-..\Module\ZLCR\my_zlcr_config.c: 8 warnings, 0 errors
-compiling my_timer_config.c...
-../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
-  #endif /* MT_MY_ADC_TASK_H */
-../Module/Frequency/my_freq_config.h(45): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-../Module/ZLCR/my_zlcr_config.h(63): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_ZLCR_TASK_H
-../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
-  #endif /* MT_MY_ADC_TASK_H */
-..\Module\Timer\my_timer_config.c(202): warning:  #1-D: last line of file ends without a newline
-  }
-..\Module\Timer\my_timer_config.c: 5 warnings, 0 errors
 compiling main.c...
 ../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
   #endif /* INA226_H_ */
@@ -96,7 +50,7 @@ compiling main.c...
   #endif /* MT_MY_ADC_TASK_H */
 ../Module/Frequency/my_freq_config.h(45): warning:  #1-D: last line of file ends without a newline
   #endif /* MY_FREQ_CONFIG_H */
-../Module/ZLCR/my_zlcr_config.h(63): warning:  #1-D: last line of file ends without a newline
+../Module/ZLCR/my_zlcr_config.h(62): warning:  #1-D: last line of file ends without a newline
   #endif // MY_ZLCR_TASK_H
 ../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
   #endif /* MT_MY_ADC_TASK_H */
@@ -111,7 +65,36 @@ compiling main.c...
 ../Core/Src/main.c(231): warning:  #167-D: argument of type "void (*)(const void *)" is incompatible with parameter of type "osThreadFunc_t"
     DDSProcessingTaskHandle = osThreadNew(StartDDSProcessingTask, NULL, &DDSProcessingTask_attributes);
 ../Core/Src/main.c: 11 warnings, 0 errors
-"FinallAttackProject\FinallAttackProject.axf" - 2 Error(s), 35 Warning(s).
+compiling my_freq_config.c...
+..\Module\Frequency\my_freq_config.h(45): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+..\Module\Frequency\my_freq_config.c: 1 warning, 0 errors
+compiling my_zlcr_config.c...
+../Module/Frequency/my_freq_config.h(45): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+..\Module\ZLCR\my_zlcr_config.h(62): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_ZLCR_TASK_H
+..\Module\ZLCR\my_zlcr_config.c(66): warning:  #223-D: function "generate_logarithmic_frequency_points" declared implicitly
+                  generate_logarithmic_frequency_points(decade_start, decade_stop, points_in_decade, &freq_array[total_points]);
+..\Module\ZLCR\my_zlcr_config.c(72): warning:  #223-D: function "generate_logarithmic_frequency_points" declared implicitly
+                      generate_logarithmic_frequency_points(decade_start, decade_stop, remaining_points, &freq_array[total_points]);
+..\Module\ZLCR\my_zlcr_config.c(98): warning:  #159-D: declaration is incompatible with previous "generate_logarithmic_frequency_points"  (declared at line 66)
+  void generate_logarithmic_frequency_points(uint32_t start_freq, uint32_t stop_freq, uint32_t points, uint32_t* freq_array) {
+..\Module\ZLCR\my_zlcr_config.c: 5 warnings, 0 errors
+compiling my_timer_config.c...
+../Module/Frequency/my_freq_config.h(45): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+../Module/ZLCR/my_zlcr_config.h(62): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_ZLCR_TASK_H
+../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
+  #endif /* MT_MY_ADC_TASK_H */
+..\Module\Timer\my_timer_config.c(202): warning:  #1-D: last line of file ends without a newline
+  }
+..\Module\Timer\my_timer_config.c: 4 warnings, 0 errors
+linking...
+Program Size: Code=50984 RO-data=40112 RW-data=228 ZI-data=209908  
+FromELF: creating hex file...
+"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 27 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -134,8 +117,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Target not created.
-Build Time Elapsed:  00:00:28
+Build Time Elapsed:  00:00:23
 </pre>
 </body>
 </html>

@@ -7,7 +7,6 @@
 #include "stdint.h"
 #include "math.h"
 #include "arm_math.h"
-#include "my_adc_task.h"
 #include "my_freq_config.h"
 
 // 扫频配置参数
