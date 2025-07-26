@@ -1,6 +1,11 @@
 #include "my_freq_config.h"
 #include <stdint.h>
 
+// Quinn频率估计算法支持
+#ifdef ENABLE_QUINN_FREQUENCY_ESTIMATION
+#include "my_quinn_config.h"
+#endif
+
 extern uint32_t g_ADC_SAMPLE_RATE_Hz; // 2MHz采样率
 
 // 前向声明辅助函数
@@ -250,6 +255,23 @@ void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
         // 如果插值失败（例如边界条件），则使用原始结果
     }
 
+    // --- Quinn频率估计算法处理 ---
+#ifdef ENABLE_QUINN_FREQUENCY_ESTIMATION
+    // 只有在启用Quinn算法且模块有效时才使用
+    if (g_quinn_module_enabled) {
+        quinn_frequency_result_t quinn_result;
+        int quinn_status = my_quinn_process(g_fft_input_buffer, fundamental_index, &quinn_result);
+        
+        // 如果Quinn算法执行成功且结果有效，则使用Quinn算法的频率估计
+        if (quinn_status == MY_QUINN_SUCCESS && quinn_result.validity == 1) {
+            final_frequency = quinn_result.frequency;
+            // printf("Using Quinn frequency estimation: %.2f Hz (confidence: %.2f)\n",
+            //        quinn_result.frequency, quinn_result.confidence);
+        }
+        // 否则使用原有的频率估计（FFT或插值结果）
+    }
+#endif
+
     float32_t fundamental_phase_angle = (atan2f(g_fft_input_buffer[2 * fundamental_index + 1], g_fft_input_buffer[2 * fundamental_index])) * (180.0f / PI) ;
 
     // 应用窗函数补偿系数来修正幅度
@@ -381,6 +403,24 @@ void my_armrfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
         }
         // 如果插值失败（例如边界条件），则使用原始结果
     }
+
+    // --- Quinn频率估计算法处理 ---
+#ifdef ENABLE_QUINN_FREQUENCY_ESTIMATION
+    // 只有在启用Quinn算法且模块有效时才使用
+    if (g_quinn_module_enabled) {
+        quinn_frequency_result_t quinn_result;
+        // 注意：对于实数FFT，需要使用不同的FFT数据
+        int quinn_status = my_quinn_process(g_fft_output_buffer, fundamental_index, &quinn_result);
+        
+        // 如果Quinn算法执行成功且结果有效，则使用Quinn算法的频率估计
+        if (quinn_status == MY_QUINN_SUCCESS && quinn_result.validity == 1) {
+            final_frequency = quinn_result.frequency;
+            // printf("Using Quinn frequency estimation: %.2f Hz (confidence: %.2f)\n",
+            //        quinn_result.frequency, quinn_result.confidence);
+        }
+        // 否则使用原有的频率估计（FFT或插值结果）
+    }
+#endif
 
     float32_t fundamental_phase_angle = (atan2f(g_fft_output_buffer[2 * fundamental_index + 1], g_fft_output_buffer[2 * fundamental_index])) * (180.0f / PI) ;
 

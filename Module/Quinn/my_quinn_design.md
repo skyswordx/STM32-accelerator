@@ -245,6 +245,10 @@ typedef enum {
     MY_QUINN_ERROR_INVALID_PEAK_INDEX
 } my_quinn_error_t;
 
+// --- 全局变量声明 ---
+/** @brief Quinn模块运行时启用标志 */
+extern uint8_t g_quinn_module_enabled;
+
 // --- 函数声明 ---
 /**
  * @brief 执行Quinn频率估计算法
@@ -288,6 +292,7 @@ float32_t my_quinn_get_confidence(void);
 
 // --- 全局变量 ---
 static quinn_frequency_result_t g_quinn_result; // Quinn算法结果结构体
+uint8_t g_quinn_module_enabled = 1; // Quinn模块运行时启用标志，默认启用
 
 extern uint32_t g_ADC_SAMPLE_RATE_Hz; // 从ADC模块获取采样率
 
@@ -301,6 +306,11 @@ extern uint32_t g_ADC_SAMPLE_RATE_Hz; // 从ADC模块获取采样率
  */
 int my_quinn_process(const float32_t* fft_data, uint16_t peak_index, quinn_frequency_result_t* result)
 {
+    // 如果模块被禁用，直接返回错误
+    if (!g_quinn_module_enabled) {
+        return MY_QUINN_ERROR_PROCESS_FAILED;
+    }
+    
     // 检查输入参数
     if (fft_data == NULL || result == NULL) {
         return MY_QUINN_ERROR_INVALID_PARAMETER;
@@ -534,9 +544,16 @@ int my_quinn_process(const float32_t* fft_data, uint16_t peak_index, quinn_frequ
 
 ### 13.1 启用Quinn算法
 
-要启用Quinn算法，请在`my_quinn_config.h`中设置：
+要启用Quinn算法，请在编译时定义`ENABLE_QUINN_FREQUENCY_ESTIMATION`宏：
+
 ```c
-#define QUINN_ENABLE 1
+// 在编译选项中添加：
+// -DENABLE_QUINN_FREQUENCY_ESTIMATION
+```
+
+或者在代码中添加：
+```c
+#define ENABLE_QUINN_FREQUENCY_ESTIMATION
 ```
 
 ### 13.2 配置参数
@@ -554,3 +571,63 @@ g_quinn_module_enabled = 1;
 
 // 禁用Quinn模块
 g_quinn_module_enabled = 0;
+```
+
+### 13.4 集成到现有系统
+
+要在现有系统中集成Quinn算法，请按以下步骤操作：
+
+1. 在Frequency模块的编译选项中添加`-DENABLE_QUINN_FREQUENCY_ESTIMATION`
+2. 确保Quinn模块的源文件被正确编译链接
+3. 在系统初始化时可以设置`g_quinn_module_enabled`来控制是否启用算法
+
+### 13.5 API使用示例
+
+```c
+// 示例：在Frequency模块中使用Quinn算法
+#ifdef ENABLE_QUINN_FREQUENCY_ESTIMATION
+    if (g_quinn_module_enabled) {
+        quinn_frequency_result_t quinn_result;
+        int quinn_status = my_quinn_process(fft_data, peak_index, &quinn_result);
+        
+        if (quinn_status == MY_QUINN_SUCCESS && quinn_result.validity == 1) {
+            // 使用Quinn算法的精确频率估计
+            final_frequency = quinn_result.frequency;
+        }
+    }
+#endif
+```
+
+## 14. 注意事项
+
+### 14.1 精度说明
+
+Quinn算法的精度依赖于以下因素：
+1. 信号的信噪比
+2. FFT的分辨率
+3. 峰值点的检测准确性
+
+### 14.2 性能影响
+
+Quinn算法会增加少量的计算开销，但在大多数应用中这个开销是可以接受的。
+
+### 14.3 限制条件
+
+1. Quinn算法要求输入的FFT数据为复数格式
+2. 峰值点不能位于频谱的边缘位置
+3. 算法对噪声较为敏感，在低信噪比环境下可能失效
+
+## 15. 版本历史
+
+### v1.0.0
+- 初始版本
+- 实现基本的Quinn频率估计算法
+- 提供完整的API接口
+- 集成到Frequency模块中
+- 提供测试程序
+
+## 16. 参考资料
+
+1. Quinn, B. G. "Estimating frequency by interpolation using Fourier coefficients with maximum and minimum amplitude." IEEE Transactions on Signal Processing 45.3 (1997): 801-805.
+2. 《数字信号处理》相关章节
+3. ARM CMSIS-DSP库文档

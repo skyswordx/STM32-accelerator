@@ -8,6 +8,10 @@
 #include "math.h"
 #include "arm_math.h"
 
+// Quinn频率估计算法支持
+#ifdef ENABLE_QUINN_FREQUENCY_ESTIMATION
+#include "my_quinn_config.h"
+#endif
 
 #define FFT_LENGTH (4096) // FFT点数
 
