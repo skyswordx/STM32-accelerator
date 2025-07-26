@@ -84,6 +84,8 @@ extern sweep_point_result_t g_sweep_result_array[SWEEP_MAX_POINTS];
 extern uint32_t g_sweep_current_index;
 extern uint32_t g_sweep_total_points;
 
+extern impedance_result_t g_current_impedance_result; // 当前频率下的阻抗结果
+
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
   if(hadc->Instance == ADC1)
@@ -183,11 +185,11 @@ void StartADCProcessingTask(void *argument) {
             }
 
             if(adc_mode == ADC_MODE_NORMAL){
-                my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 1, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
+                my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
                 
                 // my_armrfft32_apply(g_adc2_data_8bit, &g_ch1_fundamental, 1, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
 
-                my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 1, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
+                my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
 
                 printf("ADC1 %d Hz %.6f V\n", (g_ch1_fundamental.fundamental_frequency), g_ch1_fundamental.fundamental_vrms);
                 printf("ADC2 %d Hz %.6f V\n", (g_ch2_fundamental.fundamental_frequency), g_ch2_fundamental.fundamental_vrms);
@@ -195,6 +197,8 @@ void StartADCProcessingTask(void *argument) {
                 
                 my_zlcr_get_impedance(&g_ch1_fundamental, &g_ch2_fundamental, &g_current_freq_result); // 获取当前频率下的阻抗信息
                 printf("Frequency: %d Hz, Impedance: %.2f Ohm, Phase: %.2f deg\n", g_current_freq_result.frequency, g_current_freq_result.magnitude, g_current_freq_result.phase);
+                
+                my_zlcr_get_capacitance_or_inductance(&g_current_freq_result, &g_current_impedance_result); // 获取电容或电感信息
             }
 
             if (adc_mode == ADC_MODE_SWEEP && g_sweep_in_progress) {
@@ -203,8 +207,8 @@ void StartADCProcessingTask(void *argument) {
                 /* 进入这个部分，意味着当前频率点的采集已经完成 */
 
                 /* 需要调用 my_armcfft32_apply 函数进行频域分析 */
-                my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 1, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
-                my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 1, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
+                my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
+                my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
 
                 /* 然后利用频域分析结果 g_ch1_fundamental 和 g_ch2_fundamental ，利用 my_zlrc_config 中的接口，得到当前频率下的阻抗信息 */
                 my_zlcr_get_impedance(&g_ch1_fundamental, &g_ch2_fundamental, &g_current_freq_result); // 获取当前频率下的阻抗信息

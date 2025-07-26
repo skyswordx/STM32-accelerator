@@ -18,6 +18,12 @@ typedef struct {
     float32_t phase;       // 相位(度)
 } sweep_point_result_t;
 
+typedef struct {
+    float32_t esr;        // 等效串联电阻(欧姆)
+    float32_t c_or_l; // 电容(法拉)或电感(亨利)
+    float32_t quality_factor; // 质量因子
+} impedance_result_t;
+
 // DDS 设备抽象结构体
 typedef struct {
     void (*init)(void);                           // 初始化函数指针
@@ -49,6 +55,8 @@ extern dds_device_t g_dds_device;                         // DDS设备实例
 
 void my_zlcr_get_impedance(const fundamental_result_t *ch1_fundamental, const fundamental_result_t *ch2_fundamental,
                            sweep_point_result_t *current_freq_result);
+
+void my_zlcr_get_capacitance_or_inductance(const sweep_point_result_t *result, impedance_result_t *impedance_result);
 
 // 扫频控制函数
 void my_zlcr_sweep_init(const sweep_config_t *config);

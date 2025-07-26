@@ -27,24 +27,38 @@ Project File Date:  07/26/2025
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\KEIL\ARM\ARMCC\Bin'
 Build target 'FinallAttackProject'
+compiling my_adc_task.c...
+../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
+  #endif /* MT_MY_ADC_TASK_H */
+../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+../Module/ZLCR/my_zlcr_config.h(70): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_ZLCR_TASK_H
+..\Module\ADC\my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
+  #endif /* MT_MY_ADC_TASK_H */
+../Module/UART/my_uart_task.h(18): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_UART_TASK_H */
+..\Module\ADC\my_adc_task.c(249): warning:  #1-D: last line of file ends without a newline
+  }
+..\Module\ADC\my_adc_task.c: 6 warnings, 0 errors
 compiling my_zlcr_config.c...
 ../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
   #endif /* MY_FREQ_CONFIG_H */
-..\Module\ZLCR\my_zlcr_config.h(62): warning:  #1-D: last line of file ends without a newline
+..\Module\ZLCR\my_zlcr_config.h(70): warning:  #1-D: last line of file ends without a newline
   #endif // MY_ZLCR_TASK_H
-..\Module\ZLCR\my_zlcr_config.c(67): warning:  #223-D: function "generate_logarithmic_frequency_points" declared implicitly
+..\Module\ZLCR\my_zlcr_config.c(68): warning:  #223-D: function "generate_logarithmic_frequency_points" declared implicitly
                   generate_logarithmic_frequency_points(decade_start, decade_stop, points_in_decade, &freq_array[total_points]);
-..\Module\ZLCR\my_zlcr_config.c(73): warning:  #223-D: function "generate_logarithmic_frequency_points" declared implicitly
+..\Module\ZLCR\my_zlcr_config.c(74): warning:  #223-D: function "generate_logarithmic_frequency_points" declared implicitly
                       generate_logarithmic_frequency_points(decade_start, decade_stop, remaining_points, &freq_array[total_points]);
-..\Module\ZLCR\my_zlcr_config.c(99): warning:  #159-D: declaration is incompatible with previous "generate_logarithmic_frequency_points"  (declared at line 67)
+..\Module\ZLCR\my_zlcr_config.c(100): warning:  #159-D: declaration is incompatible with previous "generate_logarithmic_frequency_points"  (declared at line 68)
   void generate_logarithmic_frequency_points(uint32_t start_freq, uint32_t stop_freq, uint32_t points, uint32_t* freq_array) {
-..\Module\ZLCR\my_zlcr_config.c(263): warning:  #1-D: last line of file ends without a newline
+..\Module\ZLCR\my_zlcr_config.c(280): warning:  #1-D: last line of file ends without a newline
    */
 ..\Module\ZLCR\my_zlcr_config.c: 6 warnings, 0 errors
 linking...
-Program Size: Code=51504 RO-data=40112 RW-data=228 ZI-data=193524  
+Program Size: Code=52508 RO-data=40144 RW-data=228 ZI-data=193532  
 FromELF: creating hex file...
-"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 6 Warning(s).
+"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 12 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -67,7 +81,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:07
+Build Time Elapsed:  00:00:08
 </pre>
 </body>
 </html>

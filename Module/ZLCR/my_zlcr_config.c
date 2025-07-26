@@ -12,6 +12,7 @@
 uint32_t g_sweep_freq_array[SWEEP_MAX_POINTS];           // 扫频频率数组
 sweep_point_result_t g_sweep_result_array[SWEEP_MAX_POINTS]; // 扫频结果数组
 uint32_t g_sweep_current_index = 0;                      // 当前扫频点索引
+impedance_result_t g_current_impedance_result;          // 当前频率下的阻抗结果
 uint32_t g_sweep_total_points = 0;                       // 总扫频点数
 
 // DDS设备实例
@@ -216,36 +217,52 @@ uint8_t my_zlcr_sweep_is_complete(void) {
 
 
 /**
- * @brief 根据扫频点结果计算电容或电感值
+ * @brief 根据扫频点结果计算电容或电感值，ESR 以及 Q 值或者 D 值
  * @param result 扫频点测量结果
- * @return 计算得到的电容(法拉)或电感(亨利)值，如果无法判断则返回0
  *
  * @details
  * 假设现在测得的阻抗是纯电容/纯电感，此时的幅值就为虚部的绝对值，利用公式反推 C 与 L 的值
  * - 对于电容: Zc = 1 / (2 * π * f * C) => C = 1 / (2 * π * f * |Z|)
  * - 对于电感: Zl = 2 * π * f * L => L = |Z| / (2 * π * f)
+ * - sweep_point_result_t 中的 magnitude 是 A*e^(j*phase) 的 A 部分，即幅值
+ * - phase 是相位角度，单位为度
+ * @param impedance_result 输出的阻抗结果，包括等效串联电阻(ESR)、电容或电感值以及质量因子(Q值)
+ * 
  */
-float32_t my_zlcr_get_capacitance_or_inductance(const sweep_point_result_t *result) {
-    if (result->magnitude == 0 || result->frequency == 0) {
-        return 0.0f; // 避免除零错误
+void my_zlcr_get_capacitance_or_inductance(const sweep_point_result_t *result, impedance_result_t *impedance_result) {
+
+    if (result == NULL || impedance_result == NULL) {
+        return;
     }
-    
-    // 如果阻抗是纯电容
-    if (result->phase < (-90.0f + PHASE_THRESHOLD)) {
-        return 1.0f / (2.0f * PI * result->frequency * result->magnitude);
+
+    // 计算阻抗的幅值和相位
+    float32_t magnitude = result->magnitude;
+    float32_t phase = result->phase;
+
+    // 根据相位判断是电容还是电感
+    if (phase < (-90.0f + PHASE_THRESHOLD)) {
+        // 纯电容
+        printf("Pure Capacitor Detected\n");
+        impedance_result->c_or_l = 1.0f / (2.0f * PI * result->frequency * magnitude);
+    } else if (phase > (90.0f - PHASE_THRESHOLD)) {
+        // 纯电感
+        printf("Pure Inductor Detected\n");
+        impedance_result->c_or_l = magnitude / (2.0f * PI * result->frequency);
+    } else {
+        // 其他情况
+        impedance_result->c_or_l = 0.0f;
     }
-    
-    // 如果阻抗是纯电感
-    if (result->phase > (90.0f - PHASE_THRESHOLD)) {
-        return result->magnitude / (2.0f * PI * result->frequency);
-    }
-    
-    return 0.0f; // 如果既不是纯电容也不是纯电感，返回0
+
+    // 计算等效串联电阻和质量因子
+    impedance_result->esr = magnitude * cosf(phase * PI / 180.0f);
+    impedance_result->quality_factor = magnitude / impedance_result->esr;
+    printf("ESR: %.2f Ohm, C/L: %.6f F/H, Q: %.2f\n", impedance_result->esr, impedance_result->c_or_l, impedance_result->quality_factor);
+   
 }
 
 
 /**
- * 
+* 
 有个别电桥可能副参数显示的种类不够全。比如有的只能显示D值，Q值，显示不了ESR。
 实际上这三个参数知道一个，另外两个通过公式就能算出来。D值和Q值互为倒数，这个最简单！ESR和D值Q值换算稍微复杂点。网上查了一下，公式如下。
 
