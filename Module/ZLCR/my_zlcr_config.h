@@ -53,6 +53,10 @@ extern uint32_t g_sweep_current_index;                    // 当前扫频点索�
 extern uint32_t g_sweep_total_points;                     // 总扫频点数
 extern dds_device_t g_dds_device;                         // DDS设备实例
 
+// DDS类型宏定义
+#define DDS_TYPE_AD9833 1
+#define DDS_TYPE_AD9954 0
+
 void my_zlcr_get_impedance(const fundamental_result_t *ch1_fundamental, const fundamental_result_t *ch2_fundamental,
                            sweep_point_result_t *current_freq_result);
 
@@ -65,6 +69,6 @@ void my_zlcr_sweep_next(void);
 uint8_t my_zlcr_sweep_is_complete(void);
 
 // DDS设备初始化函数
-void my_zlcr_dds_init(void);
+void my_zlcr_dds_init(uint8_t dds_type);
 
 #endif // MY_ZLCR_TASK_H

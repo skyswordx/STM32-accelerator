@@ -137,10 +137,18 @@ void ad9954_set_frequency(double frequency) {
 }
 
 // 初始化DDS设备
-void my_zlcr_dds_init(void) {
+void my_zlcr_dds_init(uint8_t dds_type) {
     // 默认使用AD9833，如果要使用AD9954，需要修改这里
-    g_dds_device.init = ad9833_init;
-    g_dds_device.set_frequency = ad9833_set_frequency;
+    if (dds_type == DDS_TYPE_AD9833) {
+        g_dds_device.init = ad9833_init;
+        g_dds_device.set_frequency = ad9833_set_frequency;
+    } else if (dds_type == DDS_TYPE_AD9954) {
+        g_dds_device.init = ad9954_init;
+        g_dds_device.set_frequency = ad9954_set_frequency;
+    } else {
+        printf("Unsupported DDS type!\n");
+        return;
+    }
     
     // 初始化DDS设备
     if (g_dds_device.init != NULL) {

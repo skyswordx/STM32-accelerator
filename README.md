@@ -35,6 +35,12 @@ dds
 
 正弦波的峰峰值以及正弦波的边沿（上升沿+下降沿），我调研了主流方案：Reference\正弦波时域峰值+边沿检测\test.md，以及时域处理的基本方法：Reference\正弦波时域峰值+边沿检测\时域参考，请你在我的模块文件夹Module\TimeDetect\my_time_detect.h实现，
 
+我在测试中发现串口输出显示是：Time Detect Module Initialized
+Time domain detection failed! 我觉得就是 if (my_time_detect_start(g_adc1_data_8bit, &result) == 0)  失败了
+
+
+
+
 先用 FFT 算一个输入信号的频率
 然后根据这个频率动态调整一下采样率
 调整完之后再精细测量

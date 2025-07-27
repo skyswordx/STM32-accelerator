@@ -27,14 +27,18 @@ Project File Date:  07/27/2025
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\KEIL\ARM\ARMCC\Bin'
 Build target 'FinallAttackProject'
-compiling MCP4725.c...
-..\Drivers\MCP4725\MCP4725.c(44): warning:  #188-D: enumerated type mixed with another type
-  	_MCP4725._i2cAddress = (uint16_t)(addr<<1);
-..\Drivers\MCP4725\MCP4725.c: 1 warning, 0 errors
+compiling my_time_detect.c...
+..\Module\TimeDetect\my_time_detect.h(35): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_TIME_DETECT_H
+../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+..\Module\TimeDetect\my_time_detect.c(149): warning:  #1-D: last line of file ends without a newline
+  }
+..\Module\TimeDetect\my_time_detect.c: 3 warnings, 0 errors
 linking...
-Program Size: Code=56552 RO-data=40172 RW-data=272 ZI-data=194080  
+Program Size: Code=57624 RO-data=40320 RW-data=272 ZI-data=194080  
 FromELF: creating hex file...
-"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 1 Warning(s).
+"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 3 Warning(s).
 
 <h2>Software Packages used:</h2>
 

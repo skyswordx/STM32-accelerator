@@ -42,24 +42,27 @@ void StartButtonProcessingTask(void *argument) {
         }
         
         
-        if (pressed_key == 1) {
-            // 如果按下的是按键1，执行特定操作
-            float bus_voltage = INA226_GetBusV();
-            float current = INA226_GetCurrent();
-            float power = INA226_GetPower();
-
-            printf("Current: %.2f A, Voltage: %.2f V, Power: %.2f W\n", current, bus_voltage, power);
-
-        }else if (pressed_key == 2) {
-            AD9954_Set_Fre(delta_frequency); // 设置频率为1kHz
-            AD9833_WaveSeting(delta_frequency, 0, SIN_WAVE, 0); // 设置AD9833频率为1kHz
-            printf("DDS Frequency set to: %lu Hz\n", delta_frequency);
-
-            delta_frequency += 1000; // 每次增加1kHz
-            if (delta_frequency > 10000000) { // 如果超过10MHz，重置为1kHz
-                delta_frequency = 1000;
-            }
+        switch (pressed_key) {
+            case 1:
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+            case 4:
+                break;
+            case 5:
+                break;
+            case 6:
+                break;
+            case 7:
+                break;
+            case 8:
+                break;
+            case 9:
+                break;
         }
-        osDelay(20);
+        // 3. 延时一段时间，避免过于频繁的扫描
+        osDelay(20); // 20ms 延时
     }
 }

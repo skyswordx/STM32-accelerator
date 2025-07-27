@@ -114,7 +114,7 @@ void StartADCProcessingTask(void *argument) {
     HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_FACTOR_LINEARITY_REGOFFSET, ADC_SINGLE_ENDED);
 
     /* 初始化DDS设备 */
-    my_zlcr_dds_init();
+    my_zlcr_dds_init(DDS_TYPE_AD9833);
 
     /* 启动定时器3作为时间戳基准和ADC触发源 */
     HAL_ADC_Start(&hadc2);
