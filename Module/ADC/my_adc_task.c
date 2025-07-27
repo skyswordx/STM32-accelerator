@@ -4,6 +4,7 @@
 #include "my_freq_config.h"  // 添加频率配置头文件，用于窗函数类型定义
 #include "my_sine_detect.h"  // 添加正弦波检测模块头文件
 #include <stdint.h>          // 确保包含标准整数类型定义
+#include "my_sine_detect.h"  // 添加正弦波检测模块头文件
 
 extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
@@ -68,7 +69,7 @@ uint8_t g_sweep_start_flag = 0; // 扫频开始标志
 uint8_t g_sweep_in_progress = 0; // 扫频进行中标志
 
 // 正弦波检测模块启用标志
-uint8_t g_sine_detect_enabled = 1; // 默认禁用
+uint8_t g_sine_detect_enabled = 0; // 默认禁用
 
 // 扫频配置参数
 #define SWEEP_START_FREQ 1000    // 起始频率 1kHz
@@ -210,11 +211,21 @@ void StartADCProcessingTask(void *argument) {
                     sine_detect_config_t config;
                     config.sample_rate = g_ADC_SAMPLE_RATE_Hz;
                     config.data_length = ADC_SAMPLE_SIZE;
-                    config.enable_filter = 1; // 启用滤波
+                    config.enable_filter = 0; // 启用滤波
                     config.filter_length = 5; // 滤波器长度为5
                     
-                    // 初始化模块
-                    if (my_sine_detect_init(&config) == 0) {
+                    // 直接配置全局结构体
+                    g_sine_config = config;
+                    
+                    // 检查数据长度是否超过最大值
+                    if (g_sine_config.data_length <= 4096) {
+                        // 初始化结果结构体
+                        g_sine_result.peaks = g_peak_buffer;
+                        g_sine_result.edges = g_edge_buffer;
+                        g_sine_result.peak_count = 0;
+                        g_sine_result.edge_count = 0;
+                        g_sine_result.signal_midpoint = 0.0f;
+                        
                         // 处理ADC数据
                         sine_detect_result_t result;
                         if (my_sine_detect_process(g_adc1_data_8bit, &result) == 0) {
@@ -238,9 +249,6 @@ void StartADCProcessingTask(void *argument) {
                                        result.edges[i].is_rising);
                             }
                         }
-                        
-                        // 释放模块资源
-                        my_sine_detect_deinit();
                     }
                 }
             }

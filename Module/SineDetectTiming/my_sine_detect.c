@@ -3,15 +3,16 @@
 #include <math.h>
 
 // 模块配置
-static sine_detect_config_t g_config;
+sine_detect_config_t g_sine_config;
 
 // 模块结果
-static sine_detect_result_t g_result;
+sine_detect_result_t g_sine_result;
 
-// 内部缓冲区
-static float32_t* g_filtered_data = NULL;
-static peak_result_t* g_peak_buffer = NULL;
-static edge_result_t* g_edge_buffer = NULL;
+// 内部缓冲区（静态分配）
+#define MAX_DATA_LENGTH 4096  // 最大数据长度
+float32_t g_filtered_data[MAX_DATA_LENGTH];
+peak_result_t g_peak_buffer[MAX_DATA_LENGTH];
+edge_result_t g_edge_buffer[MAX_DATA_LENGTH];
 
 // 内部函数声明
 static void moving_average_filter(const float32_t* input, float32_t* output, uint32_t length, uint32_t filter_length);
@@ -20,50 +21,6 @@ static void parabolic_interpolation(const float32_t* data, peak_result_t* peak);
 static float32_t calculate_midpoint(const float32_t* data, uint32_t length);
 static uint32_t find_edges(const float32_t* data, edge_result_t* edges, uint32_t max_edges, uint32_t length, float32_t midpoint);
 static void linear_interpolation_zero_crossing(const float32_t* data, edge_result_t* edge, uint32_t index, float32_t midpoint);
-
-/**
- * @brief 初始化正弦波检测模块
- * @param config 模块配置参数
- * @return 0表示成功，其他值表示失败
- */
-int my_sine_detect_init(const sine_detect_config_t* config)
-{
-    // 检查输入参数
-    if (config == NULL) {
-        return -1;
-    }
-    
-    // 保存配置
-    g_config = *config;
-    
-    // 分配内存
-    g_filtered_data = (float32_t*)malloc(sizeof(float32_t) * g_config.data_length);
-    if (g_filtered_data == NULL) {
-        return -1;
-    }
-    
-    g_peak_buffer = (peak_result_t*)malloc(sizeof(peak_result_t) * g_config.data_length);
-    if (g_peak_buffer == NULL) {
-        free(g_filtered_data);
-        return -1;
-    }
-    
-    g_edge_buffer = (edge_result_t*)malloc(sizeof(edge_result_t) * g_config.data_length);
-    if (g_edge_buffer == NULL) {
-        free(g_filtered_data);
-        free(g_peak_buffer);
-        return -1;
-    }
-    
-    // 初始化结果结构体
-    g_result.peaks = g_peak_buffer;
-    g_result.edges = g_edge_buffer;
-    g_result.peak_count = 0;
-    g_result.edge_count = 0;
-    g_result.signal_midpoint = 0.0f;
-    
-    return 0;
-}
 
 /**
  * @brief 处理ADC数据，检测峰值和边沿
@@ -79,23 +36,23 @@ int my_sine_detect_process(const float32_t* adc_data, sine_detect_result_t* resu
     }
     
     // 数据预处理
-    if (g_config.enable_filter) {
-        moving_average_filter(adc_data, g_filtered_data, g_config.data_length, g_config.filter_length);
+    if (g_sine_config.enable_filter) {
+        moving_average_filter(adc_data, g_filtered_data, g_sine_config.data_length, g_sine_config.filter_length);
     } else {
-        memcpy(g_filtered_data, adc_data, sizeof(float32_t) * g_config.data_length);
+        memcpy(g_filtered_data, adc_data, sizeof(float32_t) * g_sine_config.data_length);
     }
     
     // 计算信号中点
-    g_result.signal_midpoint = calculate_midpoint(g_filtered_data, g_config.data_length);
+    g_sine_result.signal_midpoint = calculate_midpoint(g_filtered_data, g_sine_config.data_length);
     
     // 峰值检测
-    g_result.peak_count = find_peaks(g_filtered_data, g_result.peaks, g_config.data_length, g_config.data_length);
+    g_sine_result.peak_count = find_peaks(g_filtered_data, g_sine_result.peaks, g_sine_config.data_length, g_sine_config.data_length);
     
     // 边沿检测
-    g_result.edge_count = find_edges(g_filtered_data, g_result.edges, g_config.data_length, g_config.data_length, g_result.signal_midpoint);
+    g_sine_result.edge_count = find_edges(g_filtered_data, g_sine_result.edges, g_sine_config.data_length, g_sine_config.data_length, g_sine_result.signal_midpoint);
     
     // 返回结果
-    *result = g_result;
+    *result = g_sine_result;
     
     return 0;
 }
@@ -112,8 +69,8 @@ uint32_t my_sine_detect_get_peaks(peak_result_t* peaks, uint32_t max_count)
         return 0;
     }
     
-    uint32_t count = (g_result.peak_count < max_count) ? g_result.peak_count : max_count;
-    memcpy(peaks, g_result.peaks, sizeof(peak_result_t) * count);
+    uint32_t count = (g_sine_result.peak_count < max_count) ? g_sine_result.peak_count : max_count;
+    memcpy(peaks, g_sine_result.peaks, sizeof(peak_result_t) * count);
     return count;
 }
 
@@ -129,8 +86,8 @@ uint32_t my_sine_detect_get_edges(edge_result_t* edges, uint32_t max_count)
         return 0;
     }
     
-    uint32_t count = (g_result.edge_count < max_count) ? g_result.edge_count : max_count;
-    memcpy(edges, g_result.edges, sizeof(edge_result_t) * count);
+    uint32_t count = (g_sine_result.edge_count < max_count) ? g_sine_result.edge_count : max_count;
+    memcpy(edges, g_sine_result.edges, sizeof(edge_result_t) * count);
     return count;
 }
 
@@ -140,7 +97,7 @@ uint32_t my_sine_detect_get_edges(edge_result_t* edges, uint32_t max_count)
  */
 float32_t my_sine_detect_get_midpoint(void)
 {
-    return g_result.signal_midpoint;
+    return g_sine_result.signal_midpoint;
 }
 
 /**
@@ -148,26 +105,11 @@ float32_t my_sine_detect_get_midpoint(void)
  */
 void my_sine_detect_deinit(void)
 {
-    if (g_filtered_data != NULL) {
-        free(g_filtered_data);
-        g_filtered_data = NULL;
-    }
-    
-    if (g_peak_buffer != NULL) {
-        free(g_peak_buffer);
-        g_peak_buffer = NULL;
-    }
-    
-    if (g_edge_buffer != NULL) {
-        free(g_edge_buffer);
-        g_edge_buffer = NULL;
-    }
-    
-    g_result.peaks = NULL;
-    g_result.edges = NULL;
-    g_result.peak_count = 0;
-    g_result.edge_count = 0;
-    g_result.signal_midpoint = 0.0f;
+    g_sine_result.peaks = NULL;
+    g_sine_result.edges = NULL;
+    g_sine_result.peak_count = 0;
+    g_sine_result.edge_count = 0;
+    g_sine_result.signal_midpoint = 0.0f;
 }
 
 /**
@@ -260,7 +202,7 @@ static void parabolic_interpolation(const float32_t* data, peak_result_t* peak)
     uint32_t index = peak->index;
     
     // 检查边界条件
-    if (index == 0 || index >= g_config.data_length - 1) {
+    if (index == 0 || index >= g_sine_config.data_length - 1) {
         return;
     }
     
@@ -359,7 +301,7 @@ static uint32_t find_edges(const float32_t* data, edge_result_t* edges, uint32_t
 static void linear_interpolation_zero_crossing(const float32_t* data, edge_result_t* edge, uint32_t index, float32_t midpoint)
 {
     // 检查边界条件
-    if (index >= g_config.data_length - 1) {
+    if (index >= g_sine_config.data_length - 1) {
         return;
     }
     

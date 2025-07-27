@@ -37,12 +37,12 @@ typedef struct {
     float32_t signal_midpoint; // 信号中点
 } sine_detect_result_t;
 
-/**
- * @brief 初始化正弦波检测模块
- * @param config 模块配置参数
- * @return 0表示成功，其他值表示失败
- */
-int my_sine_detect_init(const sine_detect_config_t* config);
+// 全局配置和结果结构体声明
+extern sine_detect_config_t g_sine_config;
+extern sine_detect_result_t g_sine_result;
+extern peak_result_t g_peak_buffer[];
+extern edge_result_t g_edge_buffer[];
+extern float32_t g_filtered_data[];
 
 /**
  * @brief 处理ADC数据，检测峰值和边沿
@@ -73,10 +73,5 @@ uint32_t my_sine_detect_get_edges(edge_result_t* edges, uint32_t max_count);
  * @return 信号中点值
  */
 float32_t my_sine_detect_get_midpoint(void);
-
-/**
- * @brief 释放模块资源
- */
-void my_sine_detect_deinit(void);
 
 #endif // MY_SINE_DETECT_H
