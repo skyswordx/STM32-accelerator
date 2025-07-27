@@ -27,6 +27,54 @@ Project File Date:  07/27/2025
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\KEIL\ARM\ARMCC\Bin'
 Build target 'FinallAttackProject'
+compiling my_freq_config.c...
+..\Module\Frequency\my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+..\Module\Frequency\my_freq_config.c(520): warning:  #1-D: last line of file ends without a newline
+  }
+..\Module\Frequency\my_freq_config.c: 2 warnings, 0 errors
+compiling my_timer_config.c...
+../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_ZLCR_TASK_H
+../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
+  #endif /* MT_MY_ADC_TASK_H */
+..\Module\Timer\my_timer_config.c(202): warning:  #1-D: last line of file ends without a newline
+  }
+..\Module\Timer\my_timer_config.c: 4 warnings, 0 errors
+compiling my_zlcr_config.c...
+../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+..\Module\ZLCR\my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_ZLCR_TASK_H
+..\Module\ZLCR\my_zlcr_config.c(68): warning:  #223-D: function "generate_logarithmic_frequency_points" declared implicitly
+                  generate_logarithmic_frequency_points(decade_start, decade_stop, points_in_decade, &freq_array[total_points]);
+..\Module\ZLCR\my_zlcr_config.c(74): warning:  #223-D: function "generate_logarithmic_frequency_points" declared implicitly
+                      generate_logarithmic_frequency_points(decade_start, decade_stop, remaining_points, &freq_array[total_points]);
+..\Module\ZLCR\my_zlcr_config.c(100): warning:  #159-D: declaration is incompatible with previous "generate_logarithmic_frequency_points"  (declared at line 68)
+  void generate_logarithmic_frequency_points(uint32_t start_freq, uint32_t stop_freq, uint32_t points, uint32_t* freq_array) {
+..\Module\ZLCR\my_zlcr_config.c(289): warning:  #1-D: last line of file ends without a newline
+   */
+..\Module\ZLCR\my_zlcr_config.c: 6 warnings, 0 errors
+compiling my_button_task.c...
+..\Module\Button\my_button_task.h(16): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_BUTTON_TASK_H
+../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
+  #endif /* INA226_H_ */
+../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_ZLCR_TASK_H
+..\Module\Button\my_button_task.c(46): warning:  #1182-D: a declaration cannot have a label
+                  float32_t voltage = INA226_GetBusV();
+..\Module\Button\my_button_task.c(43): warning:  #546-D: transfer of control bypasses initialization of:
+            variable "voltage"  (declared at line 46)
+            variable "current"  (declared at line 47)
+            variable "power"  (declared at line 48)
+          switch (g_pressed_key) {
+          ^
+..\Module\Button\my_button_task.c: 6 warnings, 0 errors
 compiling my_adc_task.c...
 ../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
   #endif /* MT_MY_ADC_TASK_H */
@@ -43,10 +91,48 @@ compiling my_adc_task.c...
 ..\Module\ADC\my_adc_task.c(299): warning:  #1-D: last line of file ends without a newline
   }
 ..\Module\ADC\my_adc_task.c: 7 warnings, 0 errors
+compiling my_quinn_config.c...
+../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+..\Module\Quinn\my_quinn_config.h(76): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_QUINN_CONFIG_H
+..\Module\Quinn\my_quinn_config.c(159): warning:  #1-D: last line of file ends without a newline
+  }
+..\Module\Quinn\my_quinn_config.c: 3 warnings, 0 errors
+compiling my_time_detect.c...
+..\Module\TimeDetect\my_time_detect.h(35): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_TIME_DETECT_H
+../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+..\Module\TimeDetect\my_time_detect.c(149): warning:  #1-D: last line of file ends without a newline
+  }
+..\Module\TimeDetect\my_time_detect.c: 3 warnings, 0 errors
+compiling main.c...
+../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
+  #endif /* INA226_H_ */
+../Module/UART/my_uart_task.h(21): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_UART_TASK_H */
+../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
+  #endif /* MT_MY_ADC_TASK_H */
+../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_ZLCR_TASK_H
+../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
+  #endif /* MT_MY_ADC_TASK_H */
+../Module/DAC/my_dac_config.h(13): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_DAC_CONFIG_H */
+../Module/DAC/my_dac_task.h(15): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_DAC_TASK_H */
+../Module/Button/my_button_task.h(16): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_BUTTON_TASK_H
+../Core/Src/main.c(229): warning:  #167-D: argument of type "void (*)(const void *)" is incompatible with parameter of type "osThreadFunc_t"
+    UARTProcessingTaskHandle = osThreadNew(StartUARTProcessingTask, NULL, &UARTProcessingTask_attributes);
+../Core/Src/main.c: 10 warnings, 0 errors
 linking...
-Program Size: Code=57664 RO-data=40320 RW-data=276 ZI-data=194076  
+Program Size: Code=57660 RO-data=40320 RW-data=276 ZI-data=194076  
 FromELF: creating hex file...
-"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 7 Warning(s).
+"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 41 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -69,7 +155,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:08
+Build Time Elapsed:  00:00:36
 </pre>
 </body>
 </html>

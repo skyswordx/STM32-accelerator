@@ -341,7 +341,7 @@ void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
     
     result->fundamental_vpp = corrected_magnitude * 2.0f / fftLen; // 基波峰峰值（已补偿）
     result->fundamental_vrms = result->fundamental_vpp * sqrtf(2.0f) / 2.0f; // 基波有效值（已补偿）
-    result->fundamental_frequency = (uint16_t)final_frequency; // 使用插值后的频率
+    result->fundamental_frequency = (uint32_t)final_frequency; // 使用插值后的频率
     result->fundamental_phase_angle = fundamental_phase_angle;
 
     // printf("Raw magnitude: %.6f, Corrected magnitude: %.6f\n", fundamental_magnitude, corrected_magnitude);

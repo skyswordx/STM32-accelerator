@@ -48,7 +48,7 @@ typedef struct {
 typedef struct {
     float32_t fundamental_vpp;           // 基波峰峰值
     float32_t fundamental_vrms;          // 基波有效值
-    uint16_t fundamental_frequency;       // 基波频率
+    uint32_t fundamental_frequency;       // 基波频率
     float32_t fundamental_phase_angle;  // 基波相位（角度）
 } fundamental_result_t;
 

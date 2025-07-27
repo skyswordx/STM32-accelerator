@@ -198,8 +198,8 @@ void StartADCProcessingTask(void *argument) {
 
                 my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
 
-                printf("ADC1 %d Hz %.6f V\n", (g_ch1_fundamental.fundamental_frequency), g_ch1_fundamental.fundamental_vrms);
-                printf("ADC2 %d Hz %.6f V\n", (g_ch2_fundamental.fundamental_frequency), g_ch2_fundamental.fundamental_vrms);
+                printf("ADC1 %lu Hz %.6f V\n", (g_ch1_fundamental.fundamental_frequency), g_ch1_fundamental.fundamental_vrms);
+                printf("ADC2 %lu Hz %.6f V\n", (g_ch2_fundamental.fundamental_frequency), g_ch2_fundamental.fundamental_vrms);
                 printf("ADC phase angle: %.2f\n", (g_ch1_fundamental.fundamental_phase_angle - g_ch2_fundamental.fundamental_phase_angle ));
                 
                 my_zlcr_get_impedance(&g_ch1_fundamental, &g_ch2_fundamental, &g_current_freq_result); // 获取当前频率下的阻抗信息
