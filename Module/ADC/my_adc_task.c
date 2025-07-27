@@ -2,9 +2,9 @@
 #include "my_uart_task.h"
 #include "my_zlcr_config.h"  // 添加 ZLCR 配置头文件
 #include "my_freq_config.h"  // 添加频率配置头文件，用于窗函数类型定义
-#include "my_sine_detect.h"  // 添加正弦波检测模块头文件
+#include "my_time_detect.h"  // 添加时域检测模块头文件
 #include <stdint.h>          // 确保包含标准整数类型定义
-#include "my_sine_detect.h"  // 添加正弦波检测模块头文件
+#include "my_time_detect.h"  // 添加时域检测模块头文件
 
 extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
@@ -68,8 +68,8 @@ uint8_t g_sample_rate_update_flag = 0;
 uint8_t g_sweep_start_flag = 0; // 扫频开始标志
 uint8_t g_sweep_in_progress = 0; // 扫频进行中标志
 
-// 正弦波检测模块启用标志
-uint8_t g_sine_detect_enabled = 1; // 默认禁用
+// 时域检测模块启用标志
+uint8_t g_time_detect_enabled = 1; // 默认禁用
 
 // 扫频配置参数
 #define SWEEP_START_FREQ 1000    // 起始频率 1kHz
@@ -205,23 +205,23 @@ void StartADCProcessingTask(void *argument) {
                 
                 my_zlcr_get_capacitance_or_inductance(&g_current_freq_result, &g_current_impedance_result); // 获取电容或电感信息
                 
-// 如果启用了正弦波检测模块，则进行检测
-                if (g_sine_detect_enabled) {
-                    // 初始化正弦波检测配置
-                    sine_detect_config_params_t sine_config;
-                    sine_config.sample_rate = g_ADC_SAMPLE_RATE_Hz;
-                    sine_config.data_length = ADC_SAMPLE_SIZE;
-                    sine_config.enable_filter = 0; // 启用滤波
-                    sine_config.filter_length = 5; // 滤波器长度为5
+                // 如果启用了时域检测模块，则进行检测
+                if (g_time_detect_enabled) {
+                    // 初始化时域检测配置
+                    time_detect_config_params_t time_config;
+                    time_config.sample_rate = g_ADC_SAMPLE_RATE_Hz;
+                    time_config.data_length = ADC_SAMPLE_SIZE;
+                    time_config.enable_filter = 0; // 启用滤波
+                    time_config.filter_length = 5; // 滤波器长度为5
                     
-                    // 初始化正弦波检测模块
-                    my_sine_detect_init(&sine_config);
+                    // 初始化时域检测模块
+                    my_time_detect_init(&time_config);
                     
-                    // 启动正弦波检测
-                    sine_detect_result_t result;
-                    if (my_sine_detect_start(g_adc1_data_8bit, &result) == 0) {
+                    // 启动时域检测
+                    time_detect_result_t result;
+                    if (my_time_detect_start(g_adc1_data_8bit, &result) == 0) {
                         // 打印检测结果
-                        printf("Sine wave detection results:\n");
+                        printf("time wave detection results:\n");
                         printf("  Peak count: %lu\n", result.peak_count);
                         printf("  Edge count: %lu\n", result.edge_count);
                         printf("  Signal midpoint: %.6f\n", result.signal_midpoint);
