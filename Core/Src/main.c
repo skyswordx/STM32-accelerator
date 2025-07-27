@@ -31,9 +31,9 @@
 #include "my_uart_task.h"
 #include "my_adc_task.h"
 #include "my_dac_task.h"
-#include "my_dds_task.h"
 #include "my_zlcr_config.h"
-#include "my_ina22x_task.h"
+#include "my_button_task.h"
+
 
 /* USER CODE END Includes */
 
@@ -98,22 +98,12 @@ const osThreadAttr_t UARTProcessingTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
 };
 
-osThreadId_t DDSProcessingTaskHandle;
-const osThreadAttr_t DDSProcessingTask_attributes = {
-  .name = "DDSProcessingTask",
+osThreadId_t ButtonProcessingTaskHandle;
+const osThreadAttr_t ButtonProcessingTask_attributes = {
+  .name = "ButtonProcessingTask",
   .stack_size = 128 * 8,
   .priority = (osPriority_t) osPriorityNormal,
 };
-
-osThreadId_t INA22XProcessingTaskHandle;
-const osThreadAttr_t INA22XProcessingTask_attributes = {
-  .name = "INA22XProcessingTask",
-  .stack_size = 128 * 8,
-  .priority = (osPriority_t) osPriorityNormal,
-};
-
-
-
 
 /* USER CODE END PV */
 
@@ -237,9 +227,7 @@ int main(void)
   ADCProcessingTaskHandle = osThreadNew(StartADCProcessingTask, NULL, &ADCProcessingTask_attributes);
   DACProcessingTaskHandle = osThreadNew(StartDACProcessingTask, NULL, &DACProcessingTask_attributes);
   UARTProcessingTaskHandle = osThreadNew(StartUARTProcessingTask, NULL, &UARTProcessingTask_attributes);
-  DDSProcessingTaskHandle = osThreadNew(StartDDSProcessingTask, NULL, &DDSProcessingTask_attributes);
-  INA22XProcessingTaskHandle = osThreadNew(StartINA22XProcessingTask, NULL, &INA22XProcessingTask_attributes);
-
+  ButtonProcessingTaskHandle = osThreadNew(StartButtonProcessingTask, NULL, &ButtonProcessingTask_attributes);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */

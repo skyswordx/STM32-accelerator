@@ -1,6 +1,6 @@
 finallattackproject\my_ina22x_task.o: ..\Module\INA22x\my_ina22x_task.c
 finallattackproject\my_ina22x_task.o: ..\Module\INA22x\my_ina22x_task.h
-finallattackproject\my_ina22x_task.o: ../Core/Inc/main.h
+finallattackproject\my_ina22x_task.o: ../Drivers/INA226/INA226.h
 finallattackproject\my_ina22x_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h
 finallattackproject\my_ina22x_task.o: ../Core/Inc/stm32h7xx_hal_conf.h
 finallattackproject\my_ina22x_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc.h
@@ -44,4 +44,17 @@ finallattackproject\my_ina22x_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h
 finallattackproject\my_ina22x_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim_ex.h
 finallattackproject\my_ina22x_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h
 finallattackproject\my_ina22x_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h
-finallattackproject\my_ina22x_task.o: ../Drivers/INA226/INA226.h
+finallattackproject\my_ina22x_task.o: ../Core/Inc/main.h
+finallattackproject\my_ina22x_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h
+finallattackproject\my_ina22x_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+finallattackproject\my_ina22x_task.o: ../Core/Inc/FreeRTOSConfig.h
+finallattackproject\my_ina22x_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+finallattackproject\my_ina22x_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+finallattackproject\my_ina22x_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+finallattackproject\my_ina22x_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
+finallattackproject\my_ina22x_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+finallattackproject\my_ina22x_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+finallattackproject\my_ina22x_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
+finallattackproject\my_ina22x_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
+finallattackproject\my_ina22x_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdio.h
+finallattackproject\my_ina22x_task.o: ../Module/Button/my_button_task.h

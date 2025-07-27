@@ -1634,6 +1634,11 @@
               <FileType>1</FileType>
               <FilePath>..\Module\Button\my_button_config.c</FilePath>
             </File>
+            <File>
+              <FileName>my_button_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Module\Button\my_button_task.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

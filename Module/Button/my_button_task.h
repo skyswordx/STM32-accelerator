@@ -11,4 +11,6 @@
 // 按钮任务函数
 void StartButtonProcessingTask(void *argument);
 
+extern uint8_t pressed_key; // 按键状态变量
+
 #endif // MY_BUTTON_TASK_H
