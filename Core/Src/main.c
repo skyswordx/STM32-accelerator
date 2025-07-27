@@ -33,6 +33,7 @@
 #include "my_dac_task.h"
 #include "my_dds_task.h"
 #include "my_zlcr_config.h"
+#include "my_ina22x_task.h"
 
 /* USER CODE END Includes */
 
@@ -103,6 +104,14 @@ const osThreadAttr_t DDSProcessingTask_attributes = {
   .stack_size = 128 * 8,
   .priority = (osPriority_t) osPriorityNormal,
 };
+
+osThreadId_t INA22XProcessingTaskHandle;
+const osThreadAttr_t INA22XProcessingTask_attributes = {
+  .name = "INA22XProcessingTask",
+  .stack_size = 128 * 8,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+
 
 
 
@@ -229,7 +238,7 @@ int main(void)
   DACProcessingTaskHandle = osThreadNew(StartDACProcessingTask, NULL, &DACProcessingTask_attributes);
   UARTProcessingTaskHandle = osThreadNew(StartUARTProcessingTask, NULL, &UARTProcessingTask_attributes);
   DDSProcessingTaskHandle = osThreadNew(StartDDSProcessingTask, NULL, &DDSProcessingTask_attributes);
-
+  INA22XProcessingTaskHandle = osThreadNew(StartINA22XProcessingTask, NULL, &INA22XProcessingTask_attributes);
 
   /* USER CODE END RTOS_THREADS */
 

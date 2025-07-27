@@ -914,7 +914,7 @@
 
   <Group>
     <GroupName>Module/ADC</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -1185,7 +1185,7 @@
   </Group>
 
   <Group>
-    <GroupName>Module/SineDetectTiming</GroupName>
+    <GroupName>Module/TimeDetect</GroupName>
     <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
@@ -1197,8 +1197,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Module\SineDetectTiming\my_sine_detect.c</PathWithFileName>
-      <FilenameWithoutPath>my_sine_detect.c</FilenameWithoutPath>
+      <PathWithFileName>..\Module\TimeDetect\my_time_detect.c</PathWithFileName>
+      <FilenameWithoutPath>my_time_detect.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -1206,7 +1206,7 @@
 
   <Group>
     <GroupName>Module/Button</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -1219,6 +1219,26 @@
       <bDave2>0</bDave2>
       <PathWithFileName>..\Module\Button\my_button_config.c</PathWithFileName>
       <FilenameWithoutPath>my_button_config.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+  </Group>
+
+  <Group>
+    <GroupName>Module/INA2XX</GroupName>
+    <tvExp>1</tvExp>
+    <tvExpOptDlg>0</tvExpOptDlg>
+    <cbSel>0</cbSel>
+    <RteFlg>0</RteFlg>
+    <File>
+      <GroupNumber>23</GroupNumber>
+      <FileNumber>63</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\Module\INA22x\my_ina22x_task.c</PathWithFileName>
+      <FilenameWithoutPath>my_ina22x_task.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

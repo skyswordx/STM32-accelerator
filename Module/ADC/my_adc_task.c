@@ -5,6 +5,8 @@
 #include "my_time_detect.h"  // 添加时域检测模块头文件
 #include <stdint.h>          // 确保包含标准整数类型定义
 #include "my_time_detect.h"  // 添加时域检测模块头文件
+#include "AD9833.h"         // 添加 AD9833 头文件
+#include "AD9954.h"         // 添加 AD9954 头文件
 
 extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
@@ -211,34 +213,39 @@ void StartADCProcessingTask(void *argument) {
                     time_detect_config_params_t time_config;
                     time_config.sample_rate = g_ADC_SAMPLE_RATE_Hz;
                     time_config.data_length = ADC_SAMPLE_SIZE;
-                    time_config.enable_filter = 0; // 启用滤波
-                    time_config.filter_length = 5; // 滤波器长度为5
+                    time_config.enable_dc_filter = 1; // 启用直流分量滤除
                     
                     // 初始化时域检测模块
                     my_time_detect_init(&time_config);
                     
-                    // 启动时域检测
+                    // 启动时域检测（内部使用频域处理模块获取基波频率等参数）
                     time_detect_result_t result;
                     if (my_time_detect_start(g_adc1_data_8bit, &result) == 0) {
-                        // 打印检测结果
-                        printf("time wave detection results:\n");
-                        printf("  Peak count: %lu\n", result.peak_count);
-                        printf("  Edge count: %lu\n", result.edge_count);
-                        printf("  Signal midpoint: %.6f\n", result.signal_midpoint);
+                        // 输出检测结果
+                        printf("Time Domain Detection Results:\n");
+                        printf("  DC Component: %.6f V\n", result.dc_component);
+                        printf("  RMS Value: %.6f V\n", result.rms_value);
+                        printf("  Fundamental Frequency: %lu Hz\n", result.fundamental_freq);
+                        printf("  Period Points: %lu\n", result.period_points);
+                        printf("  Waveform Ratio: %.6f\n", result.waveform_ratio);
                         
-                        // 打印峰值信息
-                        for (uint32_t i = 0; i < result.peak_count && i < 10; i++) { // 限制打印前10个峰值
-                            printf("  Peak %lu: amplitude=%.6f, position=%.6f, index=%lu, is_positive=%d\n",
-                                   i, result.peaks[i].amplitude, result.peaks[i].position,
-                                   result.peaks[i].index, result.peaks[i].is_positive);
+                        // 根据波形类型输出
+                        switch (result.waveform_type) {
+                            case WAVEFORM_SINE:
+                                printf("  Waveform Type: Sine Wave\n");
+                                break;
+                            case WAVEFORM_SQUARE:
+                                printf("  Waveform Type: Square Wave\n");
+                                break;
+                            case WAVEFORM_TRIANGLE:
+                                printf("  Waveform Type: Triangle Wave\n");
+                                break;
+                            default:
+                                printf("  Waveform Type: Unknown\n");
+                                break;
                         }
-                        
-                        // 打印边沿信息
-                        for (uint32_t i = 0; i < result.edge_count && i < 10; i++) { // 限制打印前10个边沿
-                            printf("  Edge %lu: position=%.6f, index=%lu, is_rising=%d\n",
-                                   i, result.edges[i].position, result.edges[i].index,
-                                   result.edges[i].is_rising);
-                        }
+                    } else {
+                        printf("Time domain detection failed!\n");
                     }
                 }
                 

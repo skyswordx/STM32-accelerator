@@ -6,7 +6,7 @@
   <Header>### uVision Project, (C) Keil Software</Header>
 
   <PrjGuiSettings>
-    <LastAddFilePath>D:\Musii-SnapShot\GithubRepo\STM32-accelerator\Module\Button</LastAddFilePath>
+    <LastAddFilePath>D:\Musii-SnapShot\GithubRepo\STM32-accelerator\Module\INA22x</LastAddFilePath>
   </PrjGuiSettings>
 
   <ViewPool>
@@ -100,8 +100,8 @@
       <flags>2</flags>
       <showCmd>3</showCmd>
       <MinPosition>
-        <xPos>-32000</xPos>
-        <yPos>-32000</yPos>
+        <xPos>-1</xPos>
+        <yPos>-1</yPos>
       </MinPosition>
       <MaxPosition>
         <xPos>-1</xPos>
@@ -3757,9 +3757,9 @@
       </Doc>
       <Doc>
         <Name>..\Module\UART\my_uart_task.c</Name>
-        <ColumnNumber>12</ColumnNumber>
+        <ColumnNumber>6</ColumnNumber>
         <TopLine>16</TopLine>
-        <CurrentLine>35</CurrentLine>
+        <CurrentLine>37</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>
         <PaneID>0</PaneID>

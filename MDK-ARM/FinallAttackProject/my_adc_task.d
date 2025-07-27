@@ -64,5 +64,6 @@ finallattackproject\my_adc_task.o: ../Module/ADC/my_adc_task.h
 finallattackproject\my_adc_task.o: ../Module/Frequency/my_freq_config.h
 finallattackproject\my_adc_task.o: ../Module/ZLCR/my_zlcr_config.h
 finallattackproject\my_adc_task.o: ../Module/UART/my_uart_task.h
-finallattackproject\my_adc_task.o: ../Module/SineDetectTiming/my_sine_detect.h
-finallattackproject\my_adc_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdbool.h
+finallattackproject\my_adc_task.o: ..\Module\TimeDetect\my_time_detect.h
+finallattackproject\my_adc_task.o: ../Drivers/AD9833/AD9833.h
+finallattackproject\my_adc_task.o: ../Drivers/AD9954/AD9954.h

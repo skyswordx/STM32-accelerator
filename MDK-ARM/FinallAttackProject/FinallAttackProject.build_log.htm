@@ -27,11 +27,22 @@ Project File Date:  07/27/2025
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\KEIL\ARM\ARMCC\Bin'
 Build target 'FinallAttackProject'
-compiling my_button_config.c...
+compiling my_ina22x_task.c...
+..\Module\INA22x\my_ina22x_task.h(8): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_INA22X_TASK_H
+../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
+  #endif /* INA226_H_ */
+..\Module\INA22x\my_ina22x_task.c(15): warning:  #223-D: function "printf" declared implicitly
+          printf("Current: %.2f A, Voltage: %.2f V, Power: %.2f W\n", current, voltage, power);
+..\Module\INA22x\my_ina22x_task.c(18): warning:  #223-D: function "osDelay" declared implicitly
+          osDelay(1000); // 每秒读取一�?
+..\Module\INA22x\my_ina22x_task.c(20): warning:  #1-D: last line of file ends without a newline
+  }
+..\Module\INA22x\my_ina22x_task.c: 5 warnings, 0 errors
 linking...
-Program Size: Code=54128 RO-data=40240 RW-data=260 ZI-data=324644  
+Program Size: Code=56204 RO-data=40204 RW-data=236 ZI-data=194052  
 FromELF: creating hex file...
-"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 0 Warning(s).
+"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 5 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -54,7 +65,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:07
+Build Time Elapsed:  00:00:09
 </pre>
 </body>
 </html>
