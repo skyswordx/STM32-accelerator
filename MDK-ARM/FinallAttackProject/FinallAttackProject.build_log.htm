@@ -5,11 +5,11 @@
 <h2>Tool Versions:</h2>
 IDE-Version: ��Vision V5.41.0.0
 Copyright (C) 2024 ARM Ltd and ARM Germany GmbH. All rights reserved.
-License Information: 1 1, 1, LIC=LSNXV-P0F9R-12HLE-5QPP1-TB5K5-0RETV
+License Information: 1 1140527828@qq.com, 1, LIC=CZLZX-HJXE5-NNBAF-65NPN-WGZ9K-JT7B9
  
 Tool Versions:
 Toolchain:       MDK-ARM Plus  Version: 5.41.0.0
-Toolchain Path:  D:\Keil_v5\ARM\ARMCOMPLIER506\Bin
+Toolchain Path:  D:\KEIL\ARM\ARMCC\Bin
 C Compiler:      Armcc.exe V5.06 update 7 (build 960)
 Assembler:       Armasm.exe V5.06 update 7 (build 960)
 Linker/Locator:  ArmLink.exe V5.06 update 7 (build 960)
@@ -25,204 +25,9 @@ D:\Musii-SnapShot\GithubRepo\STM32-accelerator\MDK-ARM\FinallAttackProject.uvpro
 Project File Date:  07/27/2025
 
 <h2>Output:</h2>
-*** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\Keil_v5\ARM\ARMCOMPLIER506\Bin'
+*** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\KEIL\ARM\ARMCC\Bin'
 Build target 'FinallAttackProject'
-assembling startup_stm32h750xx.s...
-compiling stm32h7xx_hal_flash.c...
-compiling freertos.c...
-compiling stm32h7xx_hal_adc_ex.c...
-compiling stm32h7xx_it.c...
-compiling stm32h7xx_hal_flash_ex.c...
-compiling stm32h7xx_hal_timebase_tim.c...
-compiling stm32h7xx_hal_msp.c...
-compiling stm32h7xx_hal_adc.c...
-compiling stm32h7xx_hal_rcc.c...
-compiling main.c...
-../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
-  #endif /* INA226_H_ */
-../Module/UART/my_uart_task.h(18): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_UART_TASK_H */
-../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
-  #endif /* MT_MY_ADC_TASK_H */
-../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-../Module/ZLCR/my_zlcr_config.h(70): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_ZLCR_TASK_H
-../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
-  #endif /* MT_MY_ADC_TASK_H */
-../Module/DAC/my_dac_config.h(13): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_DAC_CONFIG_H */
-../Module/DAC/my_dac_task.h(15): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_DAC_TASK_H */
-../Module/DDS/my_dds_task.h(17): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_DDS_TASK_H */
-../Core/Src/main.c(230): warning:  #167-D: argument of type "void (*)(const void *)" is incompatible with parameter of type "osThreadFunc_t"
-    UARTProcessingTaskHandle = osThreadNew(StartUARTProcessingTask, NULL, &UARTProcessingTask_attributes);
-../Core/Src/main.c(231): warning:  #167-D: argument of type "void (*)(const void *)" is incompatible with parameter of type "osThreadFunc_t"
-    DDSProcessingTaskHandle = osThreadNew(StartDDSProcessingTask, NULL, &DDSProcessingTask_attributes);
-../Core/Src/main.c: 11 warnings, 0 errors
-compiling stm32h7xx_hal_rcc_ex.c...
-compiling stm32h7xx_hal_i2c_ex.c...
-compiling stm32h7xx_hal_gpio.c...
-compiling stm32h7xx_hal_hsem.c...
-compiling stm32h7xx_hal_dma_ex.c...
-compiling stm32h7xx_hal_cortex.c...
-compiling stm32h7xx_hal_mdma.c...
-compiling stm32h7xx_hal.c...
-compiling stm32h7xx_hal_pwr.c...
-compiling stm32h7xx_hal_i2c.c...
-compiling stm32h7xx_hal_dma.c...
-compiling stm32h7xx_hal_pwr_ex.c...
-compiling croutine.c...
-compiling event_groups.c...
-compiling list.c...
-compiling queue.c...
-compiling stream_buffer.c...
-compiling tasks.c...
-compiling timers.c...
-compiling stm32h7xx_hal_dac.c...
-compiling stm32h7xx_hal_exti.c...
-compiling heap_4.c...
-compiling stm32h7xx_hal_dac_ex.c...
-compiling port.c...
-compiling system_stm32h7xx.c...
-compiling stm32h7xx_hal_spi_ex.c...
-compiling stm32h7xx_hal_uart_ex.c...
-compiling stm32h7xx_hal_spi.c...
-compiling stm32h7xx_hal_tim_ex.c...
-compiling cmsis_os2.c...
-compiling stm32h7xx_hal_uart.c...
-compiling my_pid_config.c...
-..\Module\KalmanFilter\my_kalman_filter.h(23): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_KALMAN_FILTER_H */
-..\Module\PID\my_pid_config.c: 1 warning, 0 errors
-compiling stm32h7xx_hal_tim.c...
-compiling INA226.c...
-..\Drivers\INA226\INA226.h(15): warning:  #1-D: last line of file ends without a newline
-  #endif /* INA226_H_ */
-..\Drivers\INA226\INA226.c(278): warning:  #1-D: last line of file ends without a newline
-  // }
-..\Drivers\INA226\INA226.c: 2 warnings, 0 errors
-compiling my_dila_config.c...
-..\Module\DILA\my_dila_config.c(187): warning:  #1-D: last line of file ends without a newline
-  }
-..\Module\DILA\my_dila_config.c: 1 warning, 0 errors
-compiling my_czt_config.c...
-..\Module\CZT\my_czt_config.h(78): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_CZT_CONFIG_H
-..\Module\CZT\my_czt_config.c(206): warning:  #1-D: last line of file ends without a newline
-  }
-..\Module\CZT\my_czt_config.c(7): warning:  #177-D: variable "signal_in"  was declared but never referenced
-  static float32_t signal_in[CZT_N];
-..\Module\CZT\my_czt_config.c: 3 warnings, 0 errors
-compiling AD9833.c...
-compiling my_kalman_filter.c...
-..\Module\KalmanFilter\my_kalman_filter.h(23): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_KALMAN_FILTER_H */
-..\Module\KalmanFilter\my_kalman_filter.c(47): warning:  #1-D: last line of file ends without a newline
-  }
-..\Module\KalmanFilter\my_kalman_filter.c: 2 warnings, 0 errors
-compiling my_uart_task.c...
-..\Module\UART\my_uart_task.h(18): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_UART_TASK_H */
-..\Module\UART\my_uart_task.c(23): warning:  #223-D: function "strtoul" declared implicitly
-              g_desired_ADC_sample_rate_Hz = (uint32_t)strtoul(rx_buffer, NULL, 10);
-..\Module\UART\my_uart_task.c: 2 warnings, 0 errors
-compiling my_timer_config.c...
-../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-../Module/ZLCR/my_zlcr_config.h(70): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_ZLCR_TASK_H
-../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
-  #endif /* MT_MY_ADC_TASK_H */
-..\Module\Timer\my_timer_config.c(202): warning:  #1-D: last line of file ends without a newline
-  }
-..\Module\Timer\my_timer_config.c: 4 warnings, 0 errors
-compiling my_adc_task.c...
-../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
-  #endif /* MT_MY_ADC_TASK_H */
-../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-../Module/ZLCR/my_zlcr_config.h(70): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_ZLCR_TASK_H
-..\Module\ADC\my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
-  #endif /* MT_MY_ADC_TASK_H */
-../Module/UART/my_uart_task.h(18): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_UART_TASK_H */
-..\Module\SineDetectTiming\my_sine_detect.h(82): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_SINE_DETECT_H
-..\Module\ADC\my_adc_task.c(293): warning:  #1-D: last line of file ends without a newline
-  }
-..\Module\ADC\my_adc_task.c: 7 warnings, 0 errors
-compiling my_sine_detect.c...
-..\Module\SineDetectTiming\my_sine_detect.h(82): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_SINE_DETECT_H
-..\Module\SineDetectTiming\my_sine_detect.c(40): warning:  #223-D: function "malloc" declared implicitly
-      g_filtered_data = (float32_t*)malloc(sizeof(float32_t) * g_config.data_length);
-..\Module\SineDetectTiming\my_sine_detect.c(47): warning:  #223-D: function "free" declared implicitly
-          free(g_filtered_data);
-..\Module\SineDetectTiming\my_sine_detect.c(53): warning:  #223-D: function "free" declared implicitly
-          free(g_filtered_data);
-..\Module\SineDetectTiming\my_sine_detect.c(152): warning:  #223-D: function "free" declared implicitly
-          free(g_filtered_data);
-..\Module\SineDetectTiming\my_sine_detect.c(157): warning:  #223-D: function "free" declared implicitly
-          free(g_peak_buffer);
-..\Module\SineDetectTiming\my_sine_detect.c(162): warning:  #223-D: function "free" declared implicitly
-          free(g_edge_buffer);
-..\Module\SineDetectTiming\my_sine_detect.c: 7 warnings, 0 errors
-compiling my_zlcr_config.c...
-../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-..\Module\ZLCR\my_zlcr_config.h(70): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_ZLCR_TASK_H
-..\Module\ZLCR\my_zlcr_config.c(68): warning:  #223-D: function "generate_logarithmic_frequency_points" declared implicitly
-                  generate_logarithmic_frequency_points(decade_start, decade_stop, points_in_decade, &freq_array[total_points]);
-..\Module\ZLCR\my_zlcr_config.c(74): warning:  #223-D: function "generate_logarithmic_frequency_points" declared implicitly
-                      generate_logarithmic_frequency_points(decade_start, decade_stop, remaining_points, &freq_array[total_points]);
-..\Module\ZLCR\my_zlcr_config.c(100): warning:  #159-D: declaration is incompatible with previous "generate_logarithmic_frequency_points"  (declared at line 68)
-  void generate_logarithmic_frequency_points(uint32_t start_freq, uint32_t stop_freq, uint32_t points, uint32_t* freq_array) {
-..\Module\ZLCR\my_zlcr_config.c(280): warning:  #1-D: last line of file ends without a newline
-   */
-..\Module\ZLCR\my_zlcr_config.c: 6 warnings, 0 errors
-compiling AD9954.c...
-compiling my_dac_config.c...
-..\Module\DAC\my_dac_config.h(13): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_DAC_CONFIG_H */
-..\Module\DAC\my_dac_config.c(41): warning:  #1-D: last line of file ends without a newline
-  };
-..\Module\DAC\my_dac_config.c: 2 warnings, 0 errors
-compiling my_dds_task.c...
-..\Module\DDS\my_dds_task.h(17): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_DDS_TASK_H */
-..\Module\DDS\my_dds_task.c(19): warning:  #69-D: integer conversion resulted in truncation
-      AD9833_AmpSet(0x1FFF); // 设置AD9833幅度为最大�?
-..\Module\DDS\my_dds_task.c(34): warning:  #1-D: last line of file ends without a newline
-  }
-..\Module\DDS\my_dds_task.c: 3 warnings, 0 errors
-compiling my_freq_config.c...
-..\Module\Frequency\my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-..\Module\Frequency\my_freq_config.c(520): warning:  #1-D: last line of file ends without a newline
-  }
-..\Module\Frequency\my_freq_config.c: 2 warnings, 0 errors
-compiling my_dac_task.c...
-..\Module\DAC\my_dac_config.h(13): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_DAC_CONFIG_H */
-..\Module\DAC\my_dac_task.h(15): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_DAC_TASK_H */
-..\Module\DAC\my_dac_task.c: 2 warnings, 0 errors
-compiling my_quinn_config.c...
-../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-..\Module\Quinn\my_quinn_config.h(76): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_QUINN_CONFIG_H
-..\Module\Quinn\my_quinn_config.c(159): warning:  #1-D: last line of file ends without a newline
-  }
-..\Module\Quinn\my_quinn_config.c: 3 warnings, 0 errors
-linking...
-Program Size: Code=54060 RO-data=40216 RW-data=248 ZI-data=194096  
-FromELF: creating hex file...
-"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 58 Warning(s).
+"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 0 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -233,20 +38,19 @@ Package Vendor: ARM
    * Component: CORE Version: 6.1.0
 
 Package Vendor: Keil
-                https://www.keil.com/pack/Keil.STM32H7xx_DFP.3.1.1.pack
-                Keil::STM32H7xx_DFP@3.1.1
-                STMicroelectronics STM32H7 Series Device Support and Examples
+                https://www.keil.com/pack/Keil.STM32H7xx_DFP.4.1.0.pack
+                Keil::STM32H7xx_DFP@4.1.0
+                STMicroelectronics STM32H7 Series Device Support
 
 <h2>Collection of Component include folders:</h2>
   ./RTE/_FinallAttackProject
-  D:/Keil_arm_pack/ARM/CMSIS/6.1.0/CMSIS/Core/Include
-  D:/Keil_arm_pack/Keil/STM32H7xx_DFP/3.1.1/Drivers/CMSIS/Device/ST/STM32H7xx/Include
+  D:/KEIL-PACK/ARM/CMSIS/6.1.0/CMSIS/Core/Include
 
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:42
+Build Time Elapsed:  00:00:03
 </pre>
 </body>
 </html>

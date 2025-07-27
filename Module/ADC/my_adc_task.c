@@ -68,7 +68,7 @@ uint8_t g_sweep_start_flag = 0; // 扫频开始标志
 uint8_t g_sweep_in_progress = 0; // 扫频进行中标志
 
 // 正弦波检测模块启用标志
-uint8_t g_sine_detect_enabled = 0; // 默认禁用
+uint8_t g_sine_detect_enabled = 1; // 默认禁用
 
 // 扫频配置参数
 #define SWEEP_START_FREQ 1000    // 起始频率 1kHz

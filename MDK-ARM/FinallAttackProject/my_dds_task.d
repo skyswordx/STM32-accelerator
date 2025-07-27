@@ -1,6 +1,6 @@
 finallattackproject\my_dds_task.o: ..\Module\DDS\my_dds_task.c
 finallattackproject\my_dds_task.o: ..\Module\DDS\my_dds_task.h
-finallattackproject\my_dds_task.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stdint.h
+finallattackproject\my_dds_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdint.h
 finallattackproject\my_dds_task.o: ../Core/Inc/main.h
 finallattackproject\my_dds_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h
 finallattackproject\my_dds_task.o: ../Core/Inc/stm32h7xx_hal_conf.h
@@ -16,8 +16,8 @@ finallattackproject\my_dds_task.o: ../Drivers/CMSIS/Include/mpu_armv7.h
 finallattackproject\my_dds_task.o: ../Drivers/CMSIS/Device/ST/STM32H7xx/Include/system_stm32h7xx.h
 finallattackproject\my_dds_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h
 finallattackproject\my_dds_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
-finallattackproject\my_dds_task.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stddef.h
-finallattackproject\my_dds_task.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\math.h
+finallattackproject\my_dds_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stddef.h
+finallattackproject\my_dds_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\math.h
 finallattackproject\my_dds_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc_ex.h
 finallattackproject\my_dds_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_gpio.h
 finallattackproject\my_dds_task.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_gpio_ex.h
@@ -55,9 +55,9 @@ finallattackproject\my_dds_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/in
 finallattackproject\my_dds_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
 finallattackproject\my_dds_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
 finallattackproject\my_dds_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
-finallattackproject\my_dds_task.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stdio.h
+finallattackproject\my_dds_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdio.h
 finallattackproject\my_dds_task.o: ../Drivers/CMSIS/DSP/Include/arm_math.h
-finallattackproject\my_dds_task.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\string.h
-finallattackproject\my_dds_task.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\float.h
+finallattackproject\my_dds_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\string.h
+finallattackproject\my_dds_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\float.h
 finallattackproject\my_dds_task.o: ../Drivers/AD9954/AD9954.h
 finallattackproject\my_dds_task.o: ..\Drivers\AD9833\AD9833.h
