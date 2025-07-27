@@ -127,7 +127,6 @@ void ad9833_set_frequency(double frequency) {
 
 // AD9954 DDS设备初始化函数
 void ad9954_init(void) {
-    AD9954_GPIO_Init();
     AD9954_Init();
 }
 
@@ -138,7 +137,7 @@ void ad9954_set_frequency(double frequency) {
 
 // 初始化DDS设备
 void my_zlcr_dds_init(uint8_t dds_type) {
-    // 默认使用AD9833，如果要使用AD9954，需要修改这里
+    
     if (dds_type == DDS_TYPE_AD9833) {
         g_dds_device.init = ad9833_init;
         g_dds_device.set_frequency = ad9833_set_frequency;
@@ -152,7 +151,9 @@ void my_zlcr_dds_init(uint8_t dds_type) {
     
     // 初始化DDS设备
     if (g_dds_device.init != NULL) {
-        g_dds_device.init();
+        // g_dds_device.init();
+        AD9833_Init_GPIO();
+        AD9954_Init();
     }
 }
 

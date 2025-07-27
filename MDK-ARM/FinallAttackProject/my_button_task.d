@@ -60,3 +60,8 @@ finallattackproject\my_button_task.o: ..\Module\Button\my_button_config.h
 finallattackproject\my_button_task.o: ../Drivers/AD9954/AD9954.h
 finallattackproject\my_button_task.o: ../Drivers/AD9833/AD9833.h
 finallattackproject\my_button_task.o: ../Drivers/INA226/INA226.h
+finallattackproject\my_button_task.o: ../Module/ZLCR/my_zlcr_config.h
+finallattackproject\my_button_task.o: ../Drivers/CMSIS/DSP/Include/arm_math.h
+finallattackproject\my_button_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\string.h
+finallattackproject\my_button_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\float.h
+finallattackproject\my_button_task.o: ../Module/Frequency/my_freq_config.h

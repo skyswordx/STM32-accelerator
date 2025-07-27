@@ -39,6 +39,10 @@ dds
 Time domain detection failed! 我觉得就是 if (my_time_detect_start(g_adc1_data_8bit, &result) == 0)  失败了
 
 
+我想要在工程中，使用uint32_t g_dds_frequency = 1000; // 默认DDS频率为1kHz
+uint32_t g_desired_dds_frequency = 1000; // 用户期望设置的DDS频率（相关变量在 Module/Button/my_button_task.c 中定义），然后在 my_uart_task.c 中实现一个解析功能，能够通过串口接收用户输入的字符串，解析出是设置ADC采样率还是DDS频率，并且设置对应的变量。
+
+这两个变量来通过串口接收用户想要设置的DDS频率，并且进行配置，类似于我已经有的g_desired_ADC_sample_rate_Hz，但是在系统中，我已经有了ADC设置频率的功能，为了不把用户频率设定的是ADC还是DDS搞混淆，我想要到可以让用户发送A100000来表示设置ADC采样率为100000Hz，发送D100000来表示设置DDS频率为100000Hz，这样就可以通过串口接收用户的输入，解析出是设置ADC还是DDS的频率，并且设置对应的变量。请你在 my_uart_task.c 中实现这个解析功能。
 
 
 先用 FFT 算一个输入信号的频率

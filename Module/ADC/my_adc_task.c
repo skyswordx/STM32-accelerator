@@ -71,7 +71,7 @@ uint8_t g_sweep_start_flag = 0; // 扫频开始标志
 uint8_t g_sweep_in_progress = 0; // 扫频进行中标志
 
 // 时域检测模块启用标志
-uint8_t g_time_detect_enabled = 1; // 默认禁用
+uint8_t g_time_detect_enabled = 0; // 默认禁用
 
 // 扫频配置参数
 #define SWEEP_START_FREQ 1000    // 起始频率 1kHz
@@ -114,7 +114,7 @@ void StartADCProcessingTask(void *argument) {
     HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_FACTOR_LINEARITY_REGOFFSET, ADC_SINGLE_ENDED);
 
     /* 初始化DDS设备 */
-    my_zlcr_dds_init(DDS_TYPE_AD9833);
+    // 在 Button Task 中调用 my_zlcr_dds_init 函数初始化 DDS 设备
 
     /* 启动定时器3作为时间戳基准和ADC触发源 */
     HAL_ADC_Start(&hadc2);
