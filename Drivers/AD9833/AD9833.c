@@ -14,17 +14,17 @@
 //***************************	
 
 	/*端口定义 */ 
-	#define PORT_FSYNC	GPIOE
-	#define PIN_FSYNC	GPIO_PIN_0
+	#define PORT_FSYNC	GPIOA
+	#define PIN_FSYNC	GPIO_PIN_12
 
-	#define PORT_SCK	GPIOE
-	#define PIN_SCK		GPIO_PIN_6
+	#define PORT_SCK	GPIOA
+	#define PIN_SCK		GPIO_PIN_11
 
-	#define PORT_DAT	GPIOE
-	#define PIN_DAT		GPIO_PIN_4
+	#define PORT_DAT	GPIOA
+	#define PIN_DAT		GPIO_PIN_10
 
-	#define PORT_CS		GPIOE
-	#define PIN_CS		GPIO_PIN_2  //数字电位器片选
+	#define PORT_CS		GPIOA
+	#define PIN_CS		GPIO_PIN_9  //数字电位器片选
 
 //****************************************************************
 

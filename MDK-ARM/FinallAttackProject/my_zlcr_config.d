@@ -61,5 +61,5 @@ finallattackproject\my_zlcr_config.o: D:\KEIL\ARM\ARMCC\Bin\..\include\string.h
 finallattackproject\my_zlcr_config.o: D:\KEIL\ARM\ARMCC\Bin\..\include\float.h
 finallattackproject\my_zlcr_config.o: ../Module/Frequency/my_freq_config.h
 finallattackproject\my_zlcr_config.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdlib.h
-finallattackproject\my_zlcr_config.o: ..\Drivers\AD9833\AD9833.h
+finallattackproject\my_zlcr_config.o: ../Drivers/AD9833/AD9833.h
 finallattackproject\my_zlcr_config.o: ../Drivers/AD9954/AD9954.h

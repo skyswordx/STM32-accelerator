@@ -28,6 +28,14 @@ typedef struct {
     uint32_t filter_length;  // 滤波器长度
 } sine_detect_config_t;
 
+// 正弦波检测配置参数结构体（用于初始化接口）
+typedef struct {
+    uint32_t sample_rate;    // 采样率(Hz)
+    uint32_t data_length;    // 数据长度
+    uint8_t enable_filter;   // 是否启用滤波（1=启用，0=禁用）
+    uint32_t filter_length;  // 滤波器长度
+} sine_detect_config_params_t;
+
 // 模块结果结构体
 typedef struct {
     peak_result_t* peaks;    // 峰值结果数组
@@ -38,11 +46,11 @@ typedef struct {
 } sine_detect_result_t;
 
 // 全局配置和结果结构体声明
-extern sine_detect_config_t g_sine_config;
-extern sine_detect_result_t g_sine_result;
-extern peak_result_t g_peak_buffer[];
-extern edge_result_t g_edge_buffer[];
-extern float32_t g_filtered_data[];
+// extern sine_detect_config_t g_sine_config;
+// extern sine_detect_result_t g_sine_result;
+// extern peak_result_t g_peak_buffer[];
+// extern edge_result_t g_edge_buffer[];
+// extern float32_t g_filtered_data[];
 
 /**
  * @brief 处理ADC数据，检测峰值和边沿
@@ -73,5 +81,20 @@ uint32_t my_sine_detect_get_edges(edge_result_t* edges, uint32_t max_count);
  * @return 信号中点值
  */
 float32_t my_sine_detect_get_midpoint(void);
+
+/**
+ * @brief 初始化正弦波检测模块配置
+ * @param config_params 配置参数
+ * @return 0表示成功，其他值表示失败
+ */
+int my_sine_detect_init(const sine_detect_config_params_t *config_params);
+
+/**
+ * @brief 启动正弦波检测
+ * @param adc_data 输入的ADC数据数组
+ * @param result 输出的检测结果
+ * @return 0表示成功，其他值表示失败
+ */
+int my_sine_detect_start(const float32_t* adc_data, sine_detect_result_t* result);
 
 #endif // MY_SINE_DETECT_H

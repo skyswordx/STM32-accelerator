@@ -315,3 +315,53 @@ static void linear_interpolation_zero_crossing(const float32_t* data, edge_resul
     // 更新边沿位置
     edge->position = (float32_t)index + delta;
 }
+
+/**
+ * @brief 初始化正弦波检测模块配置
+ * @param config_params 配置参数
+ * @return 0表示成功，其他值表示失败
+ */
+int my_sine_detect_init(const sine_detect_config_params_t *config_params)
+{
+    // 检查输入参数
+    if (config_params == NULL) {
+        return -1;
+    }
+    
+    // 配置全局结构体
+    g_sine_config.sample_rate = config_params->sample_rate;
+    g_sine_config.data_length = config_params->data_length;
+    g_sine_config.enable_filter = config_params->enable_filter;
+    g_sine_config.filter_length = config_params->filter_length;
+    
+    return 0;
+}
+
+/**
+ * @brief 启动正弦波检测
+ * @param adc_data 输入的ADC数据数组
+ * @param result 输出的检测结果
+ * @return 0表示成功，其他值表示失败
+ */
+int my_sine_detect_start(const float32_t* adc_data, sine_detect_result_t* result)
+{
+    // 检查输入参数
+    if (adc_data == NULL || result == NULL) {
+        return -1;
+    }
+    
+    // 检查数据长度是否超过最大值
+    if (g_sine_config.data_length > MAX_DATA_LENGTH) {
+        return -2;
+    }
+    
+    // 初始化结果结构体
+    g_sine_result.peaks = g_peak_buffer;
+    g_sine_result.edges = g_edge_buffer;
+    g_sine_result.peak_count = 0;
+    g_sine_result.edge_count = 0;
+    g_sine_result.signal_midpoint = 0.0f;
+    
+    // 处理ADC数据
+    return my_sine_detect_process(adc_data, result);
+}

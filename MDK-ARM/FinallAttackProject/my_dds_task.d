@@ -60,4 +60,4 @@ finallattackproject\my_dds_task.o: ../Drivers/CMSIS/DSP/Include/arm_math.h
 finallattackproject\my_dds_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\string.h
 finallattackproject\my_dds_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\float.h
 finallattackproject\my_dds_task.o: ../Drivers/AD9954/AD9954.h
-finallattackproject\my_dds_task.o: ..\Drivers\AD9833\AD9833.h
+finallattackproject\my_dds_task.o: ../Drivers/AD9833/AD9833.h

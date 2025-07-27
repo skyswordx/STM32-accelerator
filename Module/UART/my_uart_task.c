@@ -12,26 +12,10 @@ uint8_t g_uart1_ex_flag = 0; // UART1接收标志
 
 void StartUARTProcessingTask(void const * argument)
 {
-    // UART任务代码
-    uint8_t pressed_key = 0;
-    
+    // UART任务代码   
     HAL_UART_Receive_IT(&huart1, (uint8_t *)&aRxBuffer, 1);	
     for(;;)
     {
-        /* 矩阵键盘测试 */
-        // 1. 调用扫描函数
-        pressed_key = Matrix_Keypad_Scan();
-
-        // 2. 检查是否有新的按键按下
-        if (pressed_key != NO_KEY_PRESSED) {
-            // 在这里处理按键事件
-            // 例如：通过串口打印
-            printf("Key Pressed: %d\r\n", pressed_key);
-
-           
-        }
-
-
         /* 串口接收中断 */
         if (g_uart1_ex_flag)
         {

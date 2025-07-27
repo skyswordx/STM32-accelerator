@@ -34,15 +34,10 @@ static const uint16_t col_pins[KEYPAD_NUM_COLS] = {
 };
 
 // 按键映射表
-// 对应关系: key_map[行索引][列索引]
-// SW1 -> 行0,列0 -> 1
-// SW2 -> 行0,列1 -> 2
-// ...
-// SW9 -> 行2,列2 -> 9
 static const uint8_t key_map[KEYPAD_NUM_ROWS][KEYPAD_NUM_COLS] = {
-    {1, 2, 3},
-    {4, 5, 6},
-    {7, 8, 9}
+    {3, 2, 1},
+    {6, 5, 4},
+    {9, 8, 7}
 };
 
 
