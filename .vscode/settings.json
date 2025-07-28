@@ -13,6 +13,11 @@
     "my_dds_task.h": "c",
     "my_button_config.h": "c",
     "my_ina22x_task.h": "c",
-    "ad9833.h": "c"
+    "ad9833.h": "c",
+    "string_view": "c",
+    "functional": "c",
+    "iosfwd": "c",
+    "limits": "c",
+    "streambuf": "c"
   }
 }

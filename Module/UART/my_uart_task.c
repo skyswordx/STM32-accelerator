@@ -10,6 +10,8 @@ uint8_t uart1_rx_cnt = 0;			 //接收缓冲计数
 uint8_t g_uart1_ex_flag = 0; // UART1接收标志
 
 
+
+
 void StartUARTProcessingTask(void const * argument)
 {
     // UART任务代码   

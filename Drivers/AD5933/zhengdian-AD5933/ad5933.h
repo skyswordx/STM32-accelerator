@@ -14,33 +14,33 @@ typedef  struct ImpedanceType
     float    Phase;
 } ImpeType;
 
-extern u8 D_ADDR;
-extern u8 SET_POINT;   //0xB0命令表示写入地址
-extern u8 data_clk;		//默认为内部时钟
-extern u8 data_gain;		//默认为X1增益
-extern u8 data_Vpp;		//默认0.2V Vpp
-extern u8 data_AddH;		//频率增量，100Hz=0x000c80,
-extern u8 data_AddM;
-extern u8 data_AddL;
-extern u8 data_StartH; 	//起始频率,10kHz=0x04E214
-extern u8 data_StartM;
-extern u8 data_StartL;
-extern u8 data_CountFH;	//扫描点数
-extern u8 data_CountFL;
-extern u8 data_CountTH;	//延时周期数
-extern u8 data_CountTL;
+extern uint8_t D_ADDR;
+extern uint8_t SET_POINT;   //0xB0命令表示写入地址
+extern uint8_t data_clk;		//默认为内部时钟
+extern uint8_t data_gain;		//默认为X1增益
+extern uint8_t data_Vpp;		//默认0.2V Vpp
+extern uint8_t data_AddH;		//频率增量，100Hz=0x000c80,
+extern uint8_t data_AddM;
+extern uint8_t data_AddL;
+extern uint8_t data_StartH; 	//起始频率,10kHz=0x04E214
+extern uint8_t data_StartM;
+extern uint8_t data_StartL;
+extern uint8_t data_CountFH;	//扫描点数
+extern uint8_t data_CountFL;
+extern uint8_t data_CountTH;	//延时周期数
+extern uint8_t data_CountTL;
 
 
-void AD5933_StartTest( u8 Add_OK );
+void AD5933_StartTest( uint8_t Add_OK );
 void AD5933_FreInit( float Fre,float AddFre);
 
-void AD5933_WriteByte( u8 RegOrIns, u8 DataOrReg );
-void AD5933_StartOnceTest(  ImpeType *AA, u8 Add_OK );
+void AD5933_WriteByte( uint8_t RegOrIns, uint8_t DataOrReg );
+void AD5933_StartOnceTest(  ImpeType *AA, uint8_t Add_OK );
 
 float AD5933_ReadImpedance( ImpeType *AA );
 float Temperature_Test( void );
 
-u8 AD5933_ReadByte( void );
+uint8_t AD5933_ReadByte( void );
 
 #endif
 

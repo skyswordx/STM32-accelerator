@@ -5,31 +5,31 @@
 #include "stdlib.h"
 
 /* AD5933 Instruct*********  Ö¸Áî****************************************************************/
-u8 D_ADDR=0x1A;			//µØÖ·¼Ä´æÆ÷
-u8 SET_POINT=0xB0;   	//0xB0ÃüÁî±íÊ¾Ð´ÈëµØÖ·Ö¸Áî
+uint8_t D_ADDR=0x1A;			//µØÖ·¼Ä´æÆ÷
+uint8_t SET_POINT=0xB0;   	//0xB0ÃüÁî±íÊ¾Ð´ÈëµØÖ·Ö¸Áî
 
-u8 data_clk=0x00;		//Íâ:0x08 ÄÚ0x00  Ê±ÖÓÑ¡Ôñ
-u8 data_gain=0x01;		//ÔöÒæ	 1±¶:0x01  5±¶£º0x00
-u8 data_Vpp=0x00;		//¼¤Àø·å·åÖµ£º0.2Vpp:0x02 0.4Vpp:0x04 1Vpp:0x06	 2Vpp:0x00
+uint8_t data_clk=0x00;		//Íâ:0x08 ÄÚ0x00  Ê±ÖÓÑ¡Ôñ
+uint8_t data_gain=0x01;		//ÔöÒæ	 1±¶:0x01  5±¶£º0x00
+uint8_t data_Vpp=0x00;		//¼¤Àø·å·åÖµ£º0.2Vpp:0x02 0.4Vpp:0x04 1Vpp:0x06	 2Vpp:0x00
 
-u8 data_AddH=0x00;		//ÆµÂÊÔöÁ¿£¬100Hz=0x000c80,10Hz=0x000140,1Hz=0x20
-u8 data_AddM=0x0c;
-u8 data_AddL=0x80;
+uint8_t data_AddH=0x00;		//ÆµÂÊÔöÁ¿£¬100Hz=0x000c80,10Hz=0x000140,1Hz=0x20
+uint8_t data_AddM=0x0c;
+uint8_t data_AddL=0x80;
 
-u8 data_StartH=0x0F; 	//ÆðÊ¼ÆµÂÊ,10kHz=0x04E214   30kHz=0x 0f 00 00 ;
-u8 data_StartM=0x00;		//1kHz=0x007d02,50kHz=ox186A64,35kHz=0x111764,10kHz=0x04E214
-u8 data_StartL=0x00;
+uint8_t data_StartH=0x0F; 	//ÆðÊ¼ÆµÂÊ,10kHz=0x04E214   30kHz=0x 0f 00 00 ;
+uint8_t data_StartM=0x00;		//1kHz=0x007d02,50kHz=ox186A64,35kHz=0x111764,10kHz=0x04E214
+uint8_t data_StartL=0x00;
 
-u8 data_CountFH=0x00;	//É¨ÃèµãÊý
-u8 data_CountFL=10;
+uint8_t data_CountFH=0x00;	//É¨ÃèµãÊý
+uint8_t data_CountFL=10;
 
-u8 data_CountTH=0x00;	//ÑÓÊ±ÖÜÆÚÊý
-u8 data_CountTL=0x3f;
+uint8_t data_CountTH=0x00;	//ÑÓÊ±ÖÜÆÚÊý
+uint8_t data_CountTL=0x3f;
 
 float FreFlag;
 
-u8 ReIm[6];	  			//Êý¾Ý¼Ä´æÆ÷ REH REL IMH IML   ·ûºÅ ½áÊø
-u8 ReIm10[10];
+uint8_t ReIm[6];	  			//Êý¾Ý¼Ä´æÆ÷ REH REL IMH IML   ·ûºÅ ½áÊø
+uint8_t ReIm10[10];
 
 
 int Re_Result;
@@ -39,14 +39,14 @@ float Impedance_Result;
 
 
 /* ¿ªÊ¼Ò»´Î²âÊÔ·µ»Ø*/
-void AD5933_StartOnceTest(  ImpeType *AA, u8 Add_OK )
+void AD5933_StartOnceTest(  ImpeType *AA, uint8_t Add_OK )
 {
     AD5933_StartTest( Add_OK );
     AD5933_ReadImpedance( AA );
 }
 
 
-void AD5933_StartTest( u8 Add_OK )
+void AD5933_StartTest( uint8_t Add_OK )
 {
     if( Add_OK>0 )  //Æô¶¯ÐÂµÄÒ»´ÎÉ¨Ãè²¢×ÔÔöÆµÂÊ
     {
@@ -60,7 +60,7 @@ void AD5933_StartTest( u8 Add_OK )
 
 float AD5933_ReadImpedance( ImpeType *AA )
 {
-    u8 j=0;
+    uint8_t j=0;
     while( (j&0x02)==0 )
     {
         AD5933_WriteByte( SET_POINT, 0x8f ); 		//Êý¾ÝÖ¸ÕëÖ¸Ïò×´Ì¬¼Ä´æÆ÷
@@ -110,13 +110,13 @@ float AD5933_ReadImpedance( ImpeType *AA )
 
 void AD5933_FreInit( float Fre,float AddFre)	  			//Æô¶¯Ò»¸öÆµÂÊµãµÄÉ¨Ãè
 {
-    u32 StartHz;
+    uint32_t StartHz;
 
     AD5933_WriteByte( 0x80, 0xA0|data_Vpp|data_gain );
 
     if( Fre != 0 )
     {
-        StartHz = (u32)(Fre*4.0*134217728.0/AD5933Fre);
+        StartHz = (uint32_t)(Fre*4.0*134217728.0/AD5933Fre);
         data_StartH = (StartHz>>16)&0xFF;
         data_StartM = (StartHz>>8)&0xFF;
         data_StartL = (StartHz)&0xFF;
@@ -127,7 +127,7 @@ void AD5933_FreInit( float Fre,float AddFre)	  			//Æô¶¯Ò»¸öÆµÂÊµãµÄÉ¨Ãè
 
     if( AddFre != 0 )
     {
-        StartHz = (u32)(AddFre*4.0*134217728.0/AD5933Fre);
+        StartHz = (uint32_t)(AddFre*4.0*134217728.0/AD5933Fre);
         data_AddH = (StartHz>>16)&0xFF;
         data_AddM = (StartHz>>8)&0xFF;
         data_AddL = (StartHz)&0xFF;
@@ -159,7 +159,7 @@ void AD5933_FreInit( float Fre,float AddFre)	  			//Æô¶¯Ò»¸öÆµÂÊµãµÄÉ¨Ãè
 
 }
 
-void AD5933_WriteByte( u8 RegOrIns, u8 DataOrReg )	   //Ð´Ò»¸ö×Ö½Úµ½¼Ä´æÆ÷ »òÕßÖ¸Áî
+void AD5933_WriteByte( uint8_t RegOrIns, uint8_t DataOrReg )	   //Ð´Ò»¸ö×Ö½Úµ½¼Ä´æÆ÷ »òÕßÖ¸Áî
 {
     IIC_Start();
     IIC_Send_Byte( D_ADDR );
@@ -168,9 +168,9 @@ void AD5933_WriteByte( u8 RegOrIns, u8 DataOrReg )	   //Ð´Ò»¸ö×Ö½Úµ½¼Ä´æÆ÷ »òÕßÖ
     IIC_Stop();
 }
 
-u8 AD5933_ReadByte( void )  			//¶ÁÒ»¸ö×Ö½Ú
+uint8_t AD5933_ReadByte( void )  			//¶ÁÒ»¸ö×Ö½Ú
 {
-    u8 Temp;
+    uint8_t Temp;
     IIC_Start();
     IIC_Send_Byte( D_ADDR|0x01 );		//·¢ËÍ¶ÁµØÖ·
     Temp = 	IIC_Read_Byte(0);
@@ -180,7 +180,7 @@ u8 AD5933_ReadByte( void )  			//¶ÁÒ»¸ö×Ö½Ú
 
 float Temperature_Test( void )
 {
-    u8 i;
+    uint8_t i;
     int  k=0;
     AD5933_WriteByte( 0x80, 0x90|data_Vpp|data_gain );     //Æô¶¯ÆµÂÊÉ¨Ãè |data_Vpp|data_gain
 

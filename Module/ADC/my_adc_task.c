@@ -109,27 +109,25 @@ void StartADCProcessingTask(void *argument) {
     memset(g_adc_dma_buffer, 0, ADC_SAMPLE_SIZE * sizeof(uint16_t));
     SCB_CleanDCache_by_Addr((uint32_t*)g_adc_dma_buffer, ADC_SAMPLE_SIZE * sizeof(uint16_t));
 
-    /* 校准ADC 勿动 */
+    /* 【ADC 数据流】校准ADC 勿动 */
     HAL_ADCEx_Calibration_Start(&hadc2, ADC_CALIB_FACTOR_LINEARITY_REGOFFSET, ADC_SINGLE_ENDED);
     HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_FACTOR_LINEARITY_REGOFFSET, ADC_SINGLE_ENDED);
 
     /* 初始化DDS设备 */
     // 在 Button Task 中调用 my_zlcr_dds_init 函数初始化 DDS 设备
 
-    /* 启动定时器3作为时间戳基准和ADC触发源 */
+    /* 【ADC 数据流】初始化同步采样的 ADC 模式 */
     HAL_ADC_Start(&hadc2);
     HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)g_adc_dma_buffer, ADC_SAMPLE_SIZE);
 
-    // HAL_TIM_Base_Start(&htim3);
+    // 使用这个接口 HAL_TIM_Base_Start(&htim3) 即可启动 ADC，现在不启动先，等待后续系统功能触发 
 
-    // ADC工作模式，默认为正常模式
+    // 【ADC 数据流】 指示 ADC 工作模式，默认为正常模式
     adc_mode_t adc_mode = ADC_MODE_NORMAL;
 
     for (;;) {
 
-        // 处理ADC数据
-
-        /* GPIO 按键 */
+        /* 【ADC 数据流】 利用 GPIO 按键触发启动定时器 */
         if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_RESET){
             osDelay(10); // 防抖延时
             if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_RESET){
@@ -175,6 +173,7 @@ void StartADCProcessingTask(void *argument) {
         }
     
 
+        // 【ADC 数据流】所有的 ADC 数据处理都得等待 DMA 传输完成标志位（DMA 传输完成的中断会停止 ADC 并设置标志位）
         if (g_adc_dma_transfer_flag == ADC_DMA_TRANSFER_COMPLETED) {
             g_adc_dma_transfer_flag = ADC_DMA_TRANSFER_NOT_COMPLETED; // 重置标志
             
