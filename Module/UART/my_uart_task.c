@@ -42,11 +42,12 @@ void StartUARTProcessingTask(void const * argument)
  */
 void parse_uart_command(char* cmd)
 {
-    // 解析命令格式: CMD:PARAM:VALUE
+    // 解析命令格式: CMD:PARAM[:VALUE]
+    // 支持两部分命令(如GET:ALL)和三部分命令(如SET:DDS_FREQ:1000)
     char *token;
     char *cmd_type;
     char *param;
-    char *value;
+    char *value = NULL; // 默认值为NULL
 
     // 使用strtok分割字符串
     token = strtok(cmd, ":");
@@ -63,15 +64,19 @@ void parse_uart_command(char* cmd)
     }
     param = token;
 
+    // 尝试获取第三个部分(可选)
     token = strtok(NULL, ":");
-    if (token == NULL) {
-        printf("Invalid command format\n");
-        return;
+    if (token != NULL) {
+        value = token;
     }
-    value = token;
 
     // 处理SET命令
     if (strcmp(cmd_type, "SET") == 0) {
+        // SET命令必须有值
+        if (value == NULL) {
+            printf("SET command requires a value\n");
+            return;
+        }
         handle_set_command(param, value);
     }
     // 处理GET命令
