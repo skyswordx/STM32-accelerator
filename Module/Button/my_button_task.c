@@ -9,7 +9,7 @@
 // uint8_t g_buttons[KEYPAD_NUM_COLS * KEYPAD_NUM_ROWS] = {0}; // 按键状态数组 0 表示未按下，1表示按下
 
 uint8_t g_pressed_key = NO_KEY_PRESSED; // 没有按键按下时为 NO_KEY_PRESSED (0x00)
-uint32_t g_desired_dds_frequency = 1000; // 用户期望设置的DDS频率
+extern uint32_t g_desired_dds_frequency; // 用户期望设置的DDS频率
 
 static uint8_t relay_state = 0; // 继电器状态计数器
 

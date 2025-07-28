@@ -3,10 +3,10 @@
 #include "my_zlcr_config.h"  // 添加 ZLCR 配置头文件
 #include "my_freq_config.h"  // 添加频率配置头文件，用于窗函数类型定义
 #include "my_time_detect.h"  // 添加时域检测模块头文件
-#include <stdint.h>          // 确保包含标准整数类型定义
 #include "my_time_detect.h"  // 添加时域检测模块头文件
 #include "AD9833.h"         // 添加 AD9833 头文件
 #include "AD9954.h"         // 添加 AD9954 头文件
+#include "my_parameter_config.h"  // 添加参数配置头文件
 
 extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
@@ -190,64 +190,121 @@ void StartADCProcessingTask(void *argument) {
                 // printf("ADC1/2:%.3f, %.3f, %lu\n", g_adc1_data_8bit[i], g_adc2_data_8bit[i], g_ADC_SAMPLE_RATE_Hz);
             }
 
-            if(adc_mode == ADC_MODE_NORMAL){
-                my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
-                
-                // my_armrfft32_apply(g_adc2_data_8bit, &g_ch1_fundamental, 1, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
-
-                my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
-
-                printf("ADC1 %lu Hz %.6f V\n", (g_ch1_fundamental.fundamental_frequency), g_ch1_fundamental.fundamental_vrms);
-                printf("ADC2 %lu Hz %.6f V\n", (g_ch2_fundamental.fundamental_frequency), g_ch2_fundamental.fundamental_vrms);
-                printf("ADC phase angle: %.2f\n", (g_ch1_fundamental.fundamental_phase_angle - g_ch2_fundamental.fundamental_phase_angle ));
-                
-                my_zlcr_get_impedance(&g_ch1_fundamental, &g_ch2_fundamental, &g_current_freq_result); // 获取当前频率下的阻抗信息
-                printf("Frequency: %lu Hz, Impedance: %.2f Ohm, Phase: %.2f deg\n", g_current_freq_result.frequency, g_current_freq_result.magnitude, g_current_freq_result.phase);
-                
-                my_zlcr_get_capacitance_or_inductance(&g_current_freq_result, &g_current_impedance_result); // 获取电容或电感信息
-                
-                // 如果启用了时域检测模块，则进行检测
-                if (g_time_detect_enabled) {
-                    // 初始化时域检测配置
-                    time_detect_config_params_t time_config;
-                    time_config.sample_rate = g_ADC_SAMPLE_RATE_Hz;
-                    time_config.data_length = ADC_SAMPLE_SIZE;
-                    time_config.enable_dc_filter = 1; // 启用直流分量滤除
-                    
-                    // 初始化时域检测模块
-                    my_time_detect_init(&time_config);
-                    
-                    // 启动时域检测（内部使用频域处理模块获取基波频率等参数）
-                    time_detect_result_t result;
-                    if (my_time_detect_start(g_adc1_data_8bit, &result) == 0) {
-                        // 输出检测结果
-                        printf("Time Domain Detection Results:\n");
-                        printf("  DC Component: %.6f V\n", result.dc_component);
-                        printf("  RMS Value: %.6f V\n", result.rms_value);
-                        printf("  Fundamental Frequency: %lu Hz\n", result.fundamental_freq);
-                        printf("  Period Points: %lu\n", result.period_points);
-                        printf("  Waveform Ratio: %.6f\n", result.waveform_ratio);
+            // 根据功能状态执行不同的处理逻辑
+            switch (g_desired_function_state) {
+                case LCR_STATE:
+                    // LCR表测量功能（原有逻辑）
+                    if(adc_mode == ADC_MODE_NORMAL){
+                        my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
                         
-                        // 根据波形类型输出
-                        switch (result.waveform_type) {
-                            case WAVEFORM_SINE:
-                                printf("  Waveform Type: Sine Wave\n");
-                                break;
-                            case WAVEFORM_SQUARE:
-                                printf("  Waveform Type: Square Wave\n");
-                                break;
-                            case WAVEFORM_TRIANGLE:
-                                printf("  Waveform Type: Triangle Wave\n");
-                                break;
-                            default:
-                                printf("  Waveform Type: Unknown\n");
-                                break;
+                        // my_armrfft32_apply(g_adc2_data_8bit, &g_ch1_fundamental, 1, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
+
+                        my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
+
+                        printf("ADC1 %lu Hz %.6f V\n", (g_ch1_fundamental.fundamental_frequency), g_ch1_fundamental.fundamental_vrms);
+                        printf("ADC2 %lu Hz %.6f V\n", (g_ch2_fundamental.fundamental_frequency), g_ch2_fundamental.fundamental_vrms);
+                        printf("ADC phase angle: %.2f\n", (g_ch1_fundamental.fundamental_phase_angle - g_ch2_fundamental.fundamental_phase_angle ));
+                        
+                        my_zlcr_get_impedance(&g_ch1_fundamental, &g_ch2_fundamental, &g_current_freq_result); // 获取当前频率下的阻抗信息
+                        printf("Frequency: %lu Hz, Impedance: %.2f Ohm, Phase: %.2f deg\n", g_current_freq_result.frequency, g_current_freq_result.magnitude, g_current_freq_result.phase);
+                        
+                        my_zlcr_get_capacitance_or_inductance(&g_current_freq_result, &g_current_impedance_result); // 获取电容或电感信息
+                        
+                        // 如果启用了时域检测模块，则进行检测
+                        if (g_time_detect_enabled) {
+                            // 初始化时域检测配置
+                            time_detect_config_params_t time_config;
+                            time_config.sample_rate = g_ADC_SAMPLE_RATE_Hz;
+                            time_config.data_length = ADC_SAMPLE_SIZE;
+                            time_config.enable_dc_filter = 1; // 启用直流分量滤除
+                            
+                            // 初始化时域检测模块
+                            my_time_detect_init(&time_config);
+                            
+                            // 启动时域检测（内部使用频域处理模块获取基波频率等参数）
+                            time_detect_result_t result;
+                            if (my_time_detect_start(g_adc1_data_8bit, &result) == 0) {
+                                // 输出检测结果
+                                printf("Time Domain Detection Results:\n");
+                                printf("  DC Component: %.6f V\n", result.dc_component);
+                                printf("  RMS Value: %.6f V\n", result.rms_value);
+                                printf("  Fundamental Frequency: %lu Hz\n", result.fundamental_freq);
+                                printf("  Period Points: %lu\n", result.period_points);
+                                printf("  Waveform Ratio: %.6f\n", result.waveform_ratio);
+                                
+                                // 根据波形类型输出
+                                switch (result.waveform_type) {
+                                    case WAVEFORM_SINE:
+                                        printf("  Waveform Type: Sine Wave\n");
+                                        break;
+                                    case WAVEFORM_SQUARE:
+                                        printf("  Waveform Type: Square Wave\n");
+                                        break;
+                                    case WAVEFORM_TRIANGLE:
+                                        printf("  Waveform Type: Triangle Wave\n");
+                                        break;
+                                    default:
+                                        printf("  Waveform Type: Unknown\n");
+                                        break;
+                                }
+                            } else {
+                                printf("Time domain detection failed!\n");
+                            }
                         }
-                    } else {
-                        printf("Time domain detection failed!\n");
                     }
-                }
-                
+                    break;
+
+                case SPECTRUM_STATE:
+                    // 频谱分析并打印
+                    {
+                        fundamental_result_t ch1_result, ch2_result;
+                        
+                        my_armcfft32_apply(g_adc1_data_8bit, &ch1_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
+                        my_armcfft32_apply(g_adc2_data_8bit, &ch2_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
+                        
+                        // 将频谱数据存储到独立的缓冲区中
+                        memcpy(g_adc1_spectrum_data, g_adc1_data_8bit, (FFT_LENGTH / 2) * sizeof(float32_t));
+                        memcpy(g_adc2_spectrum_data, g_adc2_data_8bit, (FFT_LENGTH / 2) * sizeof(float32_t));
+                        
+                        // 打印频谱分析结果
+                        printf("=== Spectrum Analysis Results ===\n");
+                        printf("ADC1 - Frequency: %lu Hz, Magnitude: %.6f V\n", ch1_result.fundamental_frequency, ch1_result.fundamental_vrms);
+                        printf("ADC2 - Frequency: %lu Hz, Magnitude: %.6f V\n", ch2_result.fundamental_frequency, ch2_result.fundamental_vrms);
+                    }
+                    break;
+
+                case TIME_STATE:
+                    // 时域分析并打印
+                    printf("=== Time Domain Analysis Results ===\n");
+                    
+                    // 打印ADC1和ADC2的时域数据
+                    for (uint32_t i = 0; i < 10; i++) { // 只打印前10个点作为示例
+                        printf("ADC1[%lu]: %.6f V, ADC2[%lu]: %.6f V\n", i, g_adc1_data_8bit[i], i, g_adc2_data_8bit[i]);
+                    }
+                    break;
+
+                case DIY_STATE:
+                    // 自定义功能
+                    printf("=== DIY State ===\n");
+                    printf("This is a custom function state.\n");
+                    break;
+
+                default:
+                    // 默认执行LCR_STATE逻辑
+                    if(adc_mode == ADC_MODE_NORMAL){
+                        my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
+                        my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
+
+                        printf("ADC1 %lu Hz %.6f V\n", (g_ch1_fundamental.fundamental_frequency), g_ch1_fundamental.fundamental_vrms);
+                        printf("ADC2 %lu Hz %.6f V\n", (g_ch2_fundamental.fundamental_frequency), g_ch2_fundamental.fundamental_vrms);
+                        printf("ADC phase angle: %.2f\n", (g_ch1_fundamental.fundamental_phase_angle - g_ch2_fundamental.fundamental_phase_angle ));
+                        
+                        my_zlcr_get_impedance(&g_ch1_fundamental, &g_ch2_fundamental, &g_current_freq_result);
+                        printf("Frequency: %lu Hz, Impedance: %.2f Ohm, Phase: %.2f deg\n", g_current_freq_result.frequency, g_current_freq_result.magnitude, g_current_freq_result.phase);
+                        
+                        my_zlcr_get_capacitance_or_inductance(&g_current_freq_result, &g_current_impedance_result);
+                    }
+                    break;
             }
 
             if (adc_mode == ADC_MODE_SWEEP && g_sweep_in_progress) {

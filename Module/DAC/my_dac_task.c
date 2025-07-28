@@ -4,7 +4,7 @@ extern TIM_HandleTypeDef htim4;
 extern const uint16_t ch1_value[256];
 extern const uint16_t ch2_value[256];
 
-float32_t g_desired_DAC_single_output_amplitude = 0.7f; // 默认DAC输出幅度为0.5
+extern float32_t g_desired_DAC_single_output_amplitude; // 默认DAC输出幅度为0.5
 
 // DAC参考电压为3.3V，12位精度(0~4095)
 #define DAC_MAX_VALUE 4095

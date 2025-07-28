@@ -6,7 +6,7 @@
   <Header>### uVision Project, (C) Keil Software</Header>
 
   <PrjGuiSettings>
-    <LastAddFilePath>D:\Musii-SnapShot\GithubRepo\STM32-accelerator\Drivers\MCP4725</LastAddFilePath>
+    <LastAddFilePath>D:\Musii-SnapShot\GithubRepo\STM32-accelerator\Module\Param</LastAddFilePath>
   </PrjGuiSettings>
 
   <ViewPool>
@@ -3821,7 +3821,7 @@
       <Doc>
         <Name>..\Module\DAC\my_dac_task.c</Name>
         <ColumnNumber>0</ColumnNumber>
-        <TopLine>1</TopLine>
+        <TopLine>13</TopLine>
         <CurrentLine>27</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>

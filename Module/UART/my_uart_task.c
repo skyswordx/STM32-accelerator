@@ -1,7 +1,7 @@
 #include "my_uart_task.h"
 #include "my_button_config.h" // 包含矩阵键盘配置
 
-uint32_t g_desired_ADC_sample_rate_Hz = 2000000; // 默认采样率为2MHz
+extern uint32_t g_desired_ADC_sample_rate_Hz;
 extern UART_HandleTypeDef huart1;
 
 char rx_buffer[RX_BUFFER_SIZE];   //接收数据
