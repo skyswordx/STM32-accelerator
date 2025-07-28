@@ -11,6 +11,8 @@
 uint8_t g_pressed_key = NO_KEY_PRESSED; // 没有按键按下时为 NO_KEY_PRESSED (0x00)
 uint32_t g_desired_dds_frequency = 1000; // 用户期望设置的DDS频率
 
+static uint8_t relay_state = 0; // 继电器状态计数器
+
 void StartButtonProcessingTask(void *argument) {
 
     // INA226 
@@ -63,6 +65,20 @@ void StartButtonProcessingTask(void *argument) {
                 printf("AD9954: Set Frequency to %lu Hz\r\n", g_desired_dds_frequency);
                 break;
             case 4:
+                // 按键4: 继电器测试
+                // 根据relay_state设置对应的GPIO引脚
+                // 先重置所有引脚
+                HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_RESET); 
+                HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_RESET); 
+                HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_RESET);
+                switch(relay_state) {
+                    case 0: HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_SET); break;
+                    case 1: HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_SET); break;
+                    case 2: HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_SET); break;
+                    case 3: HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_SET); break;
+                }
+                relay_state = (relay_state + 1) % 4; // 循环计数
                 break;
             case 5:
                 break;
