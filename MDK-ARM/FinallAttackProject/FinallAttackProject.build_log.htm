@@ -27,52 +27,52 @@ Project File Date:  07/28/2025
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\KEIL\ARM\ARMCC\Bin'
 Build target 'FinallAttackProject'
-compiling my_dac_task.c...
-..\Module\DAC\my_dac_config.h(13): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_DAC_CONFIG_H */
-..\Module\DAC\my_dac_task.h(15): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_DAC_TASK_H */
-..\Module\DAC\my_dac_task.c: 2 warnings, 0 errors
-compiling my_button_task.c...
-..\Module\Button\my_button_task.h(16): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_BUTTON_TASK_H
-../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
-  #endif /* INA226_H_ */
-../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_ZLCR_TASK_H
-..\Module\Button\my_button_task.c(48): warning:  #1182-D: a declaration cannot have a label
-                  float32_t voltage = INA226_GetBusV();
-..\Module\Button\my_button_task.c(45): warning:  #546-D: transfer of control bypasses initialization of:
-            variable "voltage"  (declared at line 48)
-            variable "current"  (declared at line 49)
-            variable "power"  (declared at line 50)
-          switch (g_pressed_key) {
-          ^
-..\Module\Button\my_button_task.c: 6 warnings, 0 errors
-compiling my_uart_task.c...
-..\Module\UART\my_uart_task.h(21): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_UART_TASK_H */
-..\Module\UART\my_uart_task.c(29): warning:  #223-D: function "strtoul" declared implicitly
-                  g_desired_ADC_sample_rate_Hz = (uint32_t)strtoul(&rx_buffer[1], NULL, 10);
-..\Module\UART\my_uart_task.c(33): warning:  #223-D: function "strtoul" declared implicitly
-                  g_desired_dds_frequency = (uint32_t)strtoul(&rx_buffer[1], NULL, 10);
-..\Module\UART\my_uart_task.c(37): warning:  #223-D: function "strtoul" declared implicitly
-                  g_desired_ADC_sample_rate_Hz = (uint32_t)strtoul(rx_buffer, NULL, 10);
-..\Module\UART\my_uart_task.c: 4 warnings, 0 errors
-compiling my_parameter_config.c...
+compiling my_dac_config.c...
 ../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
   #endif /* MY_FREQ_CONFIG_H */
 ..\Module\Param\my_parameter_config.h(39): warning:  #1-D: last line of file ends without a newline
   #endif // MY_PARAMETER_CONFIG_H
-..\Module\Param\my_parameter_config.c(25): warning:  #1-D: last line of file ends without a newline
-  float32_t g_adc2_spectrum_data[FFT_LENGTH / 2] = {0};
-..\Module\Param\my_parameter_config.c: 3 warnings, 0 errors
+..\Module\DAC\my_dac_config.h(24): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_DAC_CONFIG_H */
+..\Module\DAC\my_dac_config.c: 3 warnings, 0 errors
+compiling my_dac_task.c...
+../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+..\Module\Param\my_parameter_config.h(39): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_PARAMETER_CONFIG_H
+..\Module\DAC\my_dac_config.h(24): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_DAC_CONFIG_H */
+..\Module\DAC\my_dac_task.h(15): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_DAC_TASK_H */
+..\Module\DAC\my_dac_task.c: 4 warnings, 0 errors
+compiling main.c...
+../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
+  #endif /* INA226_H_ */
+../Module/UART/my_uart_task.h(27): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_UART_TASK_H */
+../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
+  #endif /* MT_MY_ADC_TASK_H */
+../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_ZLCR_TASK_H
+../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
+  #endif /* MT_MY_ADC_TASK_H */
+..\Module\Param\my_parameter_config.h(39): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_PARAMETER_CONFIG_H
+../Module/DAC/my_dac_config.h(24): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_DAC_CONFIG_H */
+../Module/DAC/my_dac_task.h(15): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_DAC_TASK_H */
+../Module/Button/my_button_task.h(16): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_BUTTON_TASK_H
+../Core/Src/main.c(229): warning:  #167-D: argument of type "void (*)(const void *)" is incompatible with parameter of type "osThreadFunc_t"
+    UARTProcessingTaskHandle = osThreadNew(StartUARTProcessingTask, NULL, &UARTProcessingTask_attributes);
+../Core/Src/main.c: 11 warnings, 0 errors
 linking...
-Program Size: Code=58884 RO-data=39808 RW-data=284 ZI-data=210452  
+Program Size: Code=62912 RO-data=39368 RW-data=836 ZI-data=211468  
 FromELF: creating hex file...
-"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 15 Warning(s).
+"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 18 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -95,7 +95,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:14
+Build Time Elapsed:  00:00:13
 </pre>
 </body>
 </html>

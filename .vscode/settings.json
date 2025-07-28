@@ -18,6 +18,7 @@
     "functional": "c",
     "iosfwd": "c",
     "limits": "c",
-    "streambuf": "c"
+    "streambuf": "c",
+    "my_time_detect.h": "c"
   }
 }

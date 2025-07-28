@@ -13,9 +13,15 @@ extern uint8_t aRxBuffer;						 //接收中断缓冲
 extern uint8_t uart1_rx_cnt;			 //接收缓冲计数
 extern uint8_t g_uart1_ex_flag; // UART1接收标志
 
-// DDS频率相关变量声明
-extern uint32_t g_desired_dds_frequency; // 用户期望设置的DDS频率
-
+// 函数声明
 void StartUARTProcessingTask(void const * argument);
+void parse_uart_command(char* cmd);
+void handle_set_command(char* param, char* value);
+void handle_get_command(char* param);
+void handle_legacy_command(char* cmd);
+void update_dac_waveform(void);
+void update_dac_frequency(void);
+void update_dac_amplitude(void);
+void update_relay_state(void);
 
 #endif /* MY_UART_TASK_H */

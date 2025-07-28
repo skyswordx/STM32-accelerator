@@ -3,11 +3,12 @@
 #include "my_zlcr_config.h"  // 添加 ZLCR 配置头文件
 #include "my_freq_config.h"  // 添加频率配置头文件，用于窗函数类型定义
 #include "my_time_detect.h"  // 添加时域检测模块头文件
-#include "my_time_detect.h"  // 添加时域检测模块头文件
 #include "AD9833.h"         // 添加 AD9833 头文件
 #include "AD9954.h"         // 添加 AD9954 头文件
 #include "my_parameter_config.h"  // 添加参数配置头文件
-
+#include "main.h"           // 添加主头文件
+#include <stdint.h>         // 添加标准整数类型头文件
+#include <string.h>         // 添加字符串处理头文件
 extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
 extern UART_HandleTypeDef huart1;
@@ -82,6 +83,9 @@ extern fundamental_result_t g_ch1_fundamental; // ADC1 通道 基波结果结构
 extern fundamental_result_t g_ch2_fundamental; // ADC2 通道 基波结果结构
 
 extern arm_cfft_radix4_instance_f32 fft_instance_radix4; // FFT实例
+
+// 外部声明频谱分析模块中的全局变量
+extern float32_t g_fft_output_buffer[FFT_LENGTH]; // FFT输出数组
 
 extern sweep_point_result_t g_current_freq_result;
 
@@ -259,12 +263,14 @@ void StartADCProcessingTask(void *argument) {
                     {
                         fundamental_result_t ch1_result, ch2_result;
                         
+                        // 分别计算两个通道的频谱数据并存储到独立的缓冲区中
                         my_armcfft32_apply(g_adc1_data_8bit, &ch1_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
-                        my_armcfft32_apply(g_adc2_data_8bit, &ch2_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
+                        memcpy(g_adc1_spectrum_data, g_fft_output_buffer, (FFT_LENGTH / 2) * sizeof(float32_t));
                         
-                        // 将频谱数据存储到独立的缓冲区中
-                        memcpy(g_adc1_spectrum_data, g_adc1_data_8bit, (FFT_LENGTH / 2) * sizeof(float32_t));
-                        memcpy(g_adc2_spectrum_data, g_adc2_data_8bit, (FFT_LENGTH / 2) * sizeof(float32_t));
+                        my_armcfft32_apply(g_adc2_data_8bit, &ch2_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
+                        memcpy(g_adc2_spectrum_data, g_fft_output_buffer, (FFT_LENGTH / 2) * sizeof(float32_t));
+                        
+                        // 打印频谱分析结果
                         
                         // 打印频谱分析结果
                         printf("=== Spectrum Analysis Results ===\n");

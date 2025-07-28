@@ -68,4 +68,5 @@ finallattackproject\main.o: ../Module/Frequency/my_freq_config.h
 finallattackproject\main.o: ../Module/ZLCR/my_zlcr_config.h
 finallattackproject\main.o: ../Module/DAC/my_dac_task.h
 finallattackproject\main.o: ../Module/DAC/my_dac_config.h
+finallattackproject\main.o: ..\Module\Param\my_parameter_config.h
 finallattackproject\main.o: ../Module/Button/my_button_task.h
