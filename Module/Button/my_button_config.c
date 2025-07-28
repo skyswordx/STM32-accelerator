@@ -1,7 +1,9 @@
-
 #include "my_button_config.h"
 #include "cmsis_os2.h"
 #include "stm32h7xx_hal.h"
+// 全局变量定义
+uint8_t g_short_pressed_key = NO_KEY_PRESSED;
+uint8_t g_long_pressed_key = NO_KEY_PRESSED;
 
 //================================================================================
 // 内部变量和定义 (Internal Variables & Definitions)
@@ -123,6 +125,7 @@ static uint8_t Matrix_Keypad_Get_Raw_Key(void) {
 uint8_t Matrix_Keypad_Scan(void) {
     // 用于消抖和状态跟踪的静态变量
     static uint8_t last_raw_key = NO_KEY_PRESSED;
+    static uint32_t key_press_start_tick = 0; // 按键按下的开始时间
     static uint8_t stable_key = NO_KEY_PRESSED;
     static uint8_t key_reported = NO_KEY_PRESSED;
     static uint32_t debounce_start_tick = 0;
@@ -143,9 +146,27 @@ uint8_t Matrix_Keypad_Scan(void) {
         // 认为当前按键状态是稳定的
         stable_key = current_raw_key;
 
-        // 3. 单次触发逻辑
+        // 3. 单次触发逻辑和长按/短按检测
         // 只有当稳定按键值与上次已报告的值不同时，才产生新的输出
         if (stable_key != key_reported) {
+            // 检查按键是按下还是释放
+            if (stable_key != NO_KEY_PRESSED) {
+                // 按键按下，记录开始时间
+                key_press_start_tick = osKernelGetTickCount();
+                // 清除之前的长按和短按状态
+                g_short_pressed_key = NO_KEY_PRESSED;
+                g_long_pressed_key = NO_KEY_PRESSED;
+            } else {
+                // 按键释放，计算持续时间
+                uint32_t press_duration = osKernelGetTickCount() - key_press_start_tick;
+                if (press_duration >= KEYPAD_LONG_PRESS_THRESHOLD_MS) {
+                    // 长按
+                    g_long_pressed_key = key_reported;
+                } else {
+                    // 短按
+                    g_short_pressed_key = key_reported;
+                }
+            }
             key_reported = stable_key; // 更新已报告的值
             // 只在按键被按下的瞬间(从无到有)返回键值
             if (stable_key != NO_KEY_PRESSED) {

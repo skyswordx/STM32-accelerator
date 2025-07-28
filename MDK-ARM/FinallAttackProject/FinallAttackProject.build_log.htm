@@ -27,7 +27,59 @@ Project File Date:  07/29/2025
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\Keil_v5\ARM\ARMCOMPLIER506\Bin'
 Build target 'FinallAttackProject'
-"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 0 Warning(s).
+compiling my_button_config.c...
+compiling my_button_task.c...
+..\Module\Button\my_button_task.h(16): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_BUTTON_TASK_H
+../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
+  #endif /* INA226_H_ */
+../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_ZLCR_TASK_H
+..\Module\Button\my_button_task.c(48): warning:  #1182-D: a declaration cannot have a label
+                      float32_t voltage = INA226_GetBusV();
+..\Module\Button\my_button_task.c(45): warning:  #546-D: transfer of control bypasses initialization of:
+            variable "voltage"  (declared at line 48)
+            variable "current"  (declared at line 49)
+            variable "power"  (declared at line 50)
+              switch (g_short_pressed_key) {
+              ^
+..\Module\Button\my_button_task.c: 6 warnings, 0 errors
+compiling my_uart_task.c...
+..\Module\UART\my_uart_task.h(27): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_UART_TASK_H */
+../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+..\Module\Param\my_parameter_config.h(47): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_PARAMETER_CONFIG_H
+../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_ZLCR_TASK_H
+..\Module\UART\my_uart_task.c(101): warning:  #223-D: function "strtoul" declared implicitly
+          g_desired_dds_frequency = (uint32_t)strtoul(value, NULL, 10);
+..\Module\UART\my_uart_task.c(111): warning:  #223-D: function "strtoul" declared implicitly
+          g_desired_ADC_sample_rate_Hz = (uint32_t)strtoul(value, NULL, 10);
+..\Module\UART\my_uart_task.c(126): warning:  #223-D: function "strtoul" declared implicitly
+          g_desired_dds_phase = (uint32_t)strtoul(value, NULL, 10);
+..\Module\UART\my_uart_task.c(134): warning:  #223-D: function "strtoul" declared implicitly
+          g_desired_dds_amplitude = (uint32_t)strtoul(value, NULL, 10);
+..\Module\UART\my_uart_task.c(156): warning:  #223-D: function "strtoul" declared implicitly
+          g_desired_DAC_output_frequency = (uint32_t)strtoul(value, NULL, 10);
+..\Module\UART\my_uart_task.c(162): warning:  #223-D: function "atof" declared implicitly
+          g_desired_DAC_single_output_amplitude = atof(value);
+..\Module\UART\my_uart_task.c(168): warning:  #223-D: function "strtoul" declared implicitly
+          g_desired_switch2which_relay = (uint8_t)strtoul(value, NULL, 10);
+..\Module\UART\my_uart_task.c(235): warning:  #223-D: function "strtoul" declared implicitly
+          g_desired_ADC_sample_rate_Hz = (uint32_t)strtoul(&cmd[1], NULL, 10);
+..\Module\UART\my_uart_task.c(239): warning:  #223-D: function "strtoul" declared implicitly
+          g_desired_dds_frequency = (uint32_t)strtoul(&cmd[1], NULL, 10);
+..\Module\UART\my_uart_task.c(243): warning:  #223-D: function "strtoul" declared implicitly
+          g_desired_ADC_sample_rate_Hz = (uint32_t)strtoul(cmd, NULL, 10);
+..\Module\UART\my_uart_task.c: 14 warnings, 0 errors
+linking...
+Program Size: Code=63344 RO-data=39368 RW-data=1868 ZI-data=210436  
+FromELF: creating hex file...
+"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 20 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -51,7 +103,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:00
+Build Time Elapsed:  00:00:05
 </pre>
 </body>
 </html>

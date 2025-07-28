@@ -4,6 +4,9 @@
 #include "main.h"
 #include "stdio.h"
 
+// 全局变量声明
+extern uint8_t g_short_pressed_key;
+extern uint8_t g_long_pressed_key;
 /* 虽然叫做 Button 其实是矩阵键盘*/
 
 
@@ -45,6 +48,8 @@
 // 定义按键消抖时间 (单位: 毫秒)
 // 建议值: 15-25ms
 #define KEYPAD_DEBOUNCE_TIME_MS 20
+// 定义长按的阈值 (单位: 毫秒)
+#define KEYPAD_LONG_PRESS_THRESHOLD_MS 1000
 
 //================================================================================
 // 2. 函数声明 (Function Prototypes)
