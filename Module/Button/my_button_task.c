@@ -52,10 +52,15 @@ void StartButtonProcessingTask(void *argument) {
             case 2:
                 // 按键2: AD9833 DDS 测试
                 AD9833_WaveSeting(g_desired_dds_frequency, 0, SIN_WAVE, 0); // 设置AD9833为正弦波
-                AD9833_AmpSet(120); // 设置AD9833幅度为最大值
+                AD9833_AmpSet(120); // 设置AD9833幅度为
                 printf("AD9833: Set Frequency to %lu Hz\r\n", g_desired_dds_frequency);
                 break;
             case 3:
+                // 按键3: AD9954 DDS 测试
+                AD9954_Set_Fre(g_desired_dds_frequency);
+                AD9954_Set_Amp(16383/2.0); // 设置AD9954幅度为
+                AD9954_Set_Phase(0);
+                printf("AD9954: Set Frequency to %lu Hz\r\n", g_desired_dds_frequency);
                 break;
             case 4:
                 break;

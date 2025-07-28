@@ -203,7 +203,7 @@ void StartADCProcessingTask(void *argument) {
                 printf("ADC phase angle: %.2f\n", (g_ch1_fundamental.fundamental_phase_angle - g_ch2_fundamental.fundamental_phase_angle ));
                 
                 my_zlcr_get_impedance(&g_ch1_fundamental, &g_ch2_fundamental, &g_current_freq_result); // 获取当前频率下的阻抗信息
-                printf("Frequency: %d Hz, Impedance: %.2f Ohm, Phase: %.2f deg\n", g_current_freq_result.frequency, g_current_freq_result.magnitude, g_current_freq_result.phase);
+                printf("Frequency: %lu Hz, Impedance: %.2f Ohm, Phase: %.2f deg\n", g_current_freq_result.frequency, g_current_freq_result.magnitude, g_current_freq_result.phase);
                 
                 my_zlcr_get_capacitance_or_inductance(&g_current_freq_result, &g_current_impedance_result); // 获取电容或电感信息
                 
