@@ -3,7 +3,7 @@
 <title>Static Call Graph - [FinallAttackProject\FinallAttackProject.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image FinallAttackProject\FinallAttackProject.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Mon Jul 28 22:19:26 2025
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Tue Jul 29 00:17:52 2025
 <BR><P>
 <H3>Maximum Stack Usage =        384 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -691,9 +691,9 @@ Global Symbols
 <LI><a href="#[1e8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvCopyDataFromQueue
 </UL>
 
-<P><STRONG><a name="[191]"></a>__aeabi_memcpy4</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memcpya.o(.text))
+<P><STRONG><a name="[193]"></a>__aeabi_memcpy4</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memcpya.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartADCProcessingTask
-<LI><a href="#[190]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
+<LI><a href="#[191]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
 </UL>
 
 <P><STRONG><a name="[21c]"></a>__aeabi_memcpy8</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memcpya.o(.text), UNUSED)
@@ -729,7 +729,7 @@ Global Symbols
 <LI><a href="#[174]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_ADC2_Init
 <LI><a href="#[173]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_ADC1_Init
 <LI><a href="#[dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;arm_fir_init_f32
-<LI><a href="#[190]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
+<LI><a href="#[191]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
 <LI><a href="#[e3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD9833_Init_GPIO
 </UL>
 
@@ -756,9 +756,9 @@ Global Symbols
 <P><STRONG><a name="[c0]"></a>strtoul</STRONG> (Thumb, 114 bytes, Stack size 40 bytes, strtoul.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = strtoul &rArr; _strtoul
 </UL>
-<BR>[Calls]<UL><LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_errno_addr
+<BR>[Calls]<UL><LI><a href="#[c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_strtoul
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_errno_addr
 <LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_ctype_table
-<LI><a href="#[c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_strtoul
 </UL>
 <BR>[Called By]<UL><LI><a href="#[1be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;handle_set_command
 <LI><a href="#[1bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;handle_legacy_command
@@ -987,13 +987,13 @@ Global Symbols
 <P><STRONG><a name="[1d1]"></a>arm_max_f32</STRONG> (Thumb, 198 bytes, Stack size 20 bytes, arm_max_f32.o(.text.arm_max_f32))
 <BR><BR>[Stack]<UL><LI>Max Depth = 20<LI>Call Chain = arm_max_f32
 </UL>
-<BR>[Called By]<UL><LI><a href="#[190]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
+<BR>[Called By]<UL><LI><a href="#[191]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
 </UL>
 
 <P><STRONG><a name="[1d2]"></a>arm_min_f32</STRONG> (Thumb, 198 bytes, Stack size 20 bytes, arm_min_f32.o(.text.arm_min_f32))
 <BR><BR>[Stack]<UL><LI>Max Depth = 20<LI>Call Chain = arm_min_f32
 </UL>
-<BR>[Called By]<UL><LI><a href="#[190]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
+<BR>[Called By]<UL><LI><a href="#[191]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
 </UL>
 
 <P><STRONG><a name="[1cc]"></a>arm_mult_f32</STRONG> (Thumb, 146 bytes, Stack size 16 bytes, arm_mult_f32.o(.text.arm_mult_f32))
@@ -1019,7 +1019,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__hardfp_sqrtf
 </UL>
-<BR>[Called By]<UL><LI><a href="#[190]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
+<BR>[Called By]<UL><LI><a href="#[191]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
 </UL>
 
 <P><STRONG><a name="[e0]"></a>AD9833_AmpSet</STRONG> (Thumb, 102 bytes, Stack size 32 bytes, ad9833.o(i.AD9833_AmpSet))
@@ -2169,7 +2169,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[ac]"></a>StartADCProcessingTask</STRONG> (Thumb, 2154 bytes, Stack size 40 bytes, my_adc_task.o(i.StartADCProcessingTask))
+<P><STRONG><a name="[ac]"></a>StartADCProcessingTask</STRONG> (Thumb, 2198 bytes, Stack size 40 bytes, my_adc_task.o(i.StartADCProcessingTask))
 <BR><BR>[Stack]<UL><LI>Max Depth = 280<LI>Call Chain = StartADCProcessingTask &rArr; my_time_detect_start &rArr; my_armcfft32_apply &rArr; arm_cfft_radix4_f32 &rArr; arm_radix4_butterfly_inverse_f32
 </UL>
 <BR>[Calls]<UL><LI><a href="#[185]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
@@ -2181,17 +2181,17 @@ Global Symbols
 <LI><a href="#[181]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_ReadPin
 <LI><a href="#[18a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switch_timer_sampleRate_Auto
 <LI><a href="#[189]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_zlcr_sweep_start
-<LI><a href="#[193]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_zlcr_sweep_next
-<LI><a href="#[192]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_zlcr_sweep_is_complete
+<LI><a href="#[192]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_zlcr_sweep_next
+<LI><a href="#[18e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_zlcr_sweep_is_complete
 <LI><a href="#[188]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_zlcr_sweep_init
 <LI><a href="#[18d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_zlcr_get_impedance
-<LI><a href="#[18e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_zlcr_get_capacitance_or_inductance
-<LI><a href="#[190]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
-<LI><a href="#[18f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_init
+<LI><a href="#[18f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_zlcr_get_capacitance_or_inductance
+<LI><a href="#[191]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
+<LI><a href="#[190]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_init
 <LI><a href="#[18c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_armcfft32_apply
 <LI><a href="#[187]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 <LI><a href="#[de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
-<LI><a href="#[191]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
+<LI><a href="#[193]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(i.main)
 </UL>
@@ -2244,8 +2244,8 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 280<LI>Call Chain = StartUARTProcessingTask &rArr; parse_uart_command &rArr; handle_set_command &rArr; atof &rArr; __strtod_int &rArr; _local_sscanf &rArr; _scanf_real
 </UL>
 <BR>[Calls]<UL><LI><a href="#[185]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
-<LI><a href="#[163]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_IT
 <LI><a href="#[198]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_uart_command
+<LI><a href="#[163]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_IT
 <LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(i.main)
@@ -2378,9 +2378,9 @@ Global Symbols
 <LI><a href="#[1bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;handle_legacy_command
 <LI><a href="#[1bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;handle_get_command
 <LI><a href="#[18a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switch_timer_sampleRate_Auto
-<LI><a href="#[18e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_zlcr_get_capacitance_or_inductance
-<LI><a href="#[190]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
-<LI><a href="#[18f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_init
+<LI><a href="#[18f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_zlcr_get_capacitance_or_inductance
+<LI><a href="#[191]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
+<LI><a href="#[190]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_init
 <LI><a href="#[194]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_zlcr_dds_init
 </UL>
 
@@ -2395,8 +2395,8 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[c1]"></a>__aeabi_errno_addr</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, errno.o(i.__aeabi_errno_addr))
-<BR><BR>[Called By]<UL><LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
-<LI><a href="#[c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_strtoul
+<BR><BR>[Called By]<UL><LI><a href="#[c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_strtoul
+<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtoul
 </UL>
 
 <P><STRONG><a name="[22e]"></a>__rt_errno_addr</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, errno.o(i.__aeabi_errno_addr), UNUSED)
@@ -2426,7 +2426,7 @@ Global Symbols
 <LI><a href="#[1a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__mathlib_flt_invalid
 <LI><a href="#[1a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__mathlib_flt_infnan
 </UL>
-<BR>[Called By]<UL><LI><a href="#[18e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_zlcr_get_capacitance_or_inductance
+<BR>[Called By]<UL><LI><a href="#[18f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_zlcr_get_capacitance_or_inductance
 </UL>
 
 <P><STRONG><a name="[1a7]"></a>__hardfp_expf</STRONG> (Thumb, 426 bytes, Stack size 16 bytes, expf.o(i.__hardfp_expf))
@@ -2610,7 +2610,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[1ce]"></a>calculate_DCcomponent</STRONG> (Thumb, 40 bytes, Stack size 0 bytes, my_time_detect.o(i.calculate_DCcomponent))
-<BR><BR>[Called By]<UL><LI><a href="#[190]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
+<BR><BR>[Called By]<UL><LI><a href="#[191]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
 </UL>
 
 <P><STRONG><a name="[ed]"></a>delay_us</STRONG> (Thumb, 26 bytes, Stack size 0 bytes, ad9954.o(i.delay_us))
@@ -2620,7 +2620,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[1d3]"></a>detect_waveform_type</STRONG> (Thumb, 78 bytes, Stack size 0 bytes, my_time_detect.o(i.detect_waveform_type))
-<BR><BR>[Called By]<UL><LI><a href="#[190]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
+<BR><BR>[Called By]<UL><LI><a href="#[191]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
 </UL>
 
 <P><STRONG><a name="[aa]"></a>fputc</STRONG> (Thumb, 20 bytes, Stack size 16 bytes, main.o(i.fputc))
@@ -2633,7 +2633,7 @@ Global Symbols
 <P><STRONG><a name="[1d4]"></a>free</STRONG> (Thumb, 76 bytes, Stack size 8 bytes, malloc.o(i.free))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = free
 </UL>
-<BR>[Called By]<UL><LI><a href="#[190]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
+<BR>[Called By]<UL><LI><a href="#[191]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
 </UL>
 
 <P><STRONG><a name="[1b5]"></a>generate_decade_frequency_points</STRONG> (Thumb, 250 bytes, Stack size 56 bytes, my_zlcr_config.o(i.generate_decade_frequency_points))
@@ -2673,7 +2673,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[1d0]"></a>get_period_points</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, my_time_detect.o(i.get_period_points))
-<BR><BR>[Called By]<UL><LI><a href="#[190]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
+<BR><BR>[Called By]<UL><LI><a href="#[191]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
 </UL>
 
 <P><STRONG><a name="[1bb]"></a>handle_get_command</STRONG> (Thumb, 218 bytes, Stack size 16 bytes, my_uart_task.o(i.handle_get_command))
@@ -2743,7 +2743,7 @@ Global Symbols
 <P><STRONG><a name="[1cf]"></a>malloc</STRONG> (Thumb, 92 bytes, Stack size 20 bytes, malloc.o(i.malloc))
 <BR><BR>[Stack]<UL><LI>Max Depth = 20<LI>Call Chain = malloc
 </UL>
-<BR>[Called By]<UL><LI><a href="#[190]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
+<BR>[Called By]<UL><LI><a href="#[191]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
 </UL>
 
 <P><STRONG><a name="[18c]"></a>my_armcfft32_apply</STRONG> (Thumb, 402 bytes, Stack size 56 bytes, my_freq_config.o(i.my_armcfft32_apply))
@@ -2762,10 +2762,10 @@ Global Symbols
 <LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__hardfp_sqrtf
 </UL>
 <BR>[Called By]<UL><LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartADCProcessingTask
-<LI><a href="#[190]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
+<LI><a href="#[191]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_detect_start
 </UL>
 
-<P><STRONG><a name="[18f]"></a>my_time_detect_init</STRONG> (Thumb, 26 bytes, Stack size 0 bytes, my_time_detect.o(i.my_time_detect_init))
+<P><STRONG><a name="[190]"></a>my_time_detect_init</STRONG> (Thumb, 26 bytes, Stack size 0 bytes, my_time_detect.o(i.my_time_detect_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = my_time_detect_init &rArr; __2printf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[187]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
@@ -2773,7 +2773,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartADCProcessingTask
 </UL>
 
-<P><STRONG><a name="[190]"></a>my_time_detect_start</STRONG> (Thumb, 440 bytes, Stack size 80 bytes, my_time_detect.o(i.my_time_detect_start))
+<P><STRONG><a name="[191]"></a>my_time_detect_start</STRONG> (Thumb, 440 bytes, Stack size 80 bytes, my_time_detect.o(i.my_time_detect_start))
 <BR><BR>[Stack]<UL><LI>Max Depth = 240<LI>Call Chain = my_time_detect_start &rArr; my_armcfft32_apply &rArr; arm_cfft_radix4_f32 &rArr; arm_radix4_butterfly_inverse_f32
 </UL>
 <BR>[Calls]<UL><LI><a href="#[18c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_armcfft32_apply
@@ -2787,7 +2787,7 @@ Global Symbols
 <LI><a href="#[1d4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;free
 <LI><a href="#[187]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 <LI><a href="#[de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
-<LI><a href="#[191]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
+<LI><a href="#[193]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
 </UL>
 <BR>[Called By]<UL><LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartADCProcessingTask
 </UL>
@@ -2802,7 +2802,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartButtonProcessingTask
 </UL>
 
-<P><STRONG><a name="[18e]"></a>my_zlcr_get_capacitance_or_inductance</STRONG> (Thumb, 200 bytes, Stack size 48 bytes, my_zlcr_config.o(i.my_zlcr_get_capacitance_or_inductance))
+<P><STRONG><a name="[18f]"></a>my_zlcr_get_capacitance_or_inductance</STRONG> (Thumb, 200 bytes, Stack size 48 bytes, my_zlcr_config.o(i.my_zlcr_get_capacitance_or_inductance))
 <BR><BR>[Stack]<UL><LI>Max Depth = 76<LI>Call Chain = my_zlcr_get_capacitance_or_inductance &rArr; __hardfp_cosf &rArr; __mathlib_rredf2
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__hardfp_cosf
@@ -2825,11 +2825,11 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartADCProcessingTask
 </UL>
 
-<P><STRONG><a name="[192]"></a>my_zlcr_sweep_is_complete</STRONG> (Thumb, 18 bytes, Stack size 0 bytes, my_zlcr_config.o(i.my_zlcr_sweep_is_complete))
+<P><STRONG><a name="[18e]"></a>my_zlcr_sweep_is_complete</STRONG> (Thumb, 18 bytes, Stack size 0 bytes, my_zlcr_config.o(i.my_zlcr_sweep_is_complete))
 <BR><BR>[Called By]<UL><LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartADCProcessingTask
 </UL>
 
-<P><STRONG><a name="[193]"></a>my_zlcr_sweep_next</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, my_zlcr_config.o(i.my_zlcr_sweep_next))
+<P><STRONG><a name="[192]"></a>my_zlcr_sweep_next</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, my_zlcr_config.o(i.my_zlcr_sweep_next))
 <BR><BR>[Called By]<UL><LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartADCProcessingTask
 </UL>
 
@@ -3612,8 +3612,8 @@ Local Symbols
 <P><STRONG><a name="[a6]"></a>UART_RxISR_16BIT</STRONG> (Thumb, 196 bytes, Stack size 8 bytes, stm32h7xx_hal_uart.o(i.UART_RxISR_16BIT))
 <BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = UART_RxISR_16BIT &rArr; HAL_UART_RxCpltCallback &rArr; HAL_UART_Receive_IT &rArr; UART_Start_Receive_IT
 </UL>
-<BR>[Calls]<UL><LI><a href="#[159]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_RxEventCallback
-<LI><a href="#[165]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
+<BR>[Calls]<UL><LI><a href="#[165]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
+<LI><a href="#[159]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_RxEventCallback
 </UL>
 <BR>[Address Reference Count : 2]<UL><LI> stm32h7xx_hal_uart.o(i.UART_RxISR_16BIT_FIFOEN)
 <LI> stm32h7xx_hal_uart.o(i.UART_Start_Receive_IT)
@@ -3621,17 +3621,17 @@ Local Symbols
 <P><STRONG><a name="[a9]"></a>UART_RxISR_16BIT_FIFOEN</STRONG> (Thumb, 404 bytes, Stack size 32 bytes, stm32h7xx_hal_uart.o(i.UART_RxISR_16BIT_FIFOEN))
 <BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = UART_RxISR_16BIT_FIFOEN &rArr; HAL_UART_RxCpltCallback &rArr; HAL_UART_Receive_IT &rArr; UART_Start_Receive_IT
 </UL>
-<BR>[Calls]<UL><LI><a href="#[158]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_ErrorCallback
+<BR>[Calls]<UL><LI><a href="#[165]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
+<LI><a href="#[158]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_ErrorCallback
 <LI><a href="#[159]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_RxEventCallback
-<LI><a href="#[165]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> stm32h7xx_hal_uart.o(i.UART_Start_Receive_IT)
 </UL>
 <P><STRONG><a name="[a7]"></a>UART_RxISR_8BIT</STRONG> (Thumb, 196 bytes, Stack size 8 bytes, stm32h7xx_hal_uart.o(i.UART_RxISR_8BIT))
 <BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = UART_RxISR_8BIT &rArr; HAL_UART_RxCpltCallback &rArr; HAL_UART_Receive_IT &rArr; UART_Start_Receive_IT
 </UL>
-<BR>[Calls]<UL><LI><a href="#[159]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_RxEventCallback
-<LI><a href="#[165]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
+<BR>[Calls]<UL><LI><a href="#[165]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
+<LI><a href="#[159]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_RxEventCallback
 </UL>
 <BR>[Address Reference Count : 2]<UL><LI> stm32h7xx_hal_uart.o(i.UART_RxISR_8BIT_FIFOEN)
 <LI> stm32h7xx_hal_uart.o(i.UART_Start_Receive_IT)
@@ -3639,9 +3639,9 @@ Local Symbols
 <P><STRONG><a name="[a8]"></a>UART_RxISR_8BIT_FIFOEN</STRONG> (Thumb, 404 bytes, Stack size 32 bytes, stm32h7xx_hal_uart.o(i.UART_RxISR_8BIT_FIFOEN))
 <BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = UART_RxISR_8BIT_FIFOEN &rArr; HAL_UART_RxCpltCallback &rArr; HAL_UART_Receive_IT &rArr; UART_Start_Receive_IT
 </UL>
-<BR>[Calls]<UL><LI><a href="#[158]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_ErrorCallback
+<BR>[Calls]<UL><LI><a href="#[165]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
+<LI><a href="#[158]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_ErrorCallback
 <LI><a href="#[159]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_RxEventCallback
-<LI><a href="#[165]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> stm32h7xx_hal_uart.o(i.UART_Start_Receive_IT)
 </UL>

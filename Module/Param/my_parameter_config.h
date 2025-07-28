@@ -6,6 +6,9 @@
 #include "my_freq_config.h"
 
 // DDS相关参数
+// DDS类型定义
+#define DDS_TYPE_AD9833 1
+#define DDS_TYPE_AD9954 0
 extern uint32_t g_desired_dds_frequency;
 extern uint8_t g_desired_dds_type;
 extern uint32_t g_desired_dds_phase;
@@ -18,6 +21,11 @@ extern uint32_t g_desired_ADC_sample_rate_Hz;
 extern uint8_t g_desired_DAC_output_waveform;
 extern uint32_t g_desired_DAC_output_frequency;
 extern float32_t g_desired_DAC_single_output_amplitude;
+extern uint16_t* g_dac_waveform_buffer;
+extern uint16_t g_dac_sine[256];
+extern uint16_t g_dac_cosine[256];
+extern uint16_t g_dac_square[256];
+extern uint16_t g_dac_triangle[256];
 
 // 继电器控制参数
 extern uint8_t g_desired_switch2which_relay;

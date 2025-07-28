@@ -12,9 +12,7 @@ uint8_t aRxBuffer;                // 接收中断缓冲
 uint8_t uart1_rx_cnt = 0;         // 接收缓冲计数
 uint8_t g_uart1_ex_flag = 0;      // UART1接收标志
 
-// DDS类型定义
-#define DDS_TYPE_AD9833 1
-#define DDS_TYPE_AD9954 0
+
 
 void StartUARTProcessingTask(void const * argument)
 {
