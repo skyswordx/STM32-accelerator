@@ -27,52 +27,28 @@ Project File Date:  07/28/2025
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\KEIL\ARM\ARMCC\Bin'
 Build target 'FinallAttackProject'
-compiling my_dac_config.c...
-../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-..\Module\Param\my_parameter_config.h(39): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_PARAMETER_CONFIG_H
-..\Module\DAC\my_dac_config.h(24): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_DAC_CONFIG_H */
-..\Module\DAC\my_dac_config.c: 3 warnings, 0 errors
-compiling my_dac_task.c...
-../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-..\Module\Param\my_parameter_config.h(39): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_PARAMETER_CONFIG_H
-..\Module\DAC\my_dac_config.h(24): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_DAC_CONFIG_H */
-..\Module\DAC\my_dac_task.h(15): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_DAC_TASK_H */
-..\Module\DAC\my_dac_task.c: 4 warnings, 0 errors
-compiling main.c...
-../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
-  #endif /* INA226_H_ */
-../Module/UART/my_uart_task.h(27): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_UART_TASK_H */
+compiling my_adc_task.c...
 ../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
   #endif /* MT_MY_ADC_TASK_H */
 ../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
   #endif /* MY_FREQ_CONFIG_H */
 ../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
   #endif // MY_ZLCR_TASK_H
-../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
+..\Module\ADC\my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
   #endif /* MT_MY_ADC_TASK_H */
+../Module/UART/my_uart_task.h(27): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_UART_TASK_H */
+../Module/TimeDetect/my_time_detect.h(35): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_TIME_DETECT_H
 ..\Module\Param\my_parameter_config.h(39): warning:  #1-D: last line of file ends without a newline
   #endif // MY_PARAMETER_CONFIG_H
-../Module/DAC/my_dac_config.h(24): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_DAC_CONFIG_H */
-../Module/DAC/my_dac_task.h(15): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_DAC_TASK_H */
-../Module/Button/my_button_task.h(16): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_BUTTON_TASK_H
-../Core/Src/main.c(229): warning:  #167-D: argument of type "void (*)(const void *)" is incompatible with parameter of type "osThreadFunc_t"
-    UARTProcessingTaskHandle = osThreadNew(StartUARTProcessingTask, NULL, &UARTProcessingTask_attributes);
-../Core/Src/main.c: 11 warnings, 0 errors
+..\Module\ADC\my_adc_task.c(362): warning:  #1-D: last line of file ends without a newline
+  }
+..\Module\ADC\my_adc_task.c: 8 warnings, 0 errors
 linking...
-Program Size: Code=62912 RO-data=39368 RW-data=836 ZI-data=211468  
+Program Size: Code=62932 RO-data=39368 RW-data=836 ZI-data=211468  
 FromELF: creating hex file...
-"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 18 Warning(s).
+"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 8 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -95,7 +71,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:13
+Build Time Elapsed:  00:00:09
 </pre>
 </body>
 </html>

@@ -79,6 +79,7 @@ void parse_uart_command(char* cmd)
     // 处理GET命令
     else if (strcmp(cmd_type, "GET") == 0) {
         handle_get_command(param);
+        printf("GET command processed: %s\n", param);
     }
     // 兼容旧格式
     else {

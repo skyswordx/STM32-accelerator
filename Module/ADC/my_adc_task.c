@@ -284,8 +284,9 @@ void StartADCProcessingTask(void *argument) {
                     printf("=== Time Domain Analysis Results ===\n");
                     
                     // 打印ADC1和ADC2的时域数据
-                    for (uint32_t i = 0; i < 10; i++) { // 只打印前10个点作为示例
-                        printf("ADC1[%lu]: %.6f V, ADC2[%lu]: %.6f V\n", i, g_adc1_data_8bit[i], i, g_adc2_data_8bit[i]);
+                    for (uint32_t i = 0; i < ADC_SAMPLE_SIZE; i++) { // 只打印前10个点作为示例
+                        // printf("ADC1[%lu]: %.6f V, ADC2[%lu]: %.6f V\n", i, g_adc1_data_8bit[i], i, g_adc2_data_8bit[i]);
+                         printf("ADC1/2 :%.6f,%.6f\n", g_adc1_data_8bit[i], g_adc2_data_8bit[i]);
                     }
                     break;
 
