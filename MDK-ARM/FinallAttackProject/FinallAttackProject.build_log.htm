@@ -5,11 +5,11 @@
 <h2>Tool Versions:</h2>
 IDE-Version: ��Vision V5.41.0.0
 Copyright (C) 2024 ARM Ltd and ARM Germany GmbH. All rights reserved.
-License Information: 1 1, 1, LIC=LSNXV-P0F9R-12HLE-5QPP1-TB5K5-0RETV
+License Information: 1 1140527828@qq.com, 1, LIC=CZLZX-HJXE5-NNBAF-65NPN-WGZ9K-JT7B9
  
 Tool Versions:
 Toolchain:       MDK-ARM Plus  Version: 5.41.0.0
-Toolchain Path:  D:\Keil_v5\ARM\ARMCOMPLIER506\Bin
+Toolchain Path:  D:\KEIL\ARM\ARMCC\Bin
 C Compiler:      Armcc.exe V5.06 update 7 (build 960)
 Assembler:       Armasm.exe V5.06 update 7 (build 960)
 Linker/Locator:  ArmLink.exe V5.06 update 7 (build 960)
@@ -25,61 +25,28 @@ D:\Musii-SnapShot\GithubRepo\STM32-accelerator\MDK-ARM\FinallAttackProject.uvpro
 Project File Date:  07/29/2025
 
 <h2>Output:</h2>
-*** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\Keil_v5\ARM\ARMCOMPLIER506\Bin'
+*** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\KEIL\ARM\ARMCC\Bin'
 Build target 'FinallAttackProject'
-compiling my_button_config.c...
 compiling my_button_task.c...
-..\Module\Button\my_button_task.h(16): warning:  #1-D: last line of file ends without a newline
+../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+..\Module\Button\../Param/my_parameter_config.h(47): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_PARAMETER_CONFIG_H
+..\Module\Button\my_button_task.h(23): warning:  #1-D: last line of file ends without a newline
   #endif // MY_BUTTON_TASK_H
 ../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
   #endif /* INA226_H_ */
-../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
 ../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
   #endif // MY_ZLCR_TASK_H
-..\Module\Button\my_button_task.c(48): warning:  #1182-D: a declaration cannot have a label
-                      float32_t voltage = INA226_GetBusV();
-..\Module\Button\my_button_task.c(45): warning:  #546-D: transfer of control bypasses initialization of:
-            variable "voltage"  (declared at line 48)
-            variable "current"  (declared at line 49)
-            variable "power"  (declared at line 50)
-              switch (g_short_pressed_key) {
-              ^
-..\Module\Button\my_button_task.c: 6 warnings, 0 errors
-compiling my_uart_task.c...
-..\Module\UART\my_uart_task.h(27): warning:  #1-D: last line of file ends without a newline
+../Module/UART/my_uart_task.h(27): warning:  #1-D: last line of file ends without a newline
   #endif /* MY_UART_TASK_H */
-../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-..\Module\Param\my_parameter_config.h(47): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_PARAMETER_CONFIG_H
-../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_ZLCR_TASK_H
-..\Module\UART\my_uart_task.c(101): warning:  #223-D: function "strtoul" declared implicitly
-          g_desired_dds_frequency = (uint32_t)strtoul(value, NULL, 10);
-..\Module\UART\my_uart_task.c(111): warning:  #223-D: function "strtoul" declared implicitly
-          g_desired_ADC_sample_rate_Hz = (uint32_t)strtoul(value, NULL, 10);
-..\Module\UART\my_uart_task.c(126): warning:  #223-D: function "strtoul" declared implicitly
-          g_desired_dds_phase = (uint32_t)strtoul(value, NULL, 10);
-..\Module\UART\my_uart_task.c(134): warning:  #223-D: function "strtoul" declared implicitly
-          g_desired_dds_amplitude = (uint32_t)strtoul(value, NULL, 10);
-..\Module\UART\my_uart_task.c(156): warning:  #223-D: function "strtoul" declared implicitly
-          g_desired_DAC_output_frequency = (uint32_t)strtoul(value, NULL, 10);
-..\Module\UART\my_uart_task.c(162): warning:  #223-D: function "atof" declared implicitly
-          g_desired_DAC_single_output_amplitude = atof(value);
-..\Module\UART\my_uart_task.c(168): warning:  #223-D: function "strtoul" declared implicitly
-          g_desired_switch2which_relay = (uint8_t)strtoul(value, NULL, 10);
-..\Module\UART\my_uart_task.c(235): warning:  #223-D: function "strtoul" declared implicitly
-          g_desired_ADC_sample_rate_Hz = (uint32_t)strtoul(&cmd[1], NULL, 10);
-..\Module\UART\my_uart_task.c(239): warning:  #223-D: function "strtoul" declared implicitly
-          g_desired_dds_frequency = (uint32_t)strtoul(&cmd[1], NULL, 10);
-..\Module\UART\my_uart_task.c(243): warning:  #223-D: function "strtoul" declared implicitly
-          g_desired_ADC_sample_rate_Hz = (uint32_t)strtoul(cmd, NULL, 10);
-..\Module\UART\my_uart_task.c: 14 warnings, 0 errors
+..\Module\Button\my_button_task.c(35): warning:  #177-D: variable "relay_state"  was declared but never referenced
+  static uint8_t relay_state = 0; // 继电器状态计数器
+..\Module\Button\my_button_task.c: 7 warnings, 0 errors
 linking...
-Program Size: Code=63344 RO-data=39368 RW-data=1868 ZI-data=210436  
+Program Size: Code=66336 RO-data=39592 RW-data=1876 ZI-data=210460  
 FromELF: creating hex file...
-"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 20 Warning(s).
+"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 7 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -90,20 +57,19 @@ Package Vendor: ARM
    * Component: CORE Version: 6.1.0
 
 Package Vendor: Keil
-                https://www.keil.com/pack/Keil.STM32H7xx_DFP.3.1.1.pack
-                Keil::STM32H7xx_DFP@3.1.1
-                STMicroelectronics STM32H7 Series Device Support and Examples
+                https://www.keil.com/pack/Keil.STM32H7xx_DFP.4.1.0.pack
+                Keil::STM32H7xx_DFP@4.1.0
+                STMicroelectronics STM32H7 Series Device Support
 
 <h2>Collection of Component include folders:</h2>
   ./RTE/_FinallAttackProject
-  D:/Keil_arm_pack/ARM/CMSIS/6.1.0/CMSIS/Core/Include
-  D:/Keil_arm_pack/Keil/STM32H7xx_DFP/3.1.1/Drivers/CMSIS/Device/ST/STM32H7xx/Include
+  D:/KEIL-PACK/ARM/CMSIS/6.1.0/CMSIS/Core/Include
 
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:05
+Build Time Elapsed:  00:00:10
 </pre>
 </body>
 </html>
