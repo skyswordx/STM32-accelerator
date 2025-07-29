@@ -15,6 +15,24 @@
 extern uint8_t g_short_pressed_key; // 短按按键
 extern uint8_t g_long_pressed_key;  // 长按按键
 extern uint32_t g_desired_dds_frequency; // 用户期望设置的DDS频率
+// 预设挡位值定义
+// DDS频率预设挡位 (Hz)
+static const uint32_t dds_freq_presets[9] = {100, 1000, 10000, 100000, 500000, 1000000, 2000000, 5000000, 10000000};
+
+// ADC采样率预设挡位 (Hz)
+static const uint32_t adc_rate_presets[9] = {1000, 10000, 100000, 500000, 1000000, 2000000, 5000000, 10000000, 20000000};
+
+// DDS相位预设挡位 (度)
+static const uint32_t dds_phase_presets[9] = {0, 45, 90, 135, 180, 225, 270, 315, 360};
+
+// DDS幅度预设挡位
+static const uint32_t dds_amp_presets[9] = {100, 500, 1000, 2000, 4000, 8000, 12000, 16000, 20000};
+
+// DAC频率预设挡位 (Hz)
+static const uint32_t dac_freq_presets[9] = {100, 1000, 10000, 100000, 500000, 1000000, 2000000, 5000000, 10000000};
+
+// DAC幅度预设挡位
+static const uint32_t dac_amp_presets[9] = {100, 500, 1000, 2000, 4000, 8000, 12000, 16000, 20000};
 
 // 按键解析状态机相关定义
 typedef enum {
@@ -100,8 +118,40 @@ void StartButtonProcessingTask(void *argument) {
                         
                     case WAIT_VALUE_STATE:
                         // 第三次按键，表示值
-                        value = g_short_pressed_key;
-                        printf("Value set to: %lu\r\n", value);
+                        // 检查是否为需要预设挡位的参数
+                        if ((param == 1 || param == 2 || param == 4 || param == 5 || param == 7 || param == 8) &&
+                            g_short_pressed_key >= 1 && g_short_pressed_key <= 9) {
+                            // 使用预设挡位值
+                            switch (param) {
+                                case 1: // DDS Frequency
+                                    value = dds_freq_presets[g_short_pressed_key - 1];
+                                    break;
+                                case 2: // ADC Sample Rate
+                                    value = adc_rate_presets[g_short_pressed_key - 1];
+                                    break;
+                                case 4: // DDS Phase
+                                    value = dds_phase_presets[g_short_pressed_key - 1];
+                                    break;
+                                case 5: // DDS Amplitude
+                                    value = dds_amp_presets[g_short_pressed_key - 1];
+                                    break;
+                                case 7: // DAC Frequency
+                                    value = dac_freq_presets[g_short_pressed_key - 1];
+                                    break;
+                                case 8: // DAC Amplitude
+                                    value = dac_amp_presets[g_short_pressed_key - 1];
+                                    break;
+                                default:
+                                    value = g_short_pressed_key;
+                                    break;
+                            }
+                            printf("Preset value selected: %lu (Key %d)\r\n", value, g_short_pressed_key);
+                        } else {
+                            // 其他参数或按键直接使用按键值
+                            value = g_short_pressed_key;
+                            printf("Value set to: %lu\r\n", value);
+                        }
+                        
                         // 处理命令
                         process_keypad_command();
                         // 重置状态机
@@ -126,11 +176,29 @@ void StartButtonProcessingTask(void *argument) {
             // 特殊处理长按按键
             switch (g_long_pressed_key) {
                 case 1:
-                    // 长按1键，进入数字输入模式
+                    // 长按1键，根据当前状态决定行为
                     if (keypad_state == WAIT_VALUE_STATE) {
+                        // 如果在等待值状态，进入数字输入模式
                         keypad_state = NUMBER_INPUT_STATE;
                         number_buffer = 0; // 重置数字缓冲区
                         printf("Enter number input mode\r\n");
+                    } else if (keypad_state == NUMBER_INPUT_STATE) {
+                        // 如果已经在数字输入模式，确认输入
+                        value = number_buffer;
+                        printf("Number input confirmed: %lu\r\n", value);
+                        // 处理命令
+                        process_keypad_command();
+                        // 重置状态机
+                        reset_keypad_state();
+                    }
+                    break;
+                    
+                case 5:
+                    // 长按5键，在数字输入模式下输入数字0
+                    if (keypad_state == NUMBER_INPUT_STATE) {
+                        // 在数字输入模式下，将0添加到数字缓冲区
+                        number_buffer = number_buffer * 10 + 0;
+                        printf("Number input: %lu\r\n", number_buffer);
                     }
                     break;
                     
@@ -332,12 +400,16 @@ void print_param_hint(uint8_t cmd_type, uint8_t param) {
             case 1:
                 printf("Parameter: DDS Frequency\r\n");
                 printf("Please enter frequency value (Hz)\r\n");
-                printf("Press key 1-9 to input digits, long press key 1 to enter number input mode\r\n");
+printf("Press key 1-9 to select preset value, long press key 1 to enter number input mode\r\n");
+                printf("Preset values: 1=100Hz, 2=1kHz, 3=10kHz, 4=100kHz, 5=500kHz, 6=1MHz, 7=2MHz, 8=5MHz, 9=10MHz\r\n");
+                printf("Press key 1-9 to input digits, long press key 1 to enter number input mode, long press key 1 again to confirm input\r\n");
                 break;
             case 2:
                 printf("Parameter: ADC Sample Rate\r\n");
                 printf("Please enter sample rate value (Hz)\r\n");
-                printf("Press key 1-9 to input digits, long press key 1 to enter number input mode\r\n");
+                printf("Press key 1-9 to select preset value, long press key 1 to enter number input mode\r\n");
+                printf("Preset values: 1=1kHz, 2=10kHz, 3=100kHz, 4=500kHz, 5=1MHz, 6=2MHz, 7=5MHz, 8=10MHz, 9=20MHz\r\n");
+                printf("Press key 1-9 to input digits, long press key 1 to enter number input mode, long press key 1 again to confirm input\r\n");
                 break;
             case 3:
                 printf("Parameter: DDS Type\r\n");
@@ -348,12 +420,16 @@ void print_param_hint(uint8_t cmd_type, uint8_t param) {
             case 4:
                 printf("Parameter: DDS Phase\r\n");
                 printf("Please enter phase value (degrees)\r\n");
-                printf("Press key 1-9 to input digits, long press key 1 to enter number input mode\r\n");
+                printf("Press key 1-9 to select preset value, long press key 1 to enter number input mode\r\n");
+                printf("Preset values: 1=0°, 2=45°, 3=90°, 4=135°, 5=180°, 6=225°, 7=270°, 8=315°, 9=360°\r\n");
+                printf("Press key 1-9 to input digits, long press key 1 to enter number input mode, long press key 1 again to confirm input\r\n");
                 break;
             case 5:
                 printf("Parameter: DDS Amplitude\r\n");
                 printf("Please enter amplitude value\r\n");
-                printf("Press key 1-9 to input digits, long press key 1 to enter number input mode\r\n");
+                printf("Press key 1-9 to select preset value, long press key 1 to enter number input mode\r\n");
+                printf("Preset values: 1=100, 2=500, 3=1000, 4=2000, 5=4000, 6=8000, 7=12000, 8=16000, 9=20000\r\n");
+                printf("Press key 1-9 to input digits, long press key 1 to enter number input mode, long press key 1 again to confirm input\r\n");
                 break;
             case 6:
                 printf("Parameter: DAC Waveform\r\n");
@@ -366,12 +442,16 @@ void print_param_hint(uint8_t cmd_type, uint8_t param) {
             case 7:
                 printf("Parameter: DAC Frequency\r\n");
                 printf("Please enter frequency value (Hz)\r\n");
-                printf("Press key 1-9 to input digits, long press key 1 to enter number input mode\r\n");
+                printf("Press key 1-9 to select preset value, long press key 1 to enter number input mode\r\n");
+                printf("Preset values: 1=100Hz, 2=1kHz, 3=10kHz, 4=100kHz, 5=500kHz, 6=1MHz, 7=2MHz, 8=5MHz, 9=10MHz\r\n");
+                printf("Press key 1-9 to input digits, long press key 1 to enter number input mode, long press key 1 again to confirm input\r\n");
                 break;
             case 8:
                 printf("Parameter: DAC Amplitude\r\n");
                 printf("Please enter amplitude value\r\n");
-                printf("Press key 1-9 to input digits, long press key 1 to enter number input mode\r\n");
+                printf("Press key 1-9 to select preset value, long press key 1 to enter number input mode\r\n");
+                printf("Preset values: 1=100, 2=500, 3=1000, 4=2000, 5=4000, 6=8000, 7=12000, 8=16000, 9=20000\r\n");
+                printf("Press key 1-9 to input digits, long press key 1 to enter number input mode, long press key 1 again to confirm input\r\n");
                 break;
             case 9:
                 printf("Parameter: Relay Control\r\n");
@@ -440,6 +520,8 @@ void print_keypad_instructions(void) {
     printf("5. Value Input:\r\n");
     printf("   - For numeric values, press keys 1-9 to input digits\r\n");
     printf("   - Long press key 1 to enter number input mode for multi-digit numbers\r\n");
+    printf("   - Long press key 1 again to confirm input in number input mode\r\n");
+    printf("   - Long press key 5 to input digit 0 in number input mode\r\n");
     printf("   - Long press key 9 to cancel input\r\n");
     printf("\r\n");
     printf("6. Examples:\r\n");

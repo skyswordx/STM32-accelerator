@@ -4,9 +4,9 @@
 #include <stdint.h>
 
 /* 
- * CubeMX GPIO ÅäÖÃÒªÇó£º
+ * CubeMX GPIO é…ç½®è¦æ±‚ï¼š
  * 
- * Êä³öÒı½Å (Push-Pull Output, GPIO_SPEED_FREQ_HIGH):
+ * è¾“å‡ºå¼•è„š (Push-Pull Output, GPIO_SPEED_FREQ_HIGH):
  * - PA12 -> PS1
  * - PA11 -> S_CS
  * - PA10 -> S_SCLK
@@ -18,17 +18,17 @@
  * - PC6  -> PS0
  * - PD13 -> AD9954_OSK
  * 
- * ÊäÈëÒı½Å (Input Pull-Up):
+ * è¾“å…¥å¼•è„š (Input Pull-Up):
  * - PD14 -> S_SDO
  * 
- * ÔÚCubeMXÖĞÅäÖÃÊ±£¬Çë¸øÃ¿¸öÒı½ÅÉèÖÃ¶ÔÓ¦µÄUser Label
+ * åœ¨CubeMXä¸­é…ç½®æ—¶ï¼Œè¯·ç»™æ¯ä¸ªå¼•è„šè®¾ç½®å¯¹åº”çš„User Label
  */
 
-// Ê¹ÓÃÈí¼şSPIÇı¶¯AD9954
+// ä½¿ç”¨è½¯ä»¶SPIé©±åŠ¨AD9954
 #define AD9954_SOFTWARE_SPI
 
 #ifdef AD9954_SOFTWARE_SPI
-// GPIO¶Ë¿Ú¶¨Òå
+// GPIOç«¯å£å®šä¹‰
 #define AD9954_CS_PORT      GPIOA
 #define AD9954_CS_PIN       GPIO_PIN_15
 
@@ -50,7 +50,7 @@
 #define IOUPDATE_PORT       GPIOD
 #define IOUPDATE_PIN        GPIO_PIN_6
 
-#define AD9954_SDO_PORT     GPIOC // ÊäÈëÒı½Å
+#define AD9954_SDO_PORT     GPIOC // è¾“å…¥å¼•è„š
 #define AD9954_SDO_PIN      GPIO_PIN_10
 
 #define AD9954_IOSY_PORT    GPIOC
@@ -62,7 +62,7 @@
 #define AD9954_PWR_PORT     GPIOD
 #define AD9954_PWR_PIN      GPIO_PIN_3
 
-// HAL API ºê¶¨Òå
+// HAL API å®å®šä¹‰
 #define AD9954_CS(x)        HAL_GPIO_WritePin(AD9954_CS_PORT, AD9954_CS_PIN, (x) ? GPIO_PIN_SET : GPIO_PIN_RESET)
 #define AD9954_SCLK(x)      HAL_GPIO_WritePin(AD9954_SCLK_PORT, AD9954_SCLK_PIN, (x) ? GPIO_PIN_SET : GPIO_PIN_RESET)
 #define AD9954_SDIO(x)      HAL_GPIO_WritePin(AD9954_SDIO_PORT, AD9954_SDIO_PIN, (x) ? GPIO_PIN_SET : GPIO_PIN_RESET)
@@ -76,53 +76,53 @@
 
 #define AD9954_SDO          HAL_GPIO_ReadPin(AD9954_SDO_PORT, AD9954_SDO_PIN)
 
-// ¾«È·ÑÓÊ±º¯ÊıÉùÃ÷
+// ç²¾ç¡®å»¶æ—¶å‡½æ•°å£°æ˜
 void delay_us(uint32_t us);
 void delay_us_systick(uint32_t us);
 #endif
 
 
-#define CFR1		0X00	//¿ØÖÆ¹¦ÄÜ¼Ä´æÆ÷1
-#define CFR2    0X01	//¿ØÖÆ¹¦ÄÜ¼Ä´æÆ÷2
-#define ASF     0X02	//Õñ·ù±ÈÀıÒò×Ó¼Ä´æÆ÷
-#define ARR     0X03	//Õñ·ùĞ±ÆÂËÙÂÊ¼Ä´æÆ÷
+#define CFR1		0X00	//æ§åˆ¶åŠŸèƒ½å¯„å­˜å™¨1
+#define CFR2    0X01	//æ§åˆ¶åŠŸèƒ½å¯„å­˜å™¨2
+#define ASF     0X02	//æŒ¯å¹…æ¯”ä¾‹å› å­å¯„å­˜å™¨
+#define ARR     0X03	//æŒ¯å¹…æ–œå¡é€Ÿç‡å¯„å­˜å™¨
 
-#define FTW0    0X04	//ÆµÂÊµ÷Ğ³×Ö¼Ä´æÆ÷0
-#define POW0    0X05	//ÏàÎ»Æ«ÒÆ×Ö¼Ä´æÆ÷
-#define FTW1    0X06	//ÆµÂÊµ÷Ğ³×Ö¼Ä´æÆ÷1
+#define FTW0    0X04	//é¢‘ç‡è°ƒè°å­—å¯„å­˜å™¨0
+#define POW0    0X05	//ç›¸ä½åç§»å­—å¯„å­˜å™¨
+#define FTW1    0X06	//é¢‘ç‡è°ƒè°å­—å¯„å­˜å™¨1
 
-#define NLSCW   0X07	//ÏÂ½µÉ¨Ãè¿ØÖÆ×Ö¼Ä´æÆ÷
-#define PLSCW   0X08	//ÉÏÉıÉ¨Ãè¿ØÖÆ×Ö¼Ä´æÆ÷
+#define NLSCW   0X07	//ä¸‹é™æ‰«ææ§åˆ¶å­—å¯„å­˜å™¨
+#define PLSCW   0X08	//ä¸Šå‡æ‰«ææ§åˆ¶å­—å¯„å­˜å™¨
 
 #define RSCW0   0X07	//
 #define RSCW1   0X08	//
 #define RSCW2   0X09	//
-#define RSCW3   0X0A	//RAM¶Î¿ØÖÆ×Ö¼Ä´æÆ÷
-#define RAM     0X0B	//¶ÁÈ¡Ö¸ÁîĞ´ÈëRAMÇ©Ãû¼Ä´æÆ÷Êı¾İ
+#define RSCW3   0X0A	//RAMæ®µæ§åˆ¶å­—å¯„å­˜å™¨
+#define RAM     0X0B	//è¯»å–æŒ‡ä»¤å†™å…¥RAMç­¾åå¯„å­˜å™¨æ•°æ®
 
-#define No_Dwell	0x04	//No_Dwell²»Í£Áô£¬Êä³öÉ¨Æµµ½ÖÕÖ¹ÆµÂÊ»Øµ½ÆğÊ¼ÆµÂÊ¡£
-#define Dwell 		0x00	//DwellÍ£Áô£¬Êä³öÉ¨Æµµ½ÖÕÖ¹ÆµÂÊºó±£³ÖÔÚÖÕÖ¹ÆµÂÊ¡£
-
-
-void AD9954_GPIO_Init(void);//³õÊ¼»¯¿ØÖÆAD9954ĞèÒªÓÃµ½µÄIO¿Ú
-void AD9954_RESET(void);		//¸´Î»AD9954
-void UPDATE(void);					//²úÉúÒ»¸ö¸üĞÂĞÅºÅ£¬¸üĞÂAD9954ÄÚ²¿¼Ä´æÆ÷
-
-void AD9954_Send_Byte(uint8_t dat);//ÏòAD9954·¢ËÍÒ»¸ö×Ö½ÚµÄÄÚÈİ
-uint8_t AD9954_Read_Byte(void);			//¶ÁAD9954Ò»¸ö×Ö½ÚµÄÄÚÈİ
-void AD9954_Write_nByte(uint8_t RegAddr,uint8_t *Data,uint8_t Len);//ÏòAD9954Ö¸¶¨µÄ¼Ä´æÆ÷Ğ´Êı¾İ
-uint32_t AD9954_Read_nByte(uint8_t ReadAddr,uint8_t Len);					//¶ÁAD9954¼Ä´æÆ÷Êı¾İ
-uint32_t Get_FTW(double Real_fH);	//ÆµÂÊÊı¾İ×ª»»
+#define No_Dwell	0x04	//No_Dwellä¸åœç•™ï¼Œè¾“å‡ºæ‰«é¢‘åˆ°ç»ˆæ­¢é¢‘ç‡å›åˆ°èµ·å§‹é¢‘ç‡ã€‚
+#define Dwell 		0x00	//Dwellåœç•™ï¼Œè¾“å‡ºæ‰«é¢‘åˆ°ç»ˆæ­¢é¢‘ç‡åä¿æŒåœ¨ç»ˆæ­¢é¢‘ç‡ã€‚
 
 
-void AD9954_Init(void);//³õÊ¼»¯AD9954µÄ¹Ü½ÅºÍÄÚ²¿¼Ä´æÆ÷µÄÅäÖÃ£¬
-void AD9954_Set_Fre(double fre);//ÉèÖÃAD9954Êä³öÆµÂÊ£¬µãÆµ
-void AD9954_Set_Amp(uint16_t Ampli);//Ğ´·ù¶È
-void AD9954_Set_Phase(uint16_t Phase);//Ğ´ÏàÎ»
+void AD9954_GPIO_Init(void);//åˆå§‹åŒ–æ§åˆ¶AD9954éœ€è¦ç”¨åˆ°çš„IOå£
+void AD9954_RESET(void);		//å¤ä½AD9954
+void UPDATE(void);					//äº§ç”Ÿä¸€ä¸ªæ›´æ–°ä¿¡å·ï¼Œæ›´æ–°AD9954å†…éƒ¨å¯„å­˜å™¨
 
-void AD9954_SetFSK(double f1,double f2,double f3,double f4,uint16_t Ampli);//AD9954µÄFSK²ÎÊıÉèÖÃ
-void AD9954_SetPSK(uint16_t Phase1,uint16_t Phase2,uint16_t Phase3,uint16_t Phase4,double fre,uint16_t Ampli);//AD9954µÄPSK²ÎÊıÉèÖÃ
-void AD9954_Set_LinearSweep(double Freq_Low,double Freq_High,double  UpStepFreq, uint8_t UpStepTime,double	DownStepFreq, uint8_t DownStepTime,uint8_t mode);//É¨Æµ²ÎÊıÉèÖÃ
+void AD9954_Send_Byte(uint8_t dat);//å‘AD9954å‘é€ä¸€ä¸ªå­—èŠ‚çš„å†…å®¹
+uint8_t AD9954_Read_Byte(void);			//è¯»AD9954ä¸€ä¸ªå­—èŠ‚çš„å†…å®¹
+void AD9954_Write_nByte(uint8_t RegAddr,uint8_t *Data,uint8_t Len);//å‘AD9954æŒ‡å®šçš„å¯„å­˜å™¨å†™æ•°æ®
+uint32_t AD9954_Read_nByte(uint8_t ReadAddr,uint8_t Len);					//è¯»AD9954å¯„å­˜å™¨æ•°æ®
+uint32_t Get_FTW(double Real_fH);	//é¢‘ç‡æ•°æ®è½¬æ¢
+
+
+void AD9954_Init(void);//åˆå§‹åŒ–AD9954çš„ç®¡è„šå’Œå†…éƒ¨å¯„å­˜å™¨çš„é…ç½®ï¼Œ
+void AD9954_Set_Fre(double fre);//è®¾ç½®AD9954è¾“å‡ºé¢‘ç‡ï¼Œç‚¹é¢‘
+void AD9954_Set_Amp(uint16_t Ampli);//å†™å¹…åº¦
+void AD9954_Set_Phase(uint16_t Phase);//å†™ç›¸ä½
+
+void AD9954_SetFSK(double f1,double f2,double f3,double f4,uint16_t Ampli);//AD9954çš„FSKå‚æ•°è®¾ç½®
+void AD9954_SetPSK(uint16_t Phase1,uint16_t Phase2,uint16_t Phase3,uint16_t Phase4,double fre,uint16_t Ampli);//AD9954çš„PSKå‚æ•°è®¾ç½®
+void AD9954_Set_LinearSweep(double Freq_Low,double Freq_High,double  UpStepFreq, uint8_t UpStepTime,double	DownStepFreq, uint8_t DownStepTime,uint8_t mode);//æ‰«é¢‘å‚æ•°è®¾ç½®
 
 		
 
