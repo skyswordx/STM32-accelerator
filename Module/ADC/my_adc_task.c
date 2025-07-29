@@ -214,47 +214,6 @@ void StartADCProcessingTask(void *argument) {
                         
                         my_zlcr_get_capacitance_or_inductance(&g_current_freq_result, &g_current_impedance_result); // 获取电容或电感信息
                         
-                        // 如果启用了时域检测模块，则进行检测
-                        if (g_time_detect_enabled) {
-                            // 初始化时域检测配置
-                            time_detect_config_params_t time_config;
-                            time_config.sample_rate = g_ADC_SAMPLE_RATE_Hz;
-                            time_config.data_length = ADC_SAMPLE_SIZE;
-                            time_config.enable_dc_filter = 1; // 启用直流分量滤除
-                            
-                            // 初始化时域检测模块
-                            my_time_detect_init(&time_config);
-                            
-                            // 启动时域检测（内部使用频域处理模块获取基波频率等参数）
-                            time_detect_result_t result;
-                            if (my_time_detect_start(g_adc1_data_8bit, &result) == 0) {
-                                // 输出检测结果
-                                printf("Time Domain Detection Results:\n");
-                                printf("  DC Component: %.6f V\n", result.dc_component);
-                                printf("  RMS Value: %.6f V\n", result.rms_value);
-                                printf("  Fundamental Frequency: %lu Hz\n", result.fundamental_freq);
-                                printf("  Period Points: %lu\n", result.period_points);
-                                printf("  Waveform Ratio: %.6f\n", result.waveform_ratio);
-                                
-                                // 根据波形类型输出
-                                switch (result.waveform_type) {
-                                    case WAVEFORM_SINE:
-                                        printf("  Waveform Type: Sine Wave\n");
-                                        break;
-                                    case WAVEFORM_SQUARE:
-                                        printf("  Waveform Type: Square Wave\n");
-                                        break;
-                                    case WAVEFORM_TRIANGLE:
-                                        printf("  Waveform Type: Triangle Wave\n");
-                                        break;
-                                    default:
-                                        printf("  Waveform Type: Unknown\n");
-                                        break;
-                                }
-                            } else {
-                                printf("Time domain detection failed!\n");
-                            }
-                        }
                     }
                     if (adc_mode == ADC_MODE_SWEEP && g_sweep_in_progress) {
                     // 扫频模式下
@@ -336,6 +295,47 @@ void StartADCProcessingTask(void *argument) {
                     for (uint32_t i = 0; i < ADC_SAMPLE_SIZE; i++) { // 只打印前10个点作为示例
                         // printf("ADC1[%lu]: %.6f V, ADC2[%lu]: %.6f V\n", i, g_adc1_data_8bit[i], i, g_adc2_data_8bit[i]);
                          printf("ADC1/2 :%.6f,%.6f\n", g_adc1_data_8bit[i], g_adc2_data_8bit[i]);
+                        // 如果启用了时域检测模块，则进行检测
+                        if (g_time_detect_enabled) {
+                            // 初始化时域检测配置
+                            time_detect_config_params_t time_config;
+                            time_config.sample_rate = g_ADC_SAMPLE_RATE_Hz;
+                            time_config.data_length = ADC_SAMPLE_SIZE;
+                            time_config.enable_dc_filter = 1; // 启用直流分量滤除
+                            
+                            // 初始化时域检测模块
+                            my_time_detect_init(&time_config);
+                            
+                            // 启动时域检测（内部使用频域处理模块获取基波频率等参数）
+                            time_detect_result_t result;
+                            if (my_time_detect_start(g_adc1_data_8bit, &result) == 0) {
+                                // 输出检测结果
+                                printf("Time Domain Detection Results:\n");
+                                printf("  DC Component: %.6f V\n", result.dc_component);
+                                printf("  RMS Value: %.6f V\n", result.rms_value);
+                                printf("  Fundamental Frequency: %lu Hz\n", result.fundamental_freq);
+                                printf("  Period Points: %lu\n", result.period_points);
+                                printf("  Waveform Ratio: %.6f\n", result.waveform_ratio);
+                                
+                                // 根据波形类型输出
+                                switch (result.waveform_type) {
+                                    case WAVEFORM_SINE:
+                                        printf("  Waveform Type: Sine Wave\n");
+                                        break;
+                                    case WAVEFORM_SQUARE:
+                                        printf("  Waveform Type: Square Wave\n");
+                                        break;
+                                    case WAVEFORM_TRIANGLE:
+                                        printf("  Waveform Type: Triangle Wave\n");
+                                        break;
+                                    default:
+                                        printf("  Waveform Type: Unknown\n");
+                                        break;
+                                }
+                            } else {
+                                printf("Time domain detection failed!\n");
+                            }
+                        }
                     }
                     break;
 

@@ -113,7 +113,21 @@ void StartButtonProcessingTask(void *argument) {
                         // 第二次按键，表示参数类型
                         param = g_short_pressed_key;
                         print_param_hint(cmd_type, param);
-                        keypad_state = WAIT_VALUE_STATE;
+                        
+                        // 检查是否为可以直接处理的两字段命令（如GET:ALL）
+                        // GET命令且参数为3（ALL）时，不需要值字段
+                        if (cmd_type == 2 && param == 3) {
+                            // 直接处理命令
+                            // 为GET:ALL命令设置参数字符串
+                            char param_str[20];
+                            strcpy(param_str, "ALL");
+                            handle_get_command_keypad(param_str);
+                            // 重置状态机
+                            reset_keypad_state();
+                        } else {
+                            // 需要值字段的命令，进入等待值状态
+                            keypad_state = WAIT_VALUE_STATE;
+                        }
                         break;
                         
                     case WAIT_VALUE_STATE:
