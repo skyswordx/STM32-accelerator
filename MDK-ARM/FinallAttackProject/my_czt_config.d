@@ -2,8 +2,8 @@ finallattackproject\my_czt_config.o: ..\Module\CZT\my_czt_config.c
 finallattackproject\my_czt_config.o: ..\Module\CZT\my_czt_config.h
 finallattackproject\my_czt_config.o: ../Drivers/CMSIS/DSP/Include/arm_math.h
 finallattackproject\my_czt_config.o: ../Drivers/CMSIS/Include/cmsis_compiler.h
-finallattackproject\my_czt_config.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdint.h
+finallattackproject\my_czt_config.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stdint.h
 finallattackproject\my_czt_config.o: ../Drivers/CMSIS/Include/cmsis_armcc.h
-finallattackproject\my_czt_config.o: D:\KEIL\ARM\ARMCC\Bin\..\include\string.h
-finallattackproject\my_czt_config.o: D:\KEIL\ARM\ARMCC\Bin\..\include\math.h
-finallattackproject\my_czt_config.o: D:\KEIL\ARM\ARMCC\Bin\..\include\float.h
+finallattackproject\my_czt_config.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\string.h
+finallattackproject\my_czt_config.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\math.h
+finallattackproject\my_czt_config.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\float.h

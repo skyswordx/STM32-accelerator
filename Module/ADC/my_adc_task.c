@@ -3,11 +3,12 @@
 #include "my_zlcr_config.h"  // 添加 ZLCR 配置头文件
 #include "my_freq_config.h"  // 添加频率配置头文件，用于窗函数类型定义
 #include "my_time_detect.h"  // 添加时域检测模块头文件
-#include "my_time_detect.h"  // 添加时域检测模块头文件
 #include "AD9833.h"         // 添加 AD9833 头文件
 #include "AD9954.h"         // 添加 AD9954 头文件
 #include "my_parameter_config.h"  // 添加参数配置头文件
-
+#include "main.h"           // 添加主头文件
+#include <stdint.h>         // 添加标准整数类型头文件
+#include <string.h>         // 添加字符串处理头文件
 extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
 extern UART_HandleTypeDef huart1;
@@ -82,6 +83,9 @@ extern fundamental_result_t g_ch1_fundamental; // ADC1 通道 基波结果结构
 extern fundamental_result_t g_ch2_fundamental; // ADC2 通道 基波结果结构
 
 extern arm_cfft_radix4_instance_f32 fft_instance_radix4; // FFT实例
+
+// 外部声明频谱分析模块中的全局变量
+extern float32_t g_fft_output_buffer[FFT_LENGTH]; // FFT输出数组
 
 extern sweep_point_result_t g_current_freq_result;
 
@@ -252,6 +256,48 @@ void StartADCProcessingTask(void *argument) {
                             }
                         }
                     }
+                    if (adc_mode == ADC_MODE_SWEEP && g_sweep_in_progress) {
+                    // 扫频模式下
+                    /* 在一段频率中，每一个频率点的 ADC 数据都会被采集 */
+                    /* 进入这个部分，意味着当前频率点的采集已经完成 */
+
+                    /* 需要调用 my_armcfft32_apply 函数进行频域分析 */
+                    my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
+                    my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
+
+                    /* 然后利用频域分析结果 g_ch1_fundamental 和 g_ch2_fundamental ，利用 my_zlrc_config 中的接口，得到当前频率下的阻抗信息 */
+                    my_zlcr_get_impedance(&g_ch1_fundamental, &g_ch2_fundamental, &g_current_freq_result); // 获取当前频率下的阻抗信息
+
+                    /* 为了绘制扫频得到的幅频和相频特性，需要将结果保存到对应的数组中 */
+                    if (g_sweep_current_index < SWEEP_MAX_POINTS) {
+                        g_sweep_result_array[g_sweep_current_index] = g_current_freq_result;
+                    }
+
+                    /* 检查扫频是否完成 */
+                    if (my_zlcr_sweep_is_complete()) {
+                        // 扫频完成
+                        g_sweep_in_progress = 0;
+                        printf("Sweep completed! Printing results:\n");
+                        
+                        // 打印扫频结果
+                        for (uint32_t i = 0; i < g_sweep_total_points; i++) {
+                            printf("Freq: %lu Hz, Magnitude: %.2f Ohm, Phase: %.2f deg\n",
+                                g_sweep_result_array[i].frequency,
+                                g_sweep_result_array[i].magnitude,
+                                g_sweep_result_array[i].phase);
+                        }
+                    } else {
+                        /* 存储完当前频率点测得的未知阻抗信息之后，要切换 DDS 的输出信号频率，测量下一个频率点的阻抗特性 */
+                        my_zlcr_sweep_next();
+                        
+                        // 等待DDS输出稳定(约10ms)
+                        osDelay(10);
+                        
+                        /* 用 timer3 启动定时器开启 ADC 采样 */
+                        switch_timer_sampleRate_Auto(&htim3, g_desired_ADC_sample_rate_Hz, g_desired_ADC_sample_rate_Hz / 100);
+                        HAL_TIM_Base_Start(&htim3);
+                        }
+                    }
                     break;
 
                 case SPECTRUM_STATE:
@@ -259,13 +305,22 @@ void StartADCProcessingTask(void *argument) {
                     {
                         fundamental_result_t ch1_result, ch2_result;
                         
+                        // 分别计算两个通道的频谱数据并存储到独立的缓冲区中
                         my_armcfft32_apply(g_adc1_data_8bit, &ch1_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
+                        memcpy(g_adc1_spectrum_data, g_fft_output_buffer, (FFT_LENGTH / 2) * sizeof(float32_t));
+                        
                         my_armcfft32_apply(g_adc2_data_8bit, &ch2_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
+                        memcpy(g_adc2_spectrum_data, g_fft_output_buffer, (FFT_LENGTH / 2) * sizeof(float32_t));
                         
-                        // 将频谱数据存储到独立的缓冲区中
-                        memcpy(g_adc1_spectrum_data, g_adc1_data_8bit, (FFT_LENGTH / 2) * sizeof(float32_t));
-                        memcpy(g_adc2_spectrum_data, g_adc2_data_8bit, (FFT_LENGTH / 2) * sizeof(float32_t));
-                        
+                        // 打印频谱
+                        printf("=== Spectrum Results ===\n");
+                        for (uint32_t i = 0; i < (FFT_LENGTH / 2); i++) {
+                            printf("  Frequency Bin %lu: %.6f V\n", i, g_adc1_spectrum_data[i]);
+                        }
+                        for (uint32_t i = 0; i < (FFT_LENGTH / 2); i++) {
+                            printf("  Frequency Bin %lu: %.6f V\n", i, g_adc2_spectrum_data[i]);
+                        }
+
                         // 打印频谱分析结果
                         printf("=== Spectrum Analysis Results ===\n");
                         printf("ADC1 - Frequency: %lu Hz, Magnitude: %.6f V\n", ch1_result.fundamental_frequency, ch1_result.fundamental_vrms);
@@ -278,8 +333,9 @@ void StartADCProcessingTask(void *argument) {
                     printf("=== Time Domain Analysis Results ===\n");
                     
                     // 打印ADC1和ADC2的时域数据
-                    for (uint32_t i = 0; i < 10; i++) { // 只打印前10个点作为示例
-                        printf("ADC1[%lu]: %.6f V, ADC2[%lu]: %.6f V\n", i, g_adc1_data_8bit[i], i, g_adc2_data_8bit[i]);
+                    for (uint32_t i = 0; i < ADC_SAMPLE_SIZE; i++) { // 只打印前10个点作为示例
+                        // printf("ADC1[%lu]: %.6f V, ADC2[%lu]: %.6f V\n", i, g_adc1_data_8bit[i], i, g_adc2_data_8bit[i]);
+                         printf("ADC1/2 :%.6f,%.6f\n", g_adc1_data_8bit[i], g_adc2_data_8bit[i]);
                     }
                     break;
 
@@ -304,51 +360,52 @@ void StartADCProcessingTask(void *argument) {
                         
                         my_zlcr_get_capacitance_or_inductance(&g_current_freq_result, &g_current_impedance_result);
                     }
+                    if (adc_mode == ADC_MODE_SWEEP && g_sweep_in_progress) {
+                        // 扫频模式下
+                        /* 在一段频率中，每一个频率点的 ADC 数据都会被采集 */
+                        /* 进入这个部分，意味着当前频率点的采集已经完成 */
+
+                        /* 需要调用 my_armcfft32_apply 函数进行频域分析 */
+                        my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
+                        my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
+
+                        /* 然后利用频域分析结果 g_ch1_fundamental 和 g_ch2_fundamental ，利用 my_zlrc_config 中的接口，得到当前频率下的阻抗信息 */
+                        my_zlcr_get_impedance(&g_ch1_fundamental, &g_ch2_fundamental, &g_current_freq_result); // 获取当前频率下的阻抗信息
+
+                        /* 为了绘制扫频得到的幅频和相频特性，需要将结果保存到对应的数组中 */
+                        if (g_sweep_current_index < SWEEP_MAX_POINTS) {
+                            g_sweep_result_array[g_sweep_current_index] = g_current_freq_result;
+                        }
+
+                        /* 检查扫频是否完成 */
+                        if (my_zlcr_sweep_is_complete()) {
+                            // 扫频完成
+                            g_sweep_in_progress = 0;
+                            printf("Sweep completed! Printing results:\n");
+                            
+                            // 打印扫频结果
+                            for (uint32_t i = 0; i < g_sweep_total_points; i++) {
+                                printf("Freq: %lu Hz, Magnitude: %.2f Ohm, Phase: %.2f deg\n",
+                                    g_sweep_result_array[i].frequency,
+                                    g_sweep_result_array[i].magnitude,
+                                    g_sweep_result_array[i].phase);
+                            }
+                        } else {
+                            /* 存储完当前频率点测得的未知阻抗信息之后，要切换 DDS 的输出信号频率，测量下一个频率点的阻抗特性 */
+                            my_zlcr_sweep_next();
+                            
+                            // 等待DDS输出稳定(约10ms)
+                            osDelay(10);
+                            
+                            /* 用 timer3 启动定时器开启 ADC 采样 */
+                            switch_timer_sampleRate_Auto(&htim3, g_desired_ADC_sample_rate_Hz, g_desired_ADC_sample_rate_Hz / 100);
+                            HAL_TIM_Base_Start(&htim3);
+                        }
+                    }
                     break;
             }
 
-            if (adc_mode == ADC_MODE_SWEEP && g_sweep_in_progress) {
-                // 扫频模式下
-                /* 在一段频率中，每一个频率点的 ADC 数据都会被采集 */
-                /* 进入这个部分，意味着当前频率点的采集已经完成 */
 
-                /* 需要调用 my_armcfft32_apply 函数进行频域分析 */
-                my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
-                my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
-
-                /* 然后利用频域分析结果 g_ch1_fundamental 和 g_ch2_fundamental ，利用 my_zlrc_config 中的接口，得到当前频率下的阻抗信息 */
-                my_zlcr_get_impedance(&g_ch1_fundamental, &g_ch2_fundamental, &g_current_freq_result); // 获取当前频率下的阻抗信息
-
-                /* 为了绘制扫频得到的幅频和相频特性，需要将结果保存到对应的数组中 */
-                if (g_sweep_current_index < SWEEP_MAX_POINTS) {
-                    g_sweep_result_array[g_sweep_current_index] = g_current_freq_result;
-                }
-
-                /* 检查扫频是否完成 */
-                if (my_zlcr_sweep_is_complete()) {
-                    // 扫频完成
-                    g_sweep_in_progress = 0;
-                    printf("Sweep completed! Printing results:\n");
-                    
-                    // 打印扫频结果
-                    for (uint32_t i = 0; i < g_sweep_total_points; i++) {
-                        printf("Freq: %lu Hz, Magnitude: %.2f Ohm, Phase: %.2f deg\n",
-                               g_sweep_result_array[i].frequency,
-                               g_sweep_result_array[i].magnitude,
-                               g_sweep_result_array[i].phase);
-                    }
-                } else {
-                    /* 存储完当前频率点测得的未知阻抗信息之后，要切换 DDS 的输出信号频率，测量下一个频率点的阻抗特性 */
-                    my_zlcr_sweep_next();
-                    
-                    // 等待DDS输出稳定(约10ms)
-                    osDelay(10);
-                    
-                    /* 用 timer3 启动定时器开启 ADC 采样 */
-                    switch_timer_sampleRate_Auto(&htim3, g_desired_ADC_sample_rate_Hz, g_desired_ADC_sample_rate_Hz / 100);
-                    HAL_TIM_Base_Start(&htim3);
-                }
-            }
         }
        osDelay(100); // 延时100毫秒
     }

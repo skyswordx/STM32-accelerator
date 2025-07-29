@@ -1,7 +1,7 @@
 finallattackproject\freertos.o: ../Core/Src/freertos.c
 finallattackproject\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-finallattackproject\freertos.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stddef.h
-finallattackproject\freertos.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdint.h
+finallattackproject\freertos.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stddef.h
+finallattackproject\freertos.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stdint.h
 finallattackproject\freertos.o: ../Core/Inc/FreeRTOSConfig.h
 finallattackproject\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 finallattackproject\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
@@ -25,7 +25,7 @@ finallattackproject\freertos.o: ../Drivers/CMSIS/Include/mpu_armv7.h
 finallattackproject\freertos.o: ../Drivers/CMSIS/Device/ST/STM32H7xx/Include/system_stm32h7xx.h
 finallattackproject\freertos.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h
 finallattackproject\freertos.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
-finallattackproject\freertos.o: D:\KEIL\ARM\ARMCC\Bin\..\include\math.h
+finallattackproject\freertos.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\math.h
 finallattackproject\freertos.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc_ex.h
 finallattackproject\freertos.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_gpio.h
 finallattackproject\freertos.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_gpio_ex.h

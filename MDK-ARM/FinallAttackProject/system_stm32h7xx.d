@@ -2,7 +2,7 @@ finallattackproject\system_stm32h7xx.o: ../Core/Src/system_stm32h7xx.c
 finallattackproject\system_stm32h7xx.o: ../Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h
 finallattackproject\system_stm32h7xx.o: ../Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h750xx.h
 finallattackproject\system_stm32h7xx.o: ../Drivers/CMSIS/Include/core_cm7.h
-finallattackproject\system_stm32h7xx.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdint.h
+finallattackproject\system_stm32h7xx.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stdint.h
 finallattackproject\system_stm32h7xx.o: ../Drivers/CMSIS/Include/cmsis_version.h
 finallattackproject\system_stm32h7xx.o: ../Drivers/CMSIS/Include/cmsis_compiler.h
 finallattackproject\system_stm32h7xx.o: ../Drivers/CMSIS/Include/cmsis_armcc.h
@@ -14,8 +14,8 @@ finallattackproject\system_stm32h7xx.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm3
 finallattackproject\system_stm32h7xx.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h
 finallattackproject\system_stm32h7xx.o: ../Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h
 finallattackproject\system_stm32h7xx.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
-finallattackproject\system_stm32h7xx.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stddef.h
-finallattackproject\system_stm32h7xx.o: D:\KEIL\ARM\ARMCC\Bin\..\include\math.h
+finallattackproject\system_stm32h7xx.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\stddef.h
+finallattackproject\system_stm32h7xx.o: D:\Keil_v5\ARM\ARMCOMPLIER506\Bin\..\include\math.h
 finallattackproject\system_stm32h7xx.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc_ex.h
 finallattackproject\system_stm32h7xx.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_gpio.h
 finallattackproject\system_stm32h7xx.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_gpio_ex.h
