@@ -8,19 +8,6 @@
 #include "my_timer_config.h"
 #include "my_button_config.h"
 
-// 函数模式宏定义
-#define FUNCTION_MODE_NONE    0  // 无模式
-#define FUNCTION_MODE_BASE2   2  // base2_function模式
-#define FUNCTION_MODE_BASE3   3  // base3_function模式
-#define FUNCTION_MODE_BASE4   4  // base4_function模式
-
-// 电压转换宏定义
-#define AD9833_VMAX_V 3.6
-#define AD9954_VMAX_V 1.1
-#define AD9833_VOLTAGE_TO_DAC(voltage) ((uint8_t)((voltage) * 255.0 / AD9833_VMAX_V))
-// AD9954幅度设置范围是0-16383，3V峰峰值对应大约9830
-#define AD9954_VOLTAGE_TO_DAC(voltage) ((uint16_t)((voltage) * 16383.0 / AD9954_VMAX_V))
-
 
 extern TIM_HandleTypeDef htim4;
 extern DAC_HandleTypeDef hdac1;
@@ -29,22 +16,24 @@ extern uint8_t g_short_pressed_key; // 短按按键
 extern uint8_t g_long_pressed_key;  // 长按按键
 
 // 按键状态跟踪变量
-static uint8_t key1_pressed_count = 0;  // 按键1按下的次数
-static uint8_t key2_pressed_count = 0;  // 按键2按下的次数
-static uint8_t key3_pressed_count = 0;  // 按键3按下的次数
+uint8_t key1_pressed_count = 0;  // 按键1按下的次数
+uint8_t key2_pressed_count = 0;  // 按键2按下的次数
+uint8_t key3_pressed_count = 0;  // 按键3按下的次数
+
+
 // 函数模式跟踪变量
-static uint8_t current_function_mode = FUNCTION_MODE_NONE;  // 当前函数模式
+uint8_t current_function_mode = FUNCTION_MODE_NONE;  // 当前函数模式
 
 
 // base2_function模式下的幅度跟踪变量
-static uint8_t base2_ad9833_amplitude = 255;  // AD9833幅度初始值
-static uint16_t base2_ad9954_amplitude = 16383;  // AD9954幅度初始值
-static uint16_t base4_ad9954_amplitude = 16383;  // AD9954幅度初始值
-static double base2_current_frequency = 1000.0;  // 当前频率，初始为1kHz
+uint8_t base2_ad9833_amplitude = 255;  // AD9833幅度初始值
+uint16_t base2_ad9954_amplitude = 16383;  // AD9954幅度初始值
+uint16_t base4_ad9954_amplitude = 16383;  // AD9954幅度初始值
+double base2_current_frequency = 1000.0;  // 当前频率，初始为1kHz
 
 // base3_function模式下的幅度跟踪变量
-static uint8_t base3_ad9833_amplitude = 255;  // AD9833幅度初始值
-static uint16_t base3_ad9954_amplitude = 16383;  // AD9954幅度初始值
+uint8_t base3_ad9833_amplitude = 255;  // AD9833幅度初始值
+uint16_t base3_ad9954_amplitude = 16383;  // AD9954幅度初始值
 
 // base4_function模式下表格输入
 /**
@@ -476,7 +465,7 @@ void base4_function(void){
     // 设置当前模式为base4_function模式
     current_function_mode = FUNCTION_MODE_BASE4;
 
-    
+
 
 
 

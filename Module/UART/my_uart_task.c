@@ -6,15 +6,9 @@
 #include "AD9954.h"              // 包含AD9954控制函数
 #include <stdlib.h>  // 包含atof函数声明
 
-// 电压转换宏定义
-#define AD9833_VMAX_V 3.6
-#define AD9954_VMAX_V 1.1
-#define AD9833_VOLTAGE_TO_DAC(voltage) ((uint8_t)((voltage) * 255.0 / AD9833_VMAX_V))
-// AD9954幅度设置范围是0-16383，3V峰峰值对应大约9830
-#define AD9954_VOLTAGE_TO_DAC(voltage) ((uint16_t)((voltage) * 16383.0 / AD9954_VMAX_V))
+#include "my_parser.h"           // 包含新系统入口函数
 
 extern UART_HandleTypeDef huart1;
-
 extern UART_HandleTypeDef huart6; // 串口屏
 
 char rx_buffer[RX_BUFFER_SIZE];   // 接收数据
@@ -26,6 +20,20 @@ char rx_buffer_uart6[RX_BUFFER_SIZE]; // 串口屏接收数据
 uint8_t aRxBuffer_uart6;              // 串口屏接收中断
 uint8_t uart6_rx_cnt = 0;             // 串口屏接收缓冲计数
 uint8_t g_uart6_ex_flag = 0;          // UART6接收标
+
+// 函数模式跟踪变量
+extern uint8_t current_function_mode;  // 当前函数模式
+
+
+// base2_function模式下的幅度跟踪变量
+extern uint8_t base2_ad9833_amplitude;  // AD9833幅度初始值
+extern uint16_t base2_ad9954_amplitude;  // AD9954幅度初始值
+extern uint16_t base4_ad9954_amplitude;  // AD9954幅度初始值
+extern double base2_current_frequency;  // 当前频率，初始为1kHz
+
+// base3_function模式下的幅度跟踪变量
+extern uint8_t base3_ad9833_amplitude;  // AD9833幅度初始值
+extern uint16_t base3_ad9954_amplitude;  // AD9954幅度初始值
 
 void StartUARTProcessingTask(void const * argument)
 {
@@ -52,7 +60,6 @@ void StartUARTProcessingTask(void const * argument)
 
             // 解析串口屏接收到的字符串
             printf("Received from UART6: %s\n", rx_buffer_uart6);
-            // parse_uart_command(rx_buffer_uart6);
 
             uart6_rx_cnt = 0;
             memset(rx_buffer_uart6, 0, sizeof(rx_buffer_uart6));
