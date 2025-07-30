@@ -48,7 +48,7 @@ finallattackproject\my_dac_config.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdio.h
 finallattackproject\my_dac_config.o: ../Drivers/CMSIS/DSP/Include/arm_math.h
 finallattackproject\my_dac_config.o: D:\KEIL\ARM\ARMCC\Bin\..\include\string.h
 finallattackproject\my_dac_config.o: D:\KEIL\ARM\ARMCC\Bin\..\include\float.h
-finallattackproject\my_dac_config.o: ..\Module\Param\my_parameter_config.h
+finallattackproject\my_dac_config.o: ../Module/Param/my_parameter_config.h
 finallattackproject\my_dac_config.o: ../Module/Frequency/my_freq_config.h
 finallattackproject\my_dac_config.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h
 finallattackproject\my_dac_config.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h

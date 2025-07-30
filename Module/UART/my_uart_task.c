@@ -12,19 +12,26 @@
 #define AD9833_VOLTAGE_TO_DAC(voltage) ((uint8_t)((voltage) * 255.0 / AD9833_VMAX_V))
 // AD9954幅度设置范围是0-16383，3V峰峰值对应大约9830
 #define AD9954_VOLTAGE_TO_DAC(voltage) ((uint16_t)((voltage) * 16383.0 / AD9954_VMAX_V))
+
 extern UART_HandleTypeDef huart1;
+
+extern UART_HandleTypeDef huart6; // 串口屏
 
 char rx_buffer[RX_BUFFER_SIZE];   // 接收数据
 uint8_t aRxBuffer;                // 接收中断缓冲
 uint8_t uart1_rx_cnt = 0;         // 接收缓冲计数
 uint8_t g_uart1_ex_flag = 0;      // UART1接收标志
 
-
+char rx_buffer_uart6[RX_BUFFER_SIZE]; // 串口屏接收数据
+uint8_t aRxBuffer_uart6;              // 串口屏接收中断
+uint8_t uart6_rx_cnt = 0;             // 串口屏接收缓冲计数
+uint8_t g_uart6_ex_flag = 0;          // UART6接收标
 
 void StartUARTProcessingTask(void const * argument)
 {
     // UART任务代码
     HAL_UART_Receive_IT(&huart1, (uint8_t *)&aRxBuffer, 1);
+    HAL_UART_Receive_IT(&huart6, (uint8_t *)&aRxBuffer_uart6, 1);
     for(;;)
     {
         /* 串口接收中断 */
@@ -37,6 +44,18 @@ void StartUARTProcessingTask(void const * argument)
 
             uart1_rx_cnt = 0;
             memset(rx_buffer, 0, sizeof(rx_buffer));
+        }
+
+        if (g_uart6_ex_flag)
+        {
+            g_uart6_ex_flag = 0;
+
+            // 解析串口屏接收到的字符串
+            printf("Received from UART6: %s\n", rx_buffer_uart6);
+            // parse_uart_command(rx_buffer_uart6);
+
+            uart6_rx_cnt = 0;
+            memset(rx_buffer_uart6, 0, sizeof(rx_buffer_uart6));
         }
 
         osDelay(20); // 延时20ms
@@ -308,25 +327,50 @@ void update_relay_state(void)
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 
-  /* 注意： 需要回调时，不应修改该函数、
-           可在用户文件中实现 HAL_UART_TxCpltCallback */
-    if(uart1_rx_cnt >= RX_BUFFER_SIZE-1)  //溢出判断
-    {
-        uart1_rx_cnt = 0;
-        memset(rx_buffer,0x00,sizeof(rx_buffer));
-    }
-    else
-    {
-        if(aRxBuffer == 0x0D) // 只用回车作为结束符
+    if (huart->Instance == USART1) {
+        // 处理接收到的数据
+        /* 注意： 需要回调时，不应修改该函数、可在用户文件中实现 HAL_UART_TxCpltCallback */
+        if(uart1_rx_cnt >= RX_BUFFER_SIZE-1)  //溢出判断
         {
-            rx_buffer[uart1_rx_cnt] = 0; // 字符串结尾
-            g_uart1_ex_flag = 1;
+            uart1_rx_cnt = 0;
+            memset(rx_buffer,0x00,sizeof(rx_buffer));
         }
         else
         {
-            rx_buffer[uart1_rx_cnt++] = aRxBuffer;
+            if(aRxBuffer == 0x0D) // 只用回车作为结束符
+            {
+                rx_buffer[uart1_rx_cnt] = 0; // 字符串结尾
+                g_uart1_ex_flag = 1;
+            }
+            else
+            {
+                rx_buffer[uart1_rx_cnt++] = aRxBuffer;
+            }
         }
+
+        HAL_UART_Receive_IT(&huart1, (uint8_t *)&aRxBuffer, 1);   //再开启接收中断
     }
 
-    HAL_UART_Receive_IT(&huart1, (uint8_t *)&aRxBuffer, 1);   //再开启接收中断
+    if (huart->Instance == USART6) {
+        // 处理串口屏接收到的数据
+        if(uart6_rx_cnt >= RX_BUFFER_SIZE-1)  //溢出判断
+        {
+            uart6_rx_cnt = 0;
+            memset(rx_buffer_uart6,0x00,sizeof(rx_buffer_uart6));
+        }
+        else
+        {
+            if(aRxBuffer_uart6 == 0x0D) // 只用回车作为结束符
+            {
+                rx_buffer_uart6[uart6_rx_cnt] = 0; // 字符串结尾
+                g_uart6_ex_flag = 1;
+            }
+            else
+            {
+                rx_buffer_uart6[uart6_rx_cnt++] = aRxBuffer_uart6;
+            }
+        }
+
+        HAL_UART_Receive_IT(&huart6, (uint8_t *)&aRxBuffer_uart6, 1);   //再开启接收中断
+    }
 }
