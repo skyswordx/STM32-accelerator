@@ -4,7 +4,14 @@
 #include "my_zlcr_config.h"      // 包含DDS控制函数
 #include "AD9833.h"              // 包含AD9833控制函数
 #include "AD9954.h"              // 包含AD9954控制函数
+#include <stdlib.h>  // 包含atof函数声明
 
+// 电压转换宏定义
+#define AD9833_VMAX_V 3.6
+#define AD9954_VMAX_V 1.1
+#define AD9833_VOLTAGE_TO_DAC(voltage) ((uint8_t)((voltage) * 255.0 / AD9833_VMAX_V))
+// AD9954幅度设置范围是0-16383，3V峰峰值对应大约9830
+#define AD9954_VOLTAGE_TO_DAC(voltage) ((uint16_t)((voltage) * 16383.0 / AD9954_VMAX_V))
 extern UART_HandleTypeDef huart1;
 
 char rx_buffer[RX_BUFFER_SIZE];   // 接收数据
@@ -131,8 +138,13 @@ void handle_set_command(char* param, char* value)
         }
     }
     else if (strcmp(param, "DDS_AMP") == 0) {
-        g_desired_dds_amplitude = (uint32_t)strtoul(value, NULL, 10);
-        printf("Set DDS amplitude: %lu\n", g_desired_dds_amplitude);
+        float voltage = atof(value);
+        if (g_desired_dds_type == DDS_TYPE_AD9833) {
+            g_desired_dds_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
+        } else {
+            g_desired_dds_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
+        }
+        printf("Set DDS amplitude: %.2f V (%lu)\n", voltage, g_desired_dds_amplitude);
         // 更新DDS幅度
         if (g_desired_dds_type == DDS_TYPE_AD9833) {
             AD9833_AmpSet(g_desired_dds_amplitude);

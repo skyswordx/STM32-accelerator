@@ -34,14 +34,18 @@ static uint8_t key2_pressed_count = 0;  // 按键2按下的次数
 static uint8_t key3_pressed_count = 0;  // 按键3按下的次数
 // 函数模式跟踪变量
 static uint8_t current_function_mode = FUNCTION_MODE_NONE;  // 当前函数模式
-// base2_function模式下的频率跟踪变量
-// base3_function和base4_function模式下的幅度跟踪变量
-static uint8_t base3_ad9833_amplitude = 255;  // AD9833幅度初始值
+
+
 // base2_function模式下的幅度跟踪变量
 static uint8_t base2_ad9833_amplitude = 255;  // AD9833幅度初始值
 static uint16_t base2_ad9954_amplitude = 16383;  // AD9954幅度初始值
 static uint16_t base4_ad9954_amplitude = 16383;  // AD9954幅度初始值
 static double base2_current_frequency = 1000.0;  // 当前频率，初始为1kHz
+
+// base3_function模式下的幅度跟踪变量
+static uint8_t base3_ad9833_amplitude = 255;  // AD9833幅度初始值
+static uint16_t base3_ad9954_amplitude = 16383;  // AD9954幅度初始值
+
 
 void myParserTask(void const * argument)
 {
@@ -420,9 +424,8 @@ void base2_function(void){
     //     // 设置AD9954频率
     //     AD9954_Set_Fre(frequency);
     //     printf("AD9954 Frequency set to: %.0f Hz\n", frequency);
-        
-    //     // 延时5秒
-    //     osDelay(5000);
+
+    //     osDelay(200);
         
     //     // 频率递增100Hz
     //     frequency += 100.0;
@@ -437,6 +440,26 @@ void base3_function(void){
     printf("Executing base3_function logic\n");
     // 设置当前模式为base3_function模式
     current_function_mode = FUNCTION_MODE_BASE3;
+
+    float ad9833_init_voltage = 0.7919;// 0.82
+    if (ad9833_init_voltage > AD9833_VMAX_V) {
+        ad9833_init_voltage = AD9833_VMAX_V;
+    }
+    base3_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(ad9833_init_voltage);
+    
+    float ad9954_init_voltage = 0.85;//微调，实际示波器 0.7919
+    if (ad9954_init_voltage > AD9954_VMAX_V) {
+        ad9954_init_voltage = AD9954_VMAX_V;
+    }
+    base3_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(ad9954_init_voltage);
+
+    AD9833_AmpSet(base3_ad9833_amplitude);
+    AD9954_Set_Amp(base3_ad9954_amplitude);
+
+    AD9833_WaveSeting(1000, 0, SIN_WAVE, 0);
+    AD9954_Set_Fre(1000);
+
+    printf("base3 completed\n");
 
 }
 

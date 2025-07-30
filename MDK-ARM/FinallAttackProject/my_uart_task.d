@@ -65,3 +65,4 @@ finallattackproject\my_uart_task.o: ../Module/Button/my_button_config.h
 finallattackproject\my_uart_task.o: ../Module/ZLCR/my_zlcr_config.h
 finallattackproject\my_uart_task.o: ../Drivers/AD9833/AD9833.h
 finallattackproject\my_uart_task.o: ../Drivers/AD9954/AD9954.h
+finallattackproject\my_uart_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdlib.h
