@@ -356,6 +356,19 @@ void StartADCProcessingTask(void *argument) {
                     printf("=== DIY State ===\n");
                     printf("This is a custom function state.\n");
                     break;
+                case TEST_DAC_DDS:
+                    fundamental_result_t ch1_result, ch2_result;
+                        
+                    // 分别计算两个通道的频谱数据并存储到独立的缓冲区中
+                    my_armcfft32_apply(g_adc1_data_8bit, &ch1_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
+                    // memcpy(g_adc1_spectrum_data, g_fft_output_buffer, (FFT_LENGTH / 2) * sizeof(float32_t));
+                        
+                    my_armcfft32_apply(g_adc2_data_8bit, &ch2_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
+                    // memcpy(g_adc2_spectrum_data, g_fft_output_buffer, (FFT_LENGTH / 2) * sizeof(float32_t));
+
+                    // 计算 ch1 的 DAC/DDS 期望频率与ADC1读取频率的误差
+                    
+
 
                 default:
                     // 默认执行LCR_STATE逻辑

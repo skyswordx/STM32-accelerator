@@ -35,6 +35,7 @@ typedef enum {
     LCR_STATE = 0,
     SPECTRUM_STATE,
     TIME_STATE,
+    TEST_DAC_DDS,
     DIY_STATE
 } function_state_t;
 
