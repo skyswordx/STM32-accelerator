@@ -29,6 +29,7 @@ void StartButtonProcessingTask(void *argument) {
     // AD9833 DDS
     // AD9833_WaveSeting(1000.0, 0, SIN_WAVE, 0); // 设置AD9833为正弦波，频率1kHz，初相位0
     // AD9833_AmpSet(0x1FFF); // 设置AD9833幅度为最大值
+    uint32_t delta = 0;
 
     for (;;) {
 
@@ -44,41 +45,23 @@ void StartButtonProcessingTask(void *argument) {
             
             switch (g_short_pressed_key) {
                 case 1:
-                    // 按键1: INA226 测试
-                    float32_t voltage = INA226_GetBusV();
-                    float32_t current = INA226_GetCurrent();
-                    float32_t power = INA226_GetPower();
-
-                    printf("INA226: Voltage: %.2f V, Current: %.2f A, Power: %.2f W\r\n", voltage, current, power);
                     break;
                 case 2:
                     // 按键2: AD9833 DDS 测试
-                    AD9833_WaveSeting(g_desired_dds_frequency, 0, SIN_WAVE, 0); // 设置AD9833为正弦波
+                    AD9833_WaveSeting(g_desired_dds_frequency+ 100*delta, 0, SIN_WAVE, 0); // 设置AD9833为正弦波
                     AD9833_AmpSet(120); // 设置AD9833幅度为
-                    printf("AD9833: Set Frequency to %lu Hz\r\n", g_desired_dds_frequency);
+                    printf("AD9833: Set Frequency to %lu Hz\r\n", g_desired_dds_frequency + 100*delta);
+                    delta++;
                     break;
                 case 3:
                     // 按键3: AD9954 DDS 测试
-                    AD9954_Set_Fre(g_desired_dds_frequency);
+                    AD9954_Set_Fre(g_desired_dds_frequency+ 100*delta);
                     AD9954_Set_Amp(16383/2.0); // 设置AD9954幅度为
                     AD9954_Set_Phase(0);
-                    printf("AD9954: Set Frequency to %lu Hz\r\n", g_desired_dds_frequency);
+                    printf("AD9954: Set Frequency to %lu Hz\r\n", g_desired_dds_frequency + 100*delta);
+                    delta++;
                     break;
                 case 4:
-                    // 按键4: 继电器测试
-                    // 根据relay_state设置对应的GPIO引脚
-                    // 先重置所有引脚
-                    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_RESET); 
-                    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_RESET); 
-                    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_RESET);
-                    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_RESET);
-                    switch(relay_state) {
-                        case 0: HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_SET); break;
-                        case 1: HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_SET); break;
-                        case 2: HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_SET); break;
-                        case 3: HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_SET); break;
-                    }
-                    relay_state = (relay_state + 1) % 4; // 循环计数
                     break;
                 case 5:
                     break;

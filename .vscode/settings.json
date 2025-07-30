@@ -23,6 +23,7 @@
     "my_parser.h": "c",
     "my_dac_config.h": "c",
     "my_parameter_config.h": "c",
-    "my_timer_config.h": "c"
+    "my_timer_config.h": "c",
+    "my_button_task.h": "c"
   }
 }

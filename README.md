@@ -79,16 +79,33 @@ uint32_t g_desired_dds_frequency = 1000; // 用户期望设置的DDS频率（相
 ```
 // 按键映射表
 static const uint8_t key_map[KEYPAD_NUM_ROWS][KEYPAD_NUM_COLS] = {
-    {3, 2, 1},
-    {6, 5, 4},
-    {9, 8, 7}
+    {3, 2(所有DDS幅度增加), 1},
+    {6(所有DDS频率增加), 5, 4(所有DDS频率减小)},
+    {9, 8(所有DDS幅度减小), 7}
 };
 
 // 按键检测变量
 uint8_t g_short_pressed_key = NO_KEY_PRESSED;
 uint8_t g_long_pressed_key = NO_KEY_PRESSED;
 ```
-为了应对测评中，不能使用电脑和串口助手的情况下，我想要首先利用矩阵键盘复现通过串口发送数据让 MCU 解析的功能
+为了应对测评中，不能使用电脑和串口助手的情况下，我想要首先利用矩阵键盘进行仪器的操作
+
+要求第一次按下按键1，就进入base2_function处理base2_function的逻辑
+第一次按下按键2，就进入base3_function处理base3_function的逻辑
+第一次按下按键3，就进入base4_function处理base4_function的逻辑
+
+第二次按下的意义则根据进入不同的函数会有不一样的逻辑，请你在 my_parser实现这个框架
+
+
+Done
+- PC1 按键触发定时器驱动 ADC
+- 运行时修改 ADC 采样率
+    - 我现在想要每次按下按键之后切换ADC采样率，ADC是使用定时器触发的，简而言之就是要修改htim3的各种参数，我觉得可以通过htim3的句柄实现，但是这种运行时修改是否需要重新init timer还是什么，请你查阅工程中的hal timer api 进行解答
+
+定时器修改 DAC 输出波形的频率
+
+
+复现通过串口发送数据让 MCU 解析的功能
 我是这么设想的：
 - 第一次按下前的编号，就代表了串口解析格式`xx:yy:cc`中的 xx 字段（cmd_type），
     - 例如第一次按下的 1 键值代表设置参数命令，就是类似于发送串口解析中的 SET 字段，
@@ -105,10 +122,3 @@ uint8_t g_long_pressed_key = NO_KEY_PRESSED;
 - 这一套过程如果有任何按键错误，可以选择通过长按按键 9 进程取消输入，重新开始检测第一次按下
 
 请你参考 my_uart_task.c 中的串口解析函数修改 my_button_task 按键解析系统，这个串口解析经过修改可以应对get:all命令整个命令只有两个字段的情形，而按键部分却没办法应对，请你修改并完善一下按键处理get:all等两个字段长度的命令
-
-Done
-- PC1 按键触发定时器驱动 ADC
-- 运行时修改 ADC 采样率
-    - 我现在想要每次按下按键之后切换ADC采样率，ADC是使用定时器触发的，简而言之就是要修改htim3的各种参数，我觉得可以通过htim3的句柄实现，但是这种运行时修改是否需要重新init timer还是什么，请你查阅工程中的hal timer api 进行解答
-
-定时器修改 DAC 输出波形的频率
