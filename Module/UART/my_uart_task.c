@@ -24,16 +24,24 @@ uint8_t g_uart6_ex_flag = 0;          // UART6接收标
 // 函数模式跟踪变量
 extern uint8_t current_function_mode;  // 当前函数模式
 
+// 串口屏当前页面跟踪变量
+static uint8_t current_lcd_page = 2;  // 默认在基础功能2页面
 
 // base2_function模式下的幅度跟踪变量
 extern uint8_t base2_ad9833_amplitude;  // AD9833幅度初始值
 extern uint16_t base2_ad9954_amplitude;  // AD9954幅度初始值
-extern uint16_t base4_ad9954_amplitude;  // AD9954幅度初始值
 extern double base2_current_frequency;  // 当前频率，初始为1kHz
 
 // base3_function模式下的幅度跟踪变量
 extern uint8_t base3_ad9833_amplitude;  // AD9833幅度初始值
 extern uint16_t base3_ad9954_amplitude;  // AD9954幅度初始值
+
+// base4_function模式下的幅度跟踪变量
+extern uint8_t base4_ad9833_amplitude;  // AD9833幅度初始值
+extern uint16_t base4_ad9954_amplitude;  // AD9954幅度初始值
+extern double base4_ad9833_frequency;    // AD9833当前频率
+extern double base4_ad9954_frequency;    // AD9954当前频率
+
 
 void StartUARTProcessingTask(void const * argument)
 {
@@ -60,6 +68,7 @@ void StartUARTProcessingTask(void const * argument)
 
             // 解析串口屏接收到的字符串
             printf("Received from UART6: %s\n", rx_buffer_uart6);
+            parse_serial_lcd_command(rx_buffer_uart6);
 
             uart6_rx_cnt = 0;
             memset(rx_buffer_uart6, 0, sizeof(rx_buffer_uart6));
@@ -226,6 +235,62 @@ void handle_set_command(char* param, char* value)
 }
 
 /**
+ * @brief 处理串口屏SET命令
+ * @param param 参数名
+ * @param value 参数值
+ */
+void handle_serial_lcd_set_command(char* param, char* value)
+{
+    // 解析参数值
+    float voltage = atof(value);
+    
+    // 根据当前页面和参数类型更新对应的幅度跟踪变量
+    if (strcmp(param, "DDS_AMP") == 0) {
+        // 更新幅度跟踪变量，不调用实际的硬件设置函数
+        if (current_lcd_page == 2) {
+            // 在基础功能2页面
+            if (g_desired_dds_type == DDS_TYPE_AD9833) {
+                base2_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
+                printf("Base2 AD9833 amplitude updated: %.2f V -> %d\n", voltage, base2_ad9833_amplitude);
+            } else {
+                base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
+                printf("Base2 AD9954 amplitude updated: %.2f V -> %d\n", voltage, base2_ad9954_amplitude);
+            }
+        } else if (current_lcd_page == 3) {
+            // 在基础功能3页面
+            if (g_desired_dds_type == DDS_TYPE_AD9833) {
+                base3_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
+                printf("Base3 AD9833 amplitude updated: %.2f V -> %d\n", voltage, base3_ad9833_amplitude);
+            } else {
+                base3_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
+                printf("Base3 AD9954 amplitude updated: %.2f V -> %d\n", voltage, base3_ad9954_amplitude);
+            }
+        } else if (current_lcd_page == 4) {
+            // 在基础功能4页面
+            // 基础功能4页面既使用AD9954，也使用AD9833
+            base4_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
+            base4_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
+            printf("Base4 AD9833 amplitude updated: %.2f V -> %d\n", voltage, base4_ad9833_amplitude);
+            printf("Base4 AD9954 amplitude updated: %.2f V -> %d\n", voltage, base4_ad9954_amplitude);
+        }
+    } else if (strcmp(param, "DDS_FREQ") == 0) {
+        // 更新频率跟踪变量
+        double frequency = atof(value);
+        if (current_lcd_page == 2) {
+            base2_current_frequency = frequency;
+            printf("Base2 frequency updated: %.2f Hz\n", frequency);
+        } else if (current_lcd_page == 4) {
+            base4_ad9833_frequency = frequency;
+            base4_ad9954_frequency = frequency;
+            printf("Base4 AD9833 frequency updated: %.2f Hz\n", frequency);
+            printf("Base4 AD9954 frequency updated: %.2f Hz\n", frequency);
+        }
+    } else {
+        printf("Unknown parameter: %s\n", param);
+    }
+}
+
+/**
  * @brief 处理GET命令
  * @param param 参数名
  */
@@ -379,5 +444,99 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
         }
 
         HAL_UART_Receive_IT(&huart6, (uint8_t *)&aRxBuffer_uart6, 1);   //再开启接收中断
+    }
+}
+
+/**
+ * @brief 解析串口屏命令
+ * @param cmd 接收到的命令字符串
+ */
+void parse_serial_lcd_command(char* cmd)
+{
+    // 串口屏命令解析
+    // S2 - 开始测试，调用base2_function函数
+    // S3 - 开始测试，调用base3_function函数
+    // S4 - 开始测试，调用base4_function函数
+    // I2 - 进入基础功能2页面
+    // I3 - 进入基础功能3页面
+    // I4 - 进入基础功能4页面
+
+    if (strcmp(cmd, "S2") == 0) {
+        // 串口屏发送"S2"命令，表示开始测试，MCU接收到该命令后会调用base2_function函数
+        printf("Received S2 command, calling base2_function\n");
+        current_lcd_page = 2;  // 更新当前页面跟踪变量
+        base2_function();
+    }
+    else if (strcmp(cmd, "S3") == 0) {
+        // 串口屏发送"S3"命令，表示开始测试，MCU接收到该命令后会调用base3_function函数
+        printf("Received S3 command, calling base3_function\n");
+        current_lcd_page = 3;  // 更新当前页面跟踪变量
+        base3_function();
+    }
+    else if (strcmp(cmd, "S4") == 0) {
+        // 串口屏发送"S4"命令，表示开始测试，MCU接收到该命令后会调用base4_function函数
+        printf("Received S4 command, calling base4_function\n");
+        current_lcd_page = 4;  // 更新当前页面跟踪变量
+        base4_function();
+    }
+    else if (strcmp(cmd, "I2") == 0) {
+        // 串口屏发送"I2"命令，表示进入基础功能2页面
+        printf("Entered base2 page\n");
+        current_lcd_page = 2;  // 更新当前页面跟踪变量
+    }
+    else if (strcmp(cmd, "I3") == 0) {
+        // 串口屏发送"I3"命令，表示进入基础功能3页面
+        printf("Entered base3 page\n");
+        current_lcd_page = 3;  // 更新当前页面跟踪变量
+    }
+    else if (strcmp(cmd, "I4") == 0) {
+        // 串口屏发送"I4"命令，表示进入基础功能4页面
+        printf("Entered base4 page\n");
+        current_lcd_page = 4;  // 更新当前页面跟踪变量
+    }
+    else {
+        // 检查是否是SET命令
+        char *token;
+        char *cmd_type;
+        char *param;
+        char *value = NULL;
+        
+        // 复制命令字符串，因为strtok会修改原字符串
+        char cmd_copy[256];
+        strncpy(cmd_copy, cmd, sizeof(cmd_copy) - 1);
+        cmd_copy[sizeof(cmd_copy) - 1] = '\0';
+        
+        // 使用strtok分割字符串
+        token = strtok(cmd_copy, ":");
+        if (token != NULL) {
+            cmd_type = token;
+            
+            token = strtok(NULL, ":");
+            if (token != NULL) {
+                param = token;
+                
+                // 尝试获取第三个部分(可选)
+                token = strtok(NULL, ":");
+                if (token != NULL) {
+                    value = token;
+                }
+                
+                // 处理SET命令
+                if (strcmp(cmd_type, "SET") == 0) {
+                    // SET命令必须有值
+                    if (value != NULL) {
+                        handle_serial_lcd_set_command(param, value);
+                    } else {
+                        printf("Serial LCD SET command requires a value\n");
+                    }
+                } else {
+                    printf("Unknown serial LCD command: %s\n", cmd);
+                }
+            } else {
+                printf("Unknown serial LCD command: %s\n", cmd);
+            }
+        } else {
+            printf("Unknown serial LCD command: %s\n", cmd);
+        }
     }
 }

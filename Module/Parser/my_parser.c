@@ -35,6 +35,11 @@ double base2_current_frequency = 1000.0;  // 当前频率，初始为1kHz
 uint8_t base3_ad9833_amplitude = 255;  // AD9833幅度初始值
 uint16_t base3_ad9954_amplitude = 16383;  // AD9954幅度初始值
 
+// base4_function模式下的幅度和频率跟踪变量
+uint8_t base4_ad9833_amplitude = 255;    // AD9833幅度初始值
+double base4_ad9833_frequency = 1000.0;   // AD9833当前频率
+double base4_ad9954_frequency = 1000.0;   // AD9954当前频率
+
 // base4_function模式下表格输入
 /**
  * 第一个维度行是 100Hz, 200 Hz, ..., 3000 Hz 一共 30 行
@@ -431,6 +436,7 @@ void base2_function(void){
     // }
     
     // printf("Frequency sweep completed\n");
+    printf("base2 completed\n");
 }
 
 void base3_function(void){
@@ -468,5 +474,5 @@ void base4_function(void){
 
 
 
-
+    printf("base4 completed\n");
 }

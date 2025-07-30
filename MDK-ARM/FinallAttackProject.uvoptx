@@ -152,71 +152,7 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>67</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134254614</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Module\Parser\my_parser.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\FinallAttackProject\../Module/Parser/my_parser.c\67</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>43</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134245112</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Module\UART\my_uart_task.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\FinallAttackProject\../Module/UART/my_uart_task.c\43</Expression>
-        </Bp>
-        <Bp>
-          <Number>2</Number>
-          <Type>0</Type>
-          <LineNumber>51</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134245138</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Module\UART\my_uart_task.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\FinallAttackProject\../Module/UART/my_uart_task.c\51</Expression>
-        </Bp>
-        <Bp>
-          <Number>3</Number>
-          <Type>0</Type>
-          <LineNumber>358</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134242546</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Module\UART\my_uart_task.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\FinallAttackProject\../Module/UART/my_uart_task.c\358</Expression>
-        </Bp>
-        <Bp>
-          <Number>4</Number>
-          <Type>0</Type>
-          <LineNumber>354</LineNumber>
+          <LineNumber>361</LineNumber>
           <EnabledFlag>1</EnabledFlag>
           <Address>134242528</Address>
           <ByteObject>0</ByteObject>
@@ -227,10 +163,10 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>..\Module\UART\my_uart_task.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\FinallAttackProject\../Module/UART/my_uart_task.c\354</Expression>
+          <Expression>\\FinallAttackProject\../Module/UART/my_uart_task.c\361</Expression>
         </Bp>
         <Bp>
-          <Number>5</Number>
+          <Number>1</Number>
           <Type>0</Type>
           <LineNumber>103</LineNumber>
           <EnabledFlag>1</EnabledFlag>
@@ -246,7 +182,7 @@
           <Expression></Expression>
         </Bp>
         <Bp>
-          <Number>6</Number>
+          <Number>2</Number>
           <Type>0</Type>
           <LineNumber>105</LineNumber>
           <EnabledFlag>1</EnabledFlag>
@@ -262,7 +198,7 @@
           <Expression></Expression>
         </Bp>
         <Bp>
-          <Number>7</Number>
+          <Number>3</Number>
           <Type>0</Type>
           <LineNumber>105</LineNumber>
           <EnabledFlag>1</EnabledFlag>
