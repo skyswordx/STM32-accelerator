@@ -49,10 +49,10 @@ void myParserTask(void const * argument)
     AD9833_Init_GPIO();
     AD9954_Init(); // Initialize AD9954
     // Set amplitude to 2V for AD9833 using the voltage conversion macro
-    AD9833_AmpSet(255);
+    AD9833_AmpSet(255/2);
     
     // Set amplitude to maximum for AD9954 (max value is 16383)
-    AD9954_Set_Amp(16383);
+    AD9954_Set_Amp(16383/2);
     AD9954_Set_Phase(0);//写相位
 
     
@@ -113,19 +113,29 @@ void myParserTask(void const * argument)
                             // 在base2_function模式下，按键2控制所有DDS的幅度增加
                             printf("Key 2 pressed in base2_function mode: Increasing all DDS amplitude\n");
                             // 增加AD9833幅度
-                            if (base2_ad9833_amplitude < 250) {
-                                base2_ad9833_amplitude += 5;
-                            } else {
-                                base2_ad9833_amplitude = 255;
+                            // 将当前DAC值转换回电压值
+                            float current_ad9833_voltage = (float)base2_ad9833_amplitude * AD9833_VMAX_V / 255.0;
+                            // 增加0.1V
+                            current_ad9833_voltage += 0.1;
+                            // 检查是否超过最大电压
+                            if (current_ad9833_voltage > AD9833_VMAX_V) {
+                                current_ad9833_voltage = AD9833_VMAX_V;
                             }
+                            // 转换为DAC值
+                            base2_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(current_ad9833_voltage);
                             AD9833_AmpSet(base2_ad9833_amplitude);
                             
                             // 增加AD9954幅度
-                            if (base2_ad9954_amplitude < 16378) {
-                                base2_ad9954_amplitude += 5;
-                            } else {
-                                base2_ad9954_amplitude = 16383;
+                            // 将当前DAC值转换回电压值
+                            float current_ad9954_voltage = (float)base2_ad9954_amplitude * AD9954_VMAX_V / 16383.0;
+                            // 增加0.1V
+                            current_ad9954_voltage += 0.1;
+                            // 检查是否超过最大电压
+                            if (current_ad9954_voltage > AD9954_VMAX_V) {
+                                current_ad9954_voltage = AD9954_VMAX_V;
                             }
+                            // 转换为DAC值
+                            base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(current_ad9954_voltage);
                             AD9954_Set_Amp(base2_ad9954_amplitude);
                             
                             printf("New amplitudes - AD9833: %d, AD9954: %d\n", base2_ad9833_amplitude, base2_ad9954_amplitude);
@@ -286,19 +296,29 @@ void myParserTask(void const * argument)
                             // 在base2_function模式下，按键8控制所有DDS的幅度减小
                             printf("Key 8 pressed in base2_function mode: Decreasing all DDS amplitude\n");
                             // 减小AD9833幅度
-                            if (base2_ad9833_amplitude > 5) {
-                                base2_ad9833_amplitude -= 5;
-                            } else {
-                                base2_ad9833_amplitude = 0;
+                            // 将当前DAC值转换回电压值
+                            float current_ad9833_voltage = (float)base2_ad9833_amplitude * AD9833_VMAX_V / 255.0;
+                            // 减小0.1V
+                            current_ad9833_voltage -= 0.1;
+                            // 检查是否低于0V
+                            if (current_ad9833_voltage < 0.0) {
+                                current_ad9833_voltage = 0.0;
                             }
+                            // 转换为DAC值
+                            base2_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(current_ad9833_voltage);
                             AD9833_AmpSet(base2_ad9833_amplitude);
                             
                             // 减小AD9954幅度
-                            if (base2_ad9954_amplitude > 5) {
-                                base2_ad9954_amplitude -= 5;
-                            } else {
-                                base2_ad9954_amplitude = 0;
+                            // 将当前DAC值转换回电压值
+                            float current_ad9954_voltage = (float)base2_ad9954_amplitude * AD9954_VMAX_V / 16383.0;
+                            // 减小0.1V
+                            current_ad9954_voltage -= 0.1;
+                            // 检查是否低于0V
+                            if (current_ad9954_voltage < 0.0) {
+                                current_ad9954_voltage = 0.0;
                             }
+                            // 转换为DAC值
+                            base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(current_ad9954_voltage);
                             AD9954_Set_Amp(base2_ad9954_amplitude);
                             
                             printf("New amplitudes - AD9833: %d, AD9954: %d\n", base2_ad9833_amplitude, base2_ad9954_amplitude);
@@ -357,7 +377,7 @@ void myParserTask(void const * argument)
         }
         
         
-        osDelay(200); // Delay for 2 seconds between steps
+        osDelay(20); 
     }
 }
 
@@ -371,8 +391,18 @@ void base2_function(void){
     base2_current_frequency = 1000.0; // 从1kHz开始
     
     // 初始化幅度跟踪变量
-    base2_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(3.0); // 3V峰峰值转换为AD9833的DAC值
-    base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(3.0); // 3V峰峰值转换为AD9954的DAC值
+    // 检查电压是否超过最大值
+    float ad9833_init_voltage = 3.0;
+    if (ad9833_init_voltage > AD9833_VMAX_V) {
+        ad9833_init_voltage = AD9833_VMAX_V;
+    }
+    base2_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(ad9833_init_voltage);
+    
+    float ad9954_init_voltage = 3.0;
+    if (ad9954_init_voltage > AD9954_VMAX_V) {
+        ad9954_init_voltage = AD9954_VMAX_V;
+    }
+    base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(ad9954_init_voltage);
     
     // 实现间隔5秒，让AD9954和AD9833依次从1kHz以100Hz递增到1MHz，并且输出的峰峰值为3V
     double frequency = base2_current_frequency; // 从1kHz开始
@@ -382,23 +412,23 @@ void base2_function(void){
     AD9954_Set_Amp(base2_ad9954_amplitude);
     
     // 循环递增频率直到1MHz
-    while (frequency <= 1000000.0) {
-        // 设置AD9833频率
-        AD9833_WaveSeting(frequency, 0, SIN_WAVE, 0);
-        printf("AD9833 Frequency set to: %.0f Hz\n", frequency);
+    // while (frequency <= 1000000.0) {
+    //     // 设置AD9833频率
+    //     AD9833_WaveSeting(frequency, 0, SIN_WAVE, 0);
+    //     printf("AD9833 Frequency set to: %.0f Hz\n", frequency);
         
-        // 设置AD9954频率
-        AD9954_Set_Fre(frequency);
-        printf("AD9954 Frequency set to: %.0f Hz\n", frequency);
+    //     // 设置AD9954频率
+    //     AD9954_Set_Fre(frequency);
+    //     printf("AD9954 Frequency set to: %.0f Hz\n", frequency);
         
-        // 延时5秒
-        osDelay(5000);
+    //     // 延时5秒
+    //     osDelay(5000);
         
-        // 频率递增100Hz
-        frequency += 100.0;
-        // 更新跟踪变量
-        base2_current_frequency = frequency;
-    }
+    //     // 频率递增100Hz
+    //     frequency += 100.0;
+    //     // 更新跟踪变量
+    //     base2_current_frequency = frequency;
+    // }
     
     printf("Frequency sweep completed\n");
 }

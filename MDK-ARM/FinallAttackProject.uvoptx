@@ -152,18 +152,18 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>105</LineNumber>
+          <LineNumber>67</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134249132</Address>
+          <Address>134247628</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Module\ADC\my_adc_task.c</Filename>
+          <Filename>..\Module\Parser\my_parser.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\FinallAttackProject\../Module/ADC/my_adc_task.c\105</Expression>
+          <Expression>\\FinallAttackProject\../Module/Parser/my_parser.c\67</Expression>
         </Bp>
         <Bp>
           <Number>1</Number>
@@ -178,6 +178,22 @@
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>0</BreakIfRCount>
           <Filename>startup_stm32h750xx.s</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression></Expression>
+        </Bp>
+        <Bp>
+          <Number>2</Number>
+          <Type>0</Type>
+          <LineNumber>105</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>0</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>0</BreakIfRCount>
+          <Filename>..\Module\ADC\my_adc_task.c</Filename>
           <ExecCommand></ExecCommand>
           <Expression></Expression>
         </Bp>
@@ -237,6 +253,11 @@
           <count>10</count>
           <WinNumber>1</WinNumber>
           <ItemText>g_and_mask</ItemText>
+        </Ww>
+        <Ww>
+          <count>11</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>g_short_pressed_key</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
