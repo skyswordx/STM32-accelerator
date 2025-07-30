@@ -416,6 +416,9 @@ void base2_function(void){
     // 设置初始幅度
     AD9833_AmpSet(base2_ad9833_amplitude);
     AD9954_Set_Amp(base2_ad9954_amplitude);
+
+    AD9833_WaveSeting(base2_current_frequency, 0, SIN_WAVE, 0);
+    AD9954_Set_Fre(base2_current_frequency);
     
     // 循环递增频率直到1MHz
     // while (frequency <= 1000000.0) {

@@ -3758,7 +3758,7 @@
       <Doc>
         <Name>..\Module\UART\my_uart_task.c</Name>
         <ColumnNumber>0</ColumnNumber>
-        <TopLine>329</TopLine>
+        <TopLine>315</TopLine>
         <CurrentLine>361</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>
