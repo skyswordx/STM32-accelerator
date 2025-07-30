@@ -389,48 +389,48 @@ void base2_function(void){
     current_function_mode = FUNCTION_MODE_BASE2;
     
     // 初始化频率跟踪变量
-    base2_current_frequency = 1000.0; // 从1kHz开始
+    // base2_current_frequency = 1000.0; // 从1kHz开始
     
-    // 初始化幅度跟踪变量
-    // 检查电压是否超过最大值
-    float ad9833_init_voltage = 3.0;
-    if (ad9833_init_voltage > AD9833_VMAX_V) {
-        ad9833_init_voltage = AD9833_VMAX_V;
-    }
-    base2_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(ad9833_init_voltage);
+    // // 初始化幅度跟踪变量
+    // // 检查电压是否超过最大值
+    // float ad9833_init_voltage = 3.0;
+    // if (ad9833_init_voltage > AD9833_VMAX_V) {
+    //     ad9833_init_voltage = AD9833_VMAX_V;
+    // }
+    // base2_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(ad9833_init_voltage);
     
-    float ad9954_init_voltage = 3.0;
-    if (ad9954_init_voltage > AD9954_VMAX_V) {
-        ad9954_init_voltage = AD9954_VMAX_V;
-    }
-    base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(ad9954_init_voltage);
+    // float ad9954_init_voltage = 3.0;
+    // if (ad9954_init_voltage > AD9954_VMAX_V) {
+    //     ad9954_init_voltage = AD9954_VMAX_V;
+    // }
+    // base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(ad9954_init_voltage);
     
-    // 实现间隔5秒，让AD9954和AD9833依次从1kHz以100Hz递增到1MHz，并且输出的峰峰值为3V
-    double frequency = base2_current_frequency; // 从1kHz开始
+    // // 实现间隔5秒，让AD9954和AD9833依次从1kHz以100Hz递增到1MHz，并且输出的峰峰值为3V
+    // double frequency = base2_current_frequency; // 从1kHz开始
     
     // 设置初始幅度
     AD9833_AmpSet(base2_ad9833_amplitude);
     AD9954_Set_Amp(base2_ad9954_amplitude);
     
     // 循环递增频率直到1MHz
-    while (frequency <= 1000000.0) {
-        // 设置AD9833频率
-        AD9833_WaveSeting(frequency, 0, SIN_WAVE, 0);
-        printf("AD9833 Frequency set to: %.0f Hz\n", frequency);
+    // while (frequency <= 1000000.0) {
+    //     // 设置AD9833频率
+    //     AD9833_WaveSeting(frequency, 0, SIN_WAVE, 0);
+    //     printf("AD9833 Frequency set to: %.0f Hz\n", frequency);
         
-        // 设置AD9954频率
-        AD9954_Set_Fre(frequency);
-        printf("AD9954 Frequency set to: %.0f Hz\n", frequency);
+    //     // 设置AD9954频率
+    //     AD9954_Set_Fre(frequency);
+    //     printf("AD9954 Frequency set to: %.0f Hz\n", frequency);
 
-        osDelay(200);
+    //     osDelay(200);
         
-        // 频率递增100Hz
-        frequency += 100.0;
-        // 更新跟踪变量
-        base2_current_frequency = frequency;
-    }
+    //     // 频率递增100Hz
+    //     frequency += 100.0;
+    //     // 更新跟踪变量
+    //     base2_current_frequency = frequency;
+    // }
     
-    printf("Frequency sweep completed\n");
+    // printf("Frequency sweep completed\n");
 }
 
 void base3_function(void){

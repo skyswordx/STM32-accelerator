@@ -24,4 +24,9 @@ void update_dac_frequency(void);
 void update_dac_amplitude(void);
 void update_relay_state(void);
 
+
+void parse_serial_lcd_command(char* cmd);
+
+
+
 #endif /* MY_UART_TASK_H */
