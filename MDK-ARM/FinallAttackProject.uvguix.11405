@@ -3793,9 +3793,9 @@
       </Doc>
       <Doc>
         <Name>..\Module\Button\my_button_task.c</Name>
-        <ColumnNumber>55</ColumnNumber>
-        <TopLine>365</TopLine>
-        <CurrentLine>468</CurrentLine>
+        <ColumnNumber>26</ColumnNumber>
+        <TopLine>1</TopLine>
+        <CurrentLine>2</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>
         <PaneID>0</PaneID>
@@ -3830,7 +3830,7 @@
       <Doc>
         <Name>..\Module\Parser\my_parser.c</Name>
         <ColumnNumber>1</ColumnNumber>
-        <TopLine>27</TopLine>
+        <TopLine>13</TopLine>
         <CurrentLine>62</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>

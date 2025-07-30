@@ -232,11 +232,11 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
-  // ADCProcessingTaskHandle = osThreadNew(StartADCProcessingTask, NULL, &ADCProcessingTask_attributes);
+  ADCProcessingTaskHandle = osThreadNew(StartADCProcessingTask, NULL, &ADCProcessingTask_attributes);
   // DACProcessingTaskHandle = osThreadNew(StartDACProcessingTask, NULL, &DACProcessingTask_attributes);
-  // UARTProcessingTaskHandle = osThreadNew(StartUARTProcessingTask, NULL, &UARTProcessingTask_attributes);
-  // ButtonProcessingTaskHandle = osThreadNew(StartButtonProcessingTask, NULL, &ButtonProcessingTask_attributes);
-  myParserTaskHandle = osThreadNew(my_parser_task, NULL, &myParserTask_attributes);
+  UARTProcessingTaskHandle = osThreadNew(StartUARTProcessingTask, NULL, &UARTProcessingTask_attributes);
+  ButtonProcessingTaskHandle = osThreadNew(StartButtonProcessingTask, NULL, &ButtonProcessingTask_attributes);
+  // myParserTaskHandle = osThreadNew(my_parser_task, NULL, &myParserTask_attributes);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
