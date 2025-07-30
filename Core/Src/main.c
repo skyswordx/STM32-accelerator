@@ -33,6 +33,7 @@
 #include "my_dac_task.h"
 #include "my_zlcr_config.h"
 #include "my_button_task.h"
+#include "my_parser.h"
 
 
 /* USER CODE END Includes */
@@ -102,6 +103,13 @@ osThreadId_t ButtonProcessingTaskHandle;
 const osThreadAttr_t ButtonProcessingTask_attributes = {
   .name = "ButtonProcessingTask",
   .stack_size = 128 * 8,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+
+osThreadId_t myParserTaskHandle;
+const osThreadAttr_t myParserTask_attributes = {
+  .name = "myParserTask",
+  .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 
@@ -224,10 +232,11 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
-  ADCProcessingTaskHandle = osThreadNew(StartADCProcessingTask, NULL, &ADCProcessingTask_attributes);
-  DACProcessingTaskHandle = osThreadNew(StartDACProcessingTask, NULL, &DACProcessingTask_attributes);
-  UARTProcessingTaskHandle = osThreadNew(StartUARTProcessingTask, NULL, &UARTProcessingTask_attributes);
-  ButtonProcessingTaskHandle = osThreadNew(StartButtonProcessingTask, NULL, &ButtonProcessingTask_attributes);
+  // ADCProcessingTaskHandle = osThreadNew(StartADCProcessingTask, NULL, &ADCProcessingTask_attributes);
+  // DACProcessingTaskHandle = osThreadNew(StartDACProcessingTask, NULL, &DACProcessingTask_attributes);
+  // UARTProcessingTaskHandle = osThreadNew(StartUARTProcessingTask, NULL, &UARTProcessingTask_attributes);
+  // ButtonProcessingTaskHandle = osThreadNew(StartButtonProcessingTask, NULL, &ButtonProcessingTask_attributes);
+  myParserTaskHandle = osThreadNew(my_parser_task, NULL, &myParserTask_attributes);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */

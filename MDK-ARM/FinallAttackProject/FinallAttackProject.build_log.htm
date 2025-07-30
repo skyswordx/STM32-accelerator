@@ -22,31 +22,27 @@ Dialog DLL:      TCM.DLL V1.56.4.0
  
 <h2>Project:</h2>
 D:\Musii-SnapShot\GithubRepo\STM32-accelerator\MDK-ARM\FinallAttackProject.uvprojx
-Project File Date:  07/29/2025
+Project File Date:  07/30/2025
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\KEIL\ARM\ARMCC\Bin'
 Build target 'FinallAttackProject'
-compiling my_button_task.c...
+compiling my_parser.c...
+..\Module\Parser\my_parser.h(6): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_PARSER_H
 ../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
   #endif /* MY_FREQ_CONFIG_H */
-..\Module\Button\../Param/my_parameter_config.h(47): warning:  #1-D: last line of file ends without a newline
+..\Module\Param\my_parameter_config.h(47): warning:  #1-D: last line of file ends without a newline
   #endif // MY_PARAMETER_CONFIG_H
-..\Module\Button\my_button_task.h(23): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_BUTTON_TASK_H
-../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
-  #endif /* INA226_H_ */
-../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_ZLCR_TASK_H
-../Module/UART/my_uart_task.h(27): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_UART_TASK_H */
-..\Module\Button\my_button_task.c(53): warning:  #177-D: variable "relay_state"  was declared but never referenced
-  static uint8_t relay_state = 0; // 继电器状态计数器
-..\Module\Button\my_button_task.c: 7 warnings, 0 errors
+../Module/DAC/my_dac_config.h(21): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_DAC_CONFIG_H */
+..\Module\Parser\my_parser.c(47): warning:  #1-D: last line of file ends without a newline
+  }
+..\Module\Parser\my_parser.c: 5 warnings, 0 errors
 linking...
-Program Size: Code=66684 RO-data=40380 RW-data=1876 ZI-data=210460  
+Program Size: Code=33804 RO-data=860 RW-data=680 ZI-data=20728  
 FromELF: creating hex file...
-"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 7 Warning(s).
+"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 5 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -69,7 +65,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:07
+Build Time Elapsed:  00:00:08
 </pre>
 </body>
 </html>
