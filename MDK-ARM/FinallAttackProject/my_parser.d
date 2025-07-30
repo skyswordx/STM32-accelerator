@@ -64,3 +64,7 @@ finallattackproject\my_parser.o: ../Drivers/CMSIS/DSP/Include/arm_math.h
 finallattackproject\my_parser.o: D:\KEIL\ARM\ARMCC\Bin\..\include\float.h
 finallattackproject\my_parser.o: ..\Module\Param\my_parameter_config.h
 finallattackproject\my_parser.o: ../Module/Frequency/my_freq_config.h
+finallattackproject\my_parser.o: ../Module/Timer/my_timer_config.h
+finallattackproject\my_parser.o: ../Module/ADC/my_adc_task.h
+finallattackproject\my_parser.o: ../Module/Timer/my_timer_config.h
+finallattackproject\my_parser.o: ../Module/ZLCR/my_zlcr_config.h

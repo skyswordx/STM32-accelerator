@@ -22,6 +22,7 @@
     "my_time_detect.h": "c",
     "my_parser.h": "c",
     "my_dac_config.h": "c",
-    "my_parameter_config.h": "c"
+    "my_parameter_config.h": "c",
+    "my_timer_config.h": "c"
   }
 }

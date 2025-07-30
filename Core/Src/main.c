@@ -109,8 +109,8 @@ const osThreadAttr_t ButtonProcessingTask_attributes = {
 osThreadId_t myParserTaskHandle;
 const osThreadAttr_t myParserTask_attributes = {
   .name = "myParserTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 128 * 8,
+  .priority = (osPriority_t) osPriorityHigh,
 };
 
 /* USER CODE END PV */

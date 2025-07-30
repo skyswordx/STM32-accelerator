@@ -66,14 +66,20 @@ HAL_StatusTypeDef switch_timer_sampleRate_Auto(TIM_HandleTypeDef* htimer, uint32
     htimer->Instance->PSC = best_prescaler;
     htimer->Instance->ARR = best_arr;
     htimer->Instance->EGR = 0x01;
-    g_ADC_SAMPLE_RATE_Hz = tim_clk / ((best_prescaler + 1) * (best_arr + 1));
+
+    uint32_t actuall_rate = tim_clk / ((best_prescaler + 1) * (best_arr + 1));
+
+    if ( htimer == &htim3){
+        g_ADC_SAMPLE_RATE_Hz = actuall_rate;
+    }
+
     if (found) {
         printf("Finall timer sample rate to %lu Hz (PSC=%lu, ARR=%lu)\n",
-               g_ADC_SAMPLE_RATE_Hz, best_prescaler, best_arr);
+               actuall_rate, best_prescaler, best_arr);
         return HAL_OK;
     } else {
         printf("Warning: Cannot set timer to desired sample rate %lu Hz within threshold %lu Hz. Set to closest possible: %lu Hz (min error: %lu Hz, PSC=%lu, ARR=%lu)\n",
-               desired_sample_rate, error_threshold, g_ADC_SAMPLE_RATE_Hz, min_error, best_prescaler, best_arr);
+               actuall_rate, error_threshold, actuall_rate, min_error, best_prescaler, best_arr);
         return HAL_OK;
     }
 }

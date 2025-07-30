@@ -129,6 +129,19 @@ void StartADCProcessingTask(void *argument) {
     // 【ADC 数据流】 指示 ADC 工作模式，默认为正常模式
     adc_mode_t adc_mode = ADC_MODE_NORMAL;
 
+    // DDS 初始化
+    AD9833_Init_GPIO();
+    AD9954_Init(); // Initialize AD9954
+    // Set amplitude to 2V for AD9833 using the voltage conversion macro
+    AD9833_AmpSet(255);
+    
+    // Set amplitude to maximum for AD9954 (max value is 16383)
+    AD9954_Set_Amp(16383);
+    AD9954_Set_Phase(0);//写相位
+
+    double frequency = 1000.0;  // Start frequency
+    int direction = 1;  // 1 for increasing, -1 for decreasing
+
     for (;;) {
 
         /* 【ADC 数据流】 利用 GPIO 按键触发启动定时器 */
