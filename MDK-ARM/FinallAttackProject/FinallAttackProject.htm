@@ -3,7 +3,7 @@
 <title>Static Call Graph - [FinallAttackProject\FinallAttackProject.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image FinallAttackProject\FinallAttackProject.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Wed Jul 30 16:54:08 2025
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Wed Jul 30 17:02:59 2025
 <BR><P>
 <H3>Maximum Stack Usage =        384 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -937,6 +937,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[a4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;myParserTask
 <LI><a href="#[15e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;handle_set_command
 <LI><a href="#[159]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;base3_function
+<LI><a href="#[157]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;base2_function
 </UL>
 
 <P><STRONG><a name="[cf]"></a>AD9833_Write</STRONG> (Thumb, 122 bytes, Stack size 32 bytes, ad9833.o(i.AD9833_Write))
@@ -1011,6 +1012,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[a4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;myParserTask
 <LI><a href="#[15e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;handle_set_command
 <LI><a href="#[159]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;base3_function
+<LI><a href="#[157]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;base2_function
 </UL>
 
 <P><STRONG><a name="[db]"></a>AD9954_Set_Phase</STRONG> (Thumb, 60 bytes, Stack size 24 bytes, ad9954.o(i.AD9954_Set_Phase))
@@ -1232,11 +1234,11 @@ Global Symbols
 <LI><a href="#[f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RCCEx_PeriphCLKConfig
 <LI><a href="#[103]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_PWREx_ConfigSupply
 <LI><a href="#[eb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DAC_ConfigChannel
-<LI><a href="#[135]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_WaitOnFlagUntilTimeout
-<LI><a href="#[130]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_CheckIdleState
 <LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RCCEx_PLL3_Config
 <LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RCCEx_PLL2_Config
 <LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_Abort
+<LI><a href="#[135]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_WaitOnFlagUntilTimeout
+<LI><a href="#[130]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_CheckIdleState
 </UL>
 
 <P><STRONG><a name="[13b]"></a>HAL_I2CEx_ConfigAnalogFilter</STRONG> (Thumb, 88 bytes, Stack size 12 bytes, stm32h7xx_hal_i2c_ex.o(i.HAL_I2CEx_ConfigAnalogFilter))
@@ -1357,8 +1359,8 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RCC_GetHCLKFreq
 </UL>
-<BR>[Called By]<UL><LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_SetConfig
-<LI><a href="#[de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RCCEx_GetPeriphCLKFreq
+<BR>[Called By]<UL><LI><a href="#[de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RCCEx_GetPeriphCLKFreq
+<LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_SetConfig
 </UL>
 
 <P><STRONG><a name="[105]"></a>HAL_RCCEx_GetPLL1ClockFreq</STRONG> (Thumb, 298 bytes, Stack size 12 bytes, stm32h7xx_hal_rcc_ex.o(i.HAL_RCCEx_GetPLL1ClockFreq))
@@ -1370,15 +1372,15 @@ Global Symbols
 <P><STRONG><a name="[106]"></a>HAL_RCCEx_GetPLL2ClockFreq</STRONG> (Thumb, 296 bytes, Stack size 12 bytes, stm32h7xx_hal_rcc_ex.o(i.HAL_RCCEx_GetPLL2ClockFreq))
 <BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = HAL_RCCEx_GetPLL2ClockFreq
 </UL>
-<BR>[Called By]<UL><LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_SetConfig
-<LI><a href="#[de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RCCEx_GetPeriphCLKFreq
+<BR>[Called By]<UL><LI><a href="#[de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RCCEx_GetPeriphCLKFreq
+<LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_SetConfig
 </UL>
 
 <P><STRONG><a name="[107]"></a>HAL_RCCEx_GetPLL3ClockFreq</STRONG> (Thumb, 296 bytes, Stack size 12 bytes, stm32h7xx_hal_rcc_ex.o(i.HAL_RCCEx_GetPLL3ClockFreq))
 <BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = HAL_RCCEx_GetPLL3ClockFreq
 </UL>
-<BR>[Called By]<UL><LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_SetConfig
-<LI><a href="#[de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RCCEx_GetPeriphCLKFreq
+<BR>[Called By]<UL><LI><a href="#[de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RCCEx_GetPeriphCLKFreq
+<LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_SetConfig
 </UL>
 
 <P><STRONG><a name="[de]"></a>HAL_RCCEx_GetPeriphCLKFreq</STRONG> (Thumb, 692 bytes, Stack size 72 bytes, stm32h7xx_hal_rcc_ex.o(i.HAL_RCCEx_GetPeriphCLKFreq))
@@ -1438,8 +1440,8 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RCC_GetHCLKFreq
 </UL>
-<BR>[Called By]<UL><LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_SetConfig
-<LI><a href="#[de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RCCEx_GetPeriphCLKFreq
+<BR>[Called By]<UL><LI><a href="#[de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RCCEx_GetPeriphCLKFreq
+<LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_SetConfig
 </UL>
 
 <P><STRONG><a name="[ff]"></a>HAL_RCC_GetPCLK2Freq</STRONG> (Thumb, 26 bytes, Stack size 4 bytes, stm32h7xx_hal_rcc.o(i.HAL_RCC_GetPCLK2Freq))
@@ -1628,15 +1630,15 @@ Global Symbols
 <P><STRONG><a name="[123]"></a>HAL_UART_IRQHandler</STRONG> (Thumb, 878 bytes, Stack size 24 bytes, stm32h7xx_hal_uart.o(i.HAL_UART_IRQHandler))
 <BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = HAL_UART_IRQHandler &rArr; HAL_DMA_Abort
 </UL>
-<BR>[Calls]<UL><LI><a href="#[129]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_TxCpltCallback
+<BR>[Calls]<UL><LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_Abort
+<LI><a href="#[125]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_Abort_IT
+<LI><a href="#[129]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_TxCpltCallback
 <LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_ErrorCallback
 <LI><a href="#[127]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_RxEventCallback
 <LI><a href="#[128]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_WakeupCallback
 <LI><a href="#[12a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_TxFifoEmptyCallback
 <LI><a href="#[12b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_RxFifoFullCallback
 <LI><a href="#[124]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_EndRxTransfer
-<LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_Abort
-<LI><a href="#[125]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_Abort_IT
 </UL>
 <BR>[Called By]<UL><LI><a href="#[2f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART1_IRQHandler
 </UL>
@@ -1689,8 +1691,8 @@ Global Symbols
 <P><STRONG><a name="[134]"></a>HAL_UART_Transmit</STRONG> (Thumb, 176 bytes, Stack size 32 bytes, stm32h7xx_hal_uart.o(i.HAL_UART_Transmit))
 <BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout &rArr; UART_EndRxTransfer
 </UL>
-<BR>[Calls]<UL><LI><a href="#[135]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_WaitOnFlagUntilTimeout
-<LI><a href="#[ec]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
+<BR>[Calls]<UL><LI><a href="#[ec]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
+<LI><a href="#[135]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Called By]<UL><LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fputc
 </UL>
@@ -1753,8 +1755,8 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 280<LI>Call Chain = StartUARTProcessingTask &rArr; parse_uart_command &rArr; handle_set_command &rArr; __hardfp_atof &rArr; __strtod_int &rArr; _local_sscanf &rArr; _scanf_real
 </UL>
 <BR>[Calls]<UL><LI><a href="#[148]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
-<LI><a href="#[131]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_IT
 <LI><a href="#[149]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_uart_command
+<LI><a href="#[131]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_IT
 <LI><a href="#[ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(i.main)
@@ -1807,8 +1809,8 @@ Global Symbols
 <P><STRONG><a name="[130]"></a>UART_CheckIdleState</STRONG> (Thumb, 170 bytes, Stack size 32 bytes, stm32h7xx_hal_uart.o(i.UART_CheckIdleState))
 <BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = UART_CheckIdleState &rArr; UART_WaitOnFlagUntilTimeout &rArr; UART_EndRxTransfer
 </UL>
-<BR>[Calls]<UL><LI><a href="#[135]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_WaitOnFlagUntilTimeout
-<LI><a href="#[ec]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
+<BR>[Calls]<UL><LI><a href="#[ec]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
+<LI><a href="#[135]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Called By]<UL><LI><a href="#[12c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Init
 </UL>
@@ -1835,8 +1837,8 @@ Global Symbols
 <P><STRONG><a name="[135]"></a>UART_WaitOnFlagUntilTimeout</STRONG> (Thumb, 148 bytes, Stack size 32 bytes, stm32h7xx_hal_uart.o(i.UART_WaitOnFlagUntilTimeout))
 <BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = UART_WaitOnFlagUntilTimeout &rArr; UART_EndRxTransfer
 </UL>
-<BR>[Calls]<UL><LI><a href="#[124]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_EndRxTransfer
-<LI><a href="#[ec]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
+<BR>[Calls]<UL><LI><a href="#[ec]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
+<LI><a href="#[124]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_EndRxTransfer
 </UL>
 <BR>[Called By]<UL><LI><a href="#[134]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
 <LI><a href="#[130]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_CheckIdleState
@@ -1928,10 +1930,13 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_scanf_really_real
 </UL>
 
-<P><STRONG><a name="[157]"></a>base2_function</STRONG> (Thumb, 52 bytes, Stack size 8 bytes, my_parser.o(i.base2_function))
-<BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = base2_function &rArr; AD9954_Set_Amp &rArr; AD9954_Write_nByte &rArr; AD9954_Send_Byte
+<P><STRONG><a name="[157]"></a>base2_function</STRONG> (Thumb, 136 bytes, Stack size 32 bytes, my_parser.o(i.base2_function))
+<BR><BR>[Stack]<UL><LI>Max Depth = 104<LI>Call Chain = base2_function &rArr; osDelay &rArr; vTaskDelay &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
-<BR>[Calls]<UL><LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD9833_AmpSet
+<BR>[Calls]<UL><LI><a href="#[148]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
+<LI><a href="#[ce]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD9833_WaveSeting
+<LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD9833_AmpSet
+<LI><a href="#[d9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD9954_Set_Fre
 <LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD9954_Set_Amp
 <LI><a href="#[158]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 </UL>
@@ -2036,7 +2041,7 @@ Global Symbols
 <BR>[Address Reference Count : 1]<UL><LI> entry9a.o(.ARM.Collect$$$$0000000B)
 </UL>
 <P><STRONG><a name="[a4]"></a>myParserTask</STRONG> (Thumb, 904 bytes, Stack size 64 bytes, my_parser.o(i.myParserTask))
-<BR><BR>[Stack]<UL><LI>Max Depth = 144<LI>Call Chain = myParserTask &rArr; base3_function &rArr; AD9833_WaveSeting &rArr; AD9833_Write &rArr; AD9833_Delay
+<BR><BR>[Stack]<UL><LI>Max Depth = 168<LI>Call Chain = myParserTask &rArr; base2_function &rArr; osDelay &rArr; vTaskDelay &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[148]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[ce]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD9833_WaveSeting
@@ -2062,6 +2067,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[a4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;myParserTask
 <LI><a href="#[a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartUARTProcessingTask
 <LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartDefaultTask
+<LI><a href="#[157]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;base2_function
 </UL>
 
 <P><STRONG><a name="[146]"></a>osKernelGetTickCount</STRONG> (Thumb, 14 bytes, Stack size 0 bytes, cmsis_os2.o(i.osKernelGetTickCount))
@@ -2742,8 +2748,8 @@ Local Symbols
 <P><STRONG><a name="[9d]"></a>UART_RxISR_16BIT</STRONG> (Thumb, 196 bytes, Stack size 8 bytes, stm32h7xx_hal_uart.o(i.UART_RxISR_16BIT))
 <BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = UART_RxISR_16BIT &rArr; HAL_UART_RxCpltCallback &rArr; HAL_UART_Receive_IT &rArr; UART_Start_Receive_IT
 </UL>
-<BR>[Calls]<UL><LI><a href="#[127]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_RxEventCallback
-<LI><a href="#[133]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
+<BR>[Calls]<UL><LI><a href="#[133]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
+<LI><a href="#[127]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_RxEventCallback
 </UL>
 <BR>[Address Reference Count : 2]<UL><LI> stm32h7xx_hal_uart.o(i.UART_RxISR_16BIT_FIFOEN)
 <LI> stm32h7xx_hal_uart.o(i.UART_Start_Receive_IT)
@@ -2751,17 +2757,17 @@ Local Symbols
 <P><STRONG><a name="[a0]"></a>UART_RxISR_16BIT_FIFOEN</STRONG> (Thumb, 404 bytes, Stack size 32 bytes, stm32h7xx_hal_uart.o(i.UART_RxISR_16BIT_FIFOEN))
 <BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = UART_RxISR_16BIT_FIFOEN &rArr; HAL_UART_RxCpltCallback &rArr; HAL_UART_Receive_IT &rArr; UART_Start_Receive_IT
 </UL>
-<BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_ErrorCallback
+<BR>[Calls]<UL><LI><a href="#[133]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
+<LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_ErrorCallback
 <LI><a href="#[127]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_RxEventCallback
-<LI><a href="#[133]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> stm32h7xx_hal_uart.o(i.UART_Start_Receive_IT)
 </UL>
 <P><STRONG><a name="[9e]"></a>UART_RxISR_8BIT</STRONG> (Thumb, 196 bytes, Stack size 8 bytes, stm32h7xx_hal_uart.o(i.UART_RxISR_8BIT))
 <BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = UART_RxISR_8BIT &rArr; HAL_UART_RxCpltCallback &rArr; HAL_UART_Receive_IT &rArr; UART_Start_Receive_IT
 </UL>
-<BR>[Calls]<UL><LI><a href="#[127]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_RxEventCallback
-<LI><a href="#[133]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
+<BR>[Calls]<UL><LI><a href="#[133]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
+<LI><a href="#[127]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_RxEventCallback
 </UL>
 <BR>[Address Reference Count : 2]<UL><LI> stm32h7xx_hal_uart.o(i.UART_RxISR_8BIT_FIFOEN)
 <LI> stm32h7xx_hal_uart.o(i.UART_Start_Receive_IT)
@@ -2769,9 +2775,9 @@ Local Symbols
 <P><STRONG><a name="[9f]"></a>UART_RxISR_8BIT_FIFOEN</STRONG> (Thumb, 404 bytes, Stack size 32 bytes, stm32h7xx_hal_uart.o(i.UART_RxISR_8BIT_FIFOEN))
 <BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = UART_RxISR_8BIT_FIFOEN &rArr; HAL_UART_RxCpltCallback &rArr; HAL_UART_Receive_IT &rArr; UART_Start_Receive_IT
 </UL>
-<BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_ErrorCallback
+<BR>[Calls]<UL><LI><a href="#[133]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
+<LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_ErrorCallback
 <LI><a href="#[127]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_RxEventCallback
-<LI><a href="#[133]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> stm32h7xx_hal_uart.o(i.UART_Start_Receive_IT)
 </UL>

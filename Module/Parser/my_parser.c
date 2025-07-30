@@ -21,7 +21,7 @@
 // AD9954幅度设置范围是0-16383，3V峰峰值对应大约9830
 #define AD9954_VOLTAGE_TO_DAC(voltage) ((uint16_t)((voltage) * 16383.0 / AD9954_VMAX_V))
 
-extern uint16_t g_dac_sine[256];
+
 extern TIM_HandleTypeDef htim4;
 extern DAC_HandleTypeDef hdac1;
 
@@ -45,6 +45,14 @@ static double base2_current_frequency = 1000.0;  // 当前频率，初始为1kHz
 // base3_function模式下的幅度跟踪变量
 static uint8_t base3_ad9833_amplitude = 255;  // AD9833幅度初始值
 static uint16_t base3_ad9954_amplitude = 16383;  // AD9954幅度初始值
+
+// base4_function模式下表格输入
+/**
+ * 第一个维度行是 100Hz, 200 Hz, ..., 3000 Hz 一共 30 行
+ * 第二个维度列是 1.0, 1.1, ..., 1.9 ,2.0 一共 11 列
+ * 每个元素是一个 double 类型的值，表示 DDS 在这种情况下要输出的幅度
+ */
+double base4_ad9954_table[30][11] = {0};
 
 
 void myParserTask(void const * argument)
@@ -416,22 +424,22 @@ void base2_function(void){
     AD9954_Set_Amp(base2_ad9954_amplitude);
     
     // 循环递增频率直到1MHz
-    // while (frequency <= 1000000.0) {
-    //     // 设置AD9833频率
-    //     AD9833_WaveSeting(frequency, 0, SIN_WAVE, 0);
-    //     printf("AD9833 Frequency set to: %.0f Hz\n", frequency);
+    while (frequency <= 1000000.0) {
+        // 设置AD9833频率
+        AD9833_WaveSeting(frequency, 0, SIN_WAVE, 0);
+        printf("AD9833 Frequency set to: %.0f Hz\n", frequency);
         
-    //     // 设置AD9954频率
-    //     AD9954_Set_Fre(frequency);
-    //     printf("AD9954 Frequency set to: %.0f Hz\n", frequency);
+        // 设置AD9954频率
+        AD9954_Set_Fre(frequency);
+        printf("AD9954 Frequency set to: %.0f Hz\n", frequency);
 
-    //     osDelay(200);
+        osDelay(200);
         
-    //     // 频率递增100Hz
-    //     frequency += 100.0;
-    //     // 更新跟踪变量
-    //     base2_current_frequency = frequency;
-    // }
+        // 频率递增100Hz
+        frequency += 100.0;
+        // 更新跟踪变量
+        base2_current_frequency = frequency;
+    }
     
     printf("Frequency sweep completed\n");
 }
@@ -467,5 +475,9 @@ void base4_function(void){
     printf("Executing base4_function logic\n");
     // 设置当前模式为base4_function模式
     current_function_mode = FUNCTION_MODE_BASE4;
+
+    
+
+
 
 }
