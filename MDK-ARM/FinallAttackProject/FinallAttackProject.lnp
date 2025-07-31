@@ -48,6 +48,7 @@
 "finallattackproject\my_adc_task.o"
 "finallattackproject\my_dac_config.o"
 "finallattackproject\my_dac_task.o"
+"finallattackproject\my_dds.o"
 "finallattackproject\my_timer_config.o"
 "finallattackproject\my_freq_config.o"
 "finallattackproject\my_uart_task.o"

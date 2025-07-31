@@ -62,3 +62,4 @@ finallattackproject\my_dac_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/in
 finallattackproject\my_dac_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
 finallattackproject\my_dac_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
 finallattackproject\my_dac_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
+finallattackproject\my_dac_task.o: ..\Module\DAC\my_dds.h

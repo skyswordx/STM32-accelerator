@@ -1504,6 +1504,11 @@
               <FileType>1</FileType>
               <FilePath>..\Module\DAC\my_dac_task.c</FilePath>
             </File>
+            <File>
+              <FileName>my_dds.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Module\DAC\my_dds.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

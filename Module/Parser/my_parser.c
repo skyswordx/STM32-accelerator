@@ -8,7 +8,7 @@
 #include "my_timer_config.h"
 #include "my_button_config.h"
 
-extern uint16_t g_dac_square_64[64];
+uint16_t g_dac_square_64[64] = {0};
 
 
 extern TIM_HandleTypeDef htim4;
@@ -65,7 +65,7 @@ void myParserTask(void const * argument)
 
     
     while (1) {
-        
+
         // 1. 调用扫描函数
         Matrix_Keypad_Scan();
 
