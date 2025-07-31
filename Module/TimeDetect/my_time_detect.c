@@ -86,3 +86,81 @@ void my_time_domain_analysis_optimized(const float32_t* data_in,
         result_out->frequency = 0.0f;
     }
 }
+
+
+
+/**
+ * @brief [新增] 提取整数个周期并重采样到指定长度 (用于FFT前处理)
+ */
+int my_resample_integer_cycles(const float32_t* data_in, 
+                               uint32_t in_size, 
+                               float32_t* data_out, 
+                               uint32_t out_size,
+                               const time_domain_config_t* config)
+{
+    if (data_in == NULL || data_out == NULL || config == NULL || in_size < 10 || out_size == 0) {
+        return 0; // 安全检查
+    }
+
+    // --- 步骤 1: 计算直流分量 ---
+    float64_t sum = 0.0;
+    for (uint32_t i = 0; i < in_size; i++) {
+        sum += data_in[i];
+    }
+    float32_t dc_offset = (float32_t)(sum / in_size);
+
+    // --- 步骤 2: 使用迟滞比较法找到所有上升沿过零点 ---
+    float32_t v_high = dc_offset + config->hysteresis_v;
+    float32_t v_low  = dc_offset - config->hysteresis_v;
+    uint8_t state = (data_in[0] > v_high) ? 1 : 0;
+    
+    uint32_t crossings_count = 0;
+    // 临时使用输出缓冲区的前半部分来存储过零点索引，避免额外分配内存
+    uint32_t* crossing_indices = (uint32_t*)data_out; 
+
+    for (uint32_t i = 1; i < in_size; i++) {
+        if (state == 0 && data_in[i] > v_high) {
+            crossing_indices[crossings_count++] = i;
+            state = 1;
+            // 检查临时缓冲区是否会溢出 (不太可能发生，但作为安全措施)
+            if (crossings_count >= out_size / 2) break;
+        } else if (state == 1 && data_in[i] < v_low) {
+            state = 0;
+        }
+    }
+
+    if (crossings_count < 2) {
+        return 0; // 未找到至少一个完整周期，无法处理
+    }
+
+    // --- 步骤 3: 确定用于重采样的整数周期的起始和结束点 ---
+    uint32_t start_index = crossing_indices[0];
+    uint32_t end_index = crossing_indices[crossings_count - 1];
+    uint32_t source_len = end_index - start_index;
+
+    if (source_len == 0) {
+        return 0;
+    }
+    
+    const float32_t* source_data = &data_in[start_index];
+
+    // --- 步骤 4: 线性插值重采样 ---
+    // y = y1 + (y2-y1) * (x - x1) / (x2-x1)
+    for (uint32_t i = 0; i < out_size; i++) {
+        float32_t src_pos = (float32_t)i * (float32_t)(source_len - 1) / (float32_t)(out_size - 1);
+        uint32_t index = (uint32_t)floorf(src_pos);
+        float32_t fraction = src_pos - (float32_t)index;
+
+        // 防止索引越界
+        if (index >= source_len - 1) {
+            index = source_len - 2;
+        }
+
+        float32_t y1 = source_data[index];
+        float32_t y2 = source_data[index + 1];
+        
+        data_out[i] = y1 + (y2 - y1) * fraction;
+    }
+
+    return 1; // 成功
+}

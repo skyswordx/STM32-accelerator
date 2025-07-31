@@ -18,8 +18,8 @@ extern TIM_HandleTypeDef htim3;  /* 实际使用TIM3作为ADC触发源和时间�
 #define ADC_DMA_TRANSFER_COMPLETED 1
 #define ADC_DMA_TRANSFER_NOT_COMPLETED 0
 extern uint32_t g_desired_ADC_sample_rate_Hz;
-// uint32_t g_ADC_SAMPLE_RATE_Hz = 995062*2; // 2MHz采样率
-uint32_t g_ADC_SAMPLE_RATE_Hz = 2000000; // 2MHz采样率
+uint32_t g_ADC_SAMPLE_RATE_Hz = 995062*2; // 2MHz采样率
+// uint32_t g_ADC_SAMPLE_RATE_Hz = 2000000; // 2MHz采样率
 
 #define ADC_REF_VOLTAGE 3.3f // ADC参考电压
 #define ADC_RESOLUTION_8BIT 256.0f // 2^8=256
@@ -70,7 +70,6 @@ float32_t g_adc2_data_8bit[ADC_SAMPLE_SIZE]; // ADC2数据
 float32_t g_adc1_temp_buffer[ADC_SAMPLE_SIZE];
 float32_t g_adc2_temp_buffer[ADC_SAMPLE_SIZE];
 
-
 uint16_t g_adc_dma_transfer_flag = ADC_DMA_TRANSFER_NOT_COMPLETED;
 
 
@@ -120,7 +119,7 @@ void StartADCProcessingTask(void *argument) {
 
     // --- 新增: 初始化时域分析的配置 ---
     time_domain_config_t time_config;
-    time_config.enable_filter = 1;         // 启用滤波器
+    time_config.enable_filter = 0;         // 启用滤波器
     time_config.filter_alpha = 0.05f;      // 设置IIR滤波器系数
     time_config.hysteresis_v = 0.05f;      // 设置50mV的迟滞电压窗口
 
@@ -170,14 +169,49 @@ void StartADCProcessingTask(void *argument) {
                 printf("  Vpp (Peak-Peak) : %.4f V\r\n", ch1_time_result.vpp_peak);
                 printf("  AC RMS        : %.4f V\r\n", ch1_time_result.ac_rms);
                 printf("  DC Offset     : %.4f V\r\n", ch1_time_result.dc_offset);
+                printf("  V Max        : %.4f V\r\n", ch1_time_result.v_max);
+                printf("  V Min        : %.4f V\r\n", ch1_time_result.v_min);
                 
                 printf("--- Channel 2 ---\r\n");
                 printf("  Frequency     : %.3f Hz\r\n", ch2_time_result.frequency);
                 printf("  Vpp (Peak-Peak) : %.4f V\r\n", ch2_time_result.vpp_peak);
                 printf("  AC RMS        : %.4f V\r\n", ch2_time_result.ac_rms);
                 printf("  DC Offset     : %.4f V\r\n", ch2_time_result.dc_offset);
+                printf("  V Max        : %.4f V\r\n", ch2_time_result.v_max);
+                printf("  V Min        : %.4f V\r\n", ch2_time_result.v_min);
+
                 printf("-------------------------------------\r\n\r\n");
             }
+
+            //  // --- 步骤 2: [核心] 为FFT准备数据 ---
+            // int resample_ok1 = 0;
+            // int resample_ok2 = 0;
+
+            // // 对通道1数据进行重采样
+            // // 注意：这里我们直接对原始数据进行重采样，因为滤波会改变相位，可能影响某些分析
+            // // 如果希望对滤波后数据重采样，可以将 g_adc1_temp_buffer 作为输入
+            // resample_ok1 = my_resample_integer_cycles(g_adc1_data_8bit, ADC_SAMPLE_SIZE, g_adc1_fft_input, FFT_LENGTH, &time_config);
+            // // 对通道2数据进行重采样
+            // resample_ok2 = my_resample_integer_cycles(g_adc2_data_8bit, ADC_SAMPLE_SIZE, g_adc2_fft_input, FFT_LENGTH, &time_config);
+
+
+            // // --- 步骤 3: 使用重采样后的数据进行频谱分析 ---
+            // if (resample_ok1 && resample_ok2) {
+            //     printf("Resampling successful. Performing FFT on integer-cycle data.\r\n");
+                
+            //     fundamental_result_t ch1_result, ch2_result;
+                
+            //     // 【关键】使用重采样后的 g_adc1_fft_input 作为FFT的输入
+            //     my_armcfft32_apply(g_adc1_fft_input, &ch1_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
+            //     // ... (后续的 memcpy 和打印) ...
+
+            //     // 【关键】使用重采样后的 g_adc2_fft_input 作为FFT的输入
+            //     my_armcfft32_apply(g_adc2_fft_input, &ch2_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
+            //     // ... (后续的 memcpy 和打印) ...
+
+            // } else {
+            //     printf("Resampling failed. Skipping FFT.\r\n");
+            // }
 
             fundamental_result_t ch1_freq_result, ch2_freq_result;
 

@@ -53,6 +53,8 @@ extern uint16_t base4_ad9954_amplitude;  // AD9954幅度初始值
 extern double base4_ad9833_frequency;    // AD9833当前频率
 extern double base4_ad9954_frequency;    // AD9954当前频率
 
+extern double base4_desired_model_output_frequency;
+extern double base4_desired_model_output_voltage; // 期望输出电压
 
 void StartUARTProcessingTask(void const * argument)
 {
@@ -260,29 +262,23 @@ void handle_serial_lcd_set_command(char* param, char* value)
         // 更新幅度跟踪变量，不调用实际的硬件设置函数
         if (current_lcd_page == 2) {
             // 在基础功能2页面
-            if (g_desired_dds_type == DDS_TYPE_AD9833) {
-                base2_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
-                printf("Base2 AD9833 amplitude updated: %.2f V -> %d\n", voltage, base2_ad9833_amplitude);
-            } else {
-                base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
-                printf("Base2 AD9954 amplitude updated: %.2f V -> %d\n", voltage, base2_ad9954_amplitude);
-            }
+            base2_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
+            printf("Base2 AD9833 amplitude updated: %.2f V -> %d\n", voltage, base2_ad9833_amplitude);
+            base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
+            printf("Base2 AD9954 amplitude updated: %.2f V -> %d\n", voltage, base2_ad9954_amplitude);
         } else if (current_lcd_page == 3) {
             // 在基础功能3页面
-            if (g_desired_dds_type == DDS_TYPE_AD9833) {
-                base3_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
-                printf("Base3 AD9833 amplitude updated: %.2f V -> %d\n", voltage, base3_ad9833_amplitude);
-            } else {
-                base3_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
-                printf("Base3 AD9954 amplitude updated: %.2f V -> %d\n", voltage, base3_ad9954_amplitude);
-            }
+            base3_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
+            printf("Base3 AD9833 amplitude updated: %.2f V -> %d\n", voltage, base3_ad9833_amplitude);
+            base3_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
+            printf("Base3 AD9954 amplitude updated: %.2f V -> %d\n", voltage, base3_ad9954_amplitude);
+
         } else if (current_lcd_page == 4) {
             // 在基础功能4页面
             // 基础功能4页面既使用AD9954，也使用AD9833
-            base4_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
-            base4_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
-            printf("Base4 AD9833 amplitude updated: %.2f V -> %d\n", voltage, base4_ad9833_amplitude);
-            printf("Base4 AD9954 amplitude updated: %.2f V -> %d\n", voltage, base4_ad9954_amplitude);
+            base4_desired_model_output_voltage = voltage;
+            printf("Base4 desired model output voltage updated: %.2f V\n", voltage);
+            
         }
     } else if (strcmp(param, "DDS_FREQ") == 0) {
         // 更新频率跟踪变量
@@ -291,10 +287,8 @@ void handle_serial_lcd_set_command(char* param, char* value)
             base2_current_frequency = frequency;
             printf("Base2 frequency updated: %.2f Hz\n", frequency);
         } else if (current_lcd_page == 4) {
-            base4_ad9833_frequency = frequency;
-            base4_ad9954_frequency = frequency;
-            printf("Base4 AD9833 frequency updated: %.2f Hz\n", frequency);
-            printf("Base4 AD9954 frequency updated: %.2f Hz\n", frequency);
+            base4_desired_model_output_frequency = frequency;
+            printf("Base4 desired model output frequency updated: %.2f Hz\n", frequency);
         }
     } else {
         printf("Unknown parameter: %s\n", param);

@@ -17,6 +17,7 @@ extern DAC_HandleTypeDef hdac1;
 extern float DAC_ACTUAL_V_ZERO;
 extern float DAC_ACTUAL_V_FULL;
 extern float DAC_ACTUAL_SPAN;
+extern DDS_Generator_t g_dds_generator; // 引用全局DDS生成器实例
 
 extern uint8_t g_short_pressed_key; // 短按按键
 extern uint8_t g_long_pressed_key;  // 长按按键
@@ -34,7 +35,6 @@ uint8_t current_function_mode = FUNCTION_MODE_NONE;  // 当前函数模式
 // base2_function模式下的幅度跟踪变量
 uint8_t base2_ad9833_amplitude = 255;  // AD9833幅度初始值
 uint16_t base2_ad9954_amplitude = 16383;  // AD9954幅度初始值
-uint16_t base4_ad9954_amplitude = 16383;  // AD9954幅度初始值
 double base2_current_frequency = 1000.0;  // 当前频率，初始为1kHz
 
 // base3_function模式下的幅度跟踪变量
@@ -42,9 +42,14 @@ uint8_t base3_ad9833_amplitude = 255;  // AD9833幅度初始值
 uint16_t base3_ad9954_amplitude = 16383;  // AD9954幅度初始值
 
 // base4_function模式下的幅度和频率跟踪变量
-uint8_t base4_ad9833_amplitude = 255;    // AD9833幅度初始值
-double base4_ad9833_frequency = 1000.0;   // AD9833当前频率
-double base4_ad9954_frequency = 1000.0;   // AD9954当前频率
+double base4_ad9833_frequency = 100.0;   // AD9833当前频率
+double base4_ad9954_frequency = 100.0;   // AD9954当前频率
+double base4_dacdds_frequency = 100.0;   // DAC DDS当前频率
+uint8_t base4_ad9833_amplitude = 255; // AD9833幅度初始值
+uint16_t base4_ad9954_amplitude = 16383; // AD9954幅度初始值
+uint8_t base4_dacdds_amplitude = 3; // DAC DDS幅度初始值
+double base4_desired_model_output_voltage = 1.0; // 期望输出电压
+double base4_desired_model_output_frequency = 100.0; // 期望输出频率
 
 // base4_function模式下表格输入
 /**
@@ -52,7 +57,6 @@ double base4_ad9954_frequency = 1000.0;   // AD9954当前频率
  * 第二个维度列是 1.0, 1.1, ..., 1.9 ,2.0 一共 11 列
  * 每个元素是一个 double 类型的值，表示 DDS 在这种情况下要输出的幅度
  */
-double base4_ad9954_table[30][11] = {0};
 
 
 DDS_Generator_t g_dds_generator; // 宣告一個DDS產生器實例
@@ -68,6 +72,41 @@ const uint16_t g_arbitrary_waveform[WAVE_TABLE_SIZE] = {
     0, 0, 0, 0, 0, 0, 0, 0
 };
 
+double base4_table[30]={ // 传输比
+    /* idx 从 0 开始到 29 */
+    /* 频率 100Hz 到 3000Hz */
+    /* f = idx * 100 + 100 = (idx + 1) * 100 */
+    4.940968123,
+    4.67027027,
+    4.440614536,
+    3.923152709,
+    3.630353266,
+    3.285404767,
+    2.928154956,
+    2.674937965,
+    2.453920494,
+    2.188634781,
+    1.995005993,
+    1.759580803,
+    1.628499716,
+    1.535362622,
+    1.462351476,
+    1.3797608,
+    1.286160971,
+    1.182819594,
+    1.101226061,
+    0.991769129,
+    0.948720583,
+    0.913787811,
+    0.869057377,
+    0.841037204,
+    0.788785998,
+    0.7560272,
+    0.723588994,
+    0.702215787,
+    0.664887612,
+    0.657913931
+};
 
 
 #define DDS_UPDATE_FREQUENCY 995062
@@ -255,10 +294,7 @@ void myParserTask(void const * argument)
                     switch (current_function_mode) {
                         case FUNCTION_MODE_NONE:
                            
-                            // 在无模式下，按键4可以有特殊功能
-                            HAL_TIM_Base_Stop(&htim4); // 停止定时器
-                            printf("Key 4 pressed in no function mode: Stopping timer\n");
-                            HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1); // 停止DAC DMA
+               
                             break;
                         case FUNCTION_MODE_BASE2:
                             // 在base2_function模式下，按键4控制所有DDS的频率减小100Hz
@@ -545,16 +581,75 @@ void base3_function(void){
 }
 
 void base4_function(void){
-
     printf("Executing base4_function logic\n");
     // 设置当前模式为base4_function模式
     current_function_mode = FUNCTION_MODE_BASE4;
 
-
-
+    // 1. 根据 base4_desired_model_output_frequency 计算 base4_table 的索引
+    uint16_t idx = (uint16_t)(base4_desired_model_output_frequency / 100.0) - 1;
+    
+    // 确保索引在有效范围内
+    if (idx > 29) {
+        idx = 29;
+    }
+    
+    // 2. 从 base4_table 中获取传输比
+    double transform_ratio = base4_table[idx];
+    
+    // 3. 根据传输比和 base4_desired_model_output_voltage 计算各 DDS 应该输出的电压
+    double dds_output_voltage = base4_desired_model_output_voltage / transform_ratio;
+    
+    // 4. 设置 AD9833 的幅度和频率
+    // 确保电压不超过AD9833的最大输出电压
+    double ad9833_voltage = dds_output_voltage;
+    if (ad9833_voltage > AD9833_VMAX_V) {
+        ad9833_voltage = AD9833_VMAX_V;
+    }
+    
+    // 将电压转换为DAC寄存器值并设置幅度
+    uint8_t ad9833_dac_value = AD9833_VOLTAGE_TO_DAC(ad9833_voltage);
+    AD9833_AmpSet(ad9833_dac_value);
+    
+    // 设置频率
+    base4_ad9833_frequency = base4_desired_model_output_frequency;
+    AD9833_WaveSeting(base4_ad9833_frequency, 0, SIN_WAVE, 0);
+    
+    // 5. 设置 AD9954 的幅度和频率
+    // 确保电压不超过AD9954的最大输出电压
+    double ad9954_voltage = dds_output_voltage;
+    if (ad9954_voltage > AD9954_VMAX_V) {
+        ad9954_voltage = AD9954_VMAX_V;
+    }
+    
+    // 将电压转换为DAC寄存器值并设置幅度
+    uint16_t ad9954_dac_value = AD9954_VOLTAGE_TO_DAC(ad9954_voltage);
+    AD9954_Set_Amp(ad9954_dac_value);
+    
+    // 设置频率
+    base4_ad9954_frequency = base4_desired_model_output_frequency;
+    AD9954_Set_Fre(base4_ad9954_frequency);
+    
+    // 6. 设置 DAC DDS 的幅度和频率
+    // 计算幅度值 (0.0 到 1.0)
+    float dac_dds_amplitude = (float)((dds_output_voltage - DAC_ACTUAL_V_ZERO) / DAC_ACTUAL_SPAN);
+    
+    // 确保幅度值在有效范围内
+    if (dac_dds_amplitude < 0.0f) {
+        dac_dds_amplitude = 0.0f;
+    } else if (dac_dds_amplitude > 1.0f) {
+        dac_dds_amplitude = 1.0f;
+    }
+    
+    // 设置幅度和频率
+    base4_dacdds_frequency = (uint16_t)(base4_desired_model_output_frequency); // 转换为Hz
+    DDS_SetAmplitude(&g_dds_generator, dac_dds_amplitude);
+    DDS_SetFrequency(&g_dds_generator, (float)base4_dacdds_frequency);
 
     printf("base4 completed\n");
 }
+
+
+
 
 void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef* hdac)
 {
@@ -567,3 +662,4 @@ void HAL_DAC_ConvHalfCpltCallbackCh1(DAC_HandleTypeDef* hdac)
   // 這是DMA傳輸完前半個緩衝區後的回呼 (Ping區完成)
   DDS_Callback_HalfTransfer(&g_dds_generator);
 }
+
