@@ -30,7 +30,6 @@
 #include "arm_math.h"
 #include "my_uart_task.h"
 #include "my_adc_task.h"
-#include "my_dac_task.h"
 #include "my_zlcr_config.h"
 #include "my_button_task.h"
 #include "my_parser.h"
@@ -84,13 +83,6 @@ const osThreadAttr_t ADCProcessingTask_attributes = {
   .name = "ADCProcessingTask",
   .stack_size = 128 * 16,
   .priority = (osPriority_t) osPriorityHigh,
-};
-
-osThreadId_t DACProcessingTaskHandle;
-const osThreadAttr_t DACProcessingTask_attributes = {
-  .name = "DACProcessingTask",
-  .stack_size = 128 * 8,
-  .priority = (osPriority_t) osPriorityAboveNormal,
 };
 
 osThreadId_t UARTProcessingTaskHandle;
@@ -236,7 +228,7 @@ int main(void)
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   // ADCProcessingTaskHandle = osThreadNew(StartADCProcessingTask, NULL, &ADCProcessingTask_attributes);
-  DACProcessingTaskHandle = osThreadNew(StartDACProcessingTask, NULL, &DACProcessingTask_attributes);
+
   UARTProcessingTaskHandle = osThreadNew(StartUARTProcessingTask, NULL, &UARTProcessingTask_attributes);
   // ButtonProcessingTaskHandle = osThreadNew(StartButtonProcessingTask, NULL, &ButtonProcessingTask_attributes);
   myParserTaskHandle = osThreadNew(myParserTask, NULL, &myParserTask_attributes);

@@ -27,24 +27,105 @@ Project File Date:  07/31/2025
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\KEIL\ARM\ARMCC\Bin'
 Build target 'FinallAttackProject'
-compiling my_dac_task.c...
+compiling my_dac_config.c...
+compiling my_parser.c...
+..\Module\Parser\my_parser.h(22): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_PARSER_H
+../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_ZLCR_TASK_H
+../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
+  #endif /* MT_MY_ADC_TASK_H */
+../Module/DAC/my_dds.h(83): warning:  #1-D: last line of file ends without a newline
+  #endif // DDS_WAVE_GENERATOR_H
+..\Module\Parser\my_parser.c(164): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              float current_ad9833_voltage = (float)base2_ad9833_amplitude * AD9833_VMAX_V / 255.0;
+..\Module\Parser\my_parser.c(166): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              current_ad9833_voltage += 0.1;
+..\Module\Parser\my_parser.c(168): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              if (current_ad9833_voltage > AD9833_VMAX_V) {
+..\Module\Parser\my_parser.c(172): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              base2_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(current_ad9833_voltage);
+..\Module\Parser\my_parser.c(177): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              float current_ad9954_voltage = (float)base2_ad9954_amplitude * AD9954_VMAX_V / 16383.0;
+..\Module\Parser\my_parser.c(179): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              current_ad9954_voltage += 0.1;
+..\Module\Parser\my_parser.c(181): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              if (current_ad9954_voltage > AD9954_VMAX_V) {
+..\Module\Parser\my_parser.c(185): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(current_ad9954_voltage);
+..\Module\Parser\my_parser.c(150): warning:  #546-D: transfer of control bypasses initialization of:
+            variable "current_ad9833_voltage"  (declared at line 164)
+            variable "current_ad9954_voltage"  (declared at line 177)
+                      switch (current_function_mode) {
+                      ^
+..\Module\Parser\my_parser.c(363): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              float current_ad9833_voltage = (float)base2_ad9833_amplitude * AD9833_VMAX_V / 255.0;
+..\Module\Parser\my_parser.c(365): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              current_ad9833_voltage -= 0.1;
+..\Module\Parser\my_parser.c(367): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              if (current_ad9833_voltage < 0.0) {
+..\Module\Parser\my_parser.c(371): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              base2_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(current_ad9833_voltage);
+..\Module\Parser\my_parser.c(376): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              float current_ad9954_voltage = (float)base2_ad9954_amplitude * AD9954_VMAX_V / 16383.0;
+..\Module\Parser\my_parser.c(378): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              current_ad9954_voltage -= 0.1;
+..\Module\Parser\my_parser.c(380): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              if (current_ad9954_voltage < 0.0) {
+..\Module\Parser\my_parser.c(384): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(current_ad9954_voltage);
+..\Module\Parser\my_parser.c(357): warning:  #546-D: transfer of control bypasses initialization of:
+            variable "current_ad9833_voltage"  (declared at line 363)
+            variable "current_ad9954_voltage"  (declared at line 376)
+                      switch (current_function_mode) {
+                      ^
+..\Module\Parser\my_parser.c(508): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+      if (ad9833_init_voltage > AD9833_VMAX_V) {
+..\Module\Parser\my_parser.c(511): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+      base3_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(ad9833_init_voltage);
+..\Module\Parser\my_parser.c(514): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+      if (ad9954_init_voltage > AD9954_VMAX_V) {
+..\Module\Parser\my_parser.c(517): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+      base3_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(ad9954_init_voltage);
+..\Module\Parser\my_parser.c: 27 warnings, 0 errors
+compiling my_uart_task.c...
+..\Module\UART\my_uart_task.h(32): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_UART_TASK_H */
 ../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
   #endif /* MY_FREQ_CONFIG_H */
 ../Module/Param/my_parameter_config.h(53): warning:  #1-D: last line of file ends without a newline
   #endif // MY_PARAMETER_CONFIG_H
-..\Module\DAC\my_dac_config.h(21): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_DAC_CONFIG_H */
-..\Module\DAC\my_dac_task.h(15): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_DAC_TASK_H */
-..\Module\DAC\my_dds.h(82): warning:  #1-D: last line of file ends without a newline
+../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_ZLCR_TASK_H
+../Module/Parser/my_parser.h(22): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_PARSER_H
+../Module/DAC/my_dds.h(83): warning:  #1-D: last line of file ends without a newline
   #endif // DDS_WAVE_GENERATOR_H
-..\Module\DAC\my_dac_task.c(77): warning:  #1-D: last line of file ends without a newline
-  }
-..\Module\DAC\my_dac_task.c: 6 warnings, 0 errors
+../Module/DAC/my_dac_config.h(17): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_DAC_CONFIG_H */
+..\Module\UART\my_uart_task.c(186): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+              g_desired_dds_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
+..\Module\UART\my_uart_task.c(188): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+              g_desired_dds_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
+..\Module\UART\my_uart_task.c(261): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                  base2_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
+..\Module\UART\my_uart_task.c(264): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                  base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
+..\Module\UART\my_uart_task.c(270): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                  base3_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
+..\Module\UART\my_uart_task.c(273): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                  base3_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
+..\Module\UART\my_uart_task.c(279): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+              base4_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
+..\Module\UART\my_uart_task.c(280): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+              base4_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
+..\Module\UART\my_uart_task.c: 15 warnings, 0 errors
 linking...
-Program Size: Code=48480 RO-data=2776 RW-data=324 ZI-data=21812  
+Program Size: Code=48576 RO-data=3104 RW-data=324 ZI-data=21812  
 FromELF: creating hex file...
-"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 6 Warning(s).
+"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 42 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -67,7 +148,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:08
+Build Time Elapsed:  00:00:10
 </pre>
 </body>
 </html>

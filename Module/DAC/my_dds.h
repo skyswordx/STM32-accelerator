@@ -10,6 +10,7 @@
 // to calculate samples but increases latency. 128 or 256 is a good start.
 // IMPORTANT: Must be an even number.
 #define DDS_DMA_BUFFER_SIZE 128
+#define WAVE_TABLE_SIZE 64
 
 // --- Type Definitions ---
 // DDS Generator Handle Structure

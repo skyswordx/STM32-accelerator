@@ -67,3 +67,5 @@ finallattackproject\my_uart_task.o: ../Drivers/AD9833/AD9833.h
 finallattackproject\my_uart_task.o: ../Drivers/AD9954/AD9954.h
 finallattackproject\my_uart_task.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdlib.h
 finallattackproject\my_uart_task.o: ../Module/Parser/my_parser.h
+finallattackproject\my_uart_task.o: ../Module/DAC/my_dds.h
+finallattackproject\my_uart_task.o: ../Module/DAC/my_dac_config.h

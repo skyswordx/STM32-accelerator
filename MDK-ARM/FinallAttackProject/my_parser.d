@@ -67,3 +67,4 @@ finallattackproject\my_parser.o: ../Module/Timer/my_timer_config.h
 finallattackproject\my_parser.o: ../Module/Frequency/my_freq_config.h
 finallattackproject\my_parser.o: ../Module/ZLCR/my_zlcr_config.h
 finallattackproject\my_parser.o: ../Module/Button/my_button_config.h
+finallattackproject\my_parser.o: ../Module/DAC/my_dds.h

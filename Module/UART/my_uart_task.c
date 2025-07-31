@@ -7,6 +7,14 @@
 #include <stdlib.h>  // 包含atof函数声明
 
 #include "my_parser.h"           // 包含新系统入口函数
+#include "my_dds.h"
+#include "my_dac_config.h"
+
+
+extern DDS_Generator_t g_dds_generator; 
+extern const uint16_t g_sine_wave_64[WAVE_TABLE_SIZE];
+extern const uint16_t g_square_wave_64[WAVE_TABLE_SIZE];
+extern const uint16_t g_triangle_wave_64[WAVE_TABLE_SIZE];
 
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart6; // 串口屏
@@ -355,6 +363,20 @@ void update_dac_waveform(void)
 {
     // 波形更新逻辑将在DAC任务中实现
     printf("DAC waveform update requested\n");
+    DDS_Stop(&g_dds_generator);
+    if (g_desired_DAC_output_waveform == 0) {
+        // 正弦波
+        DDS_SetWaveform(&g_dds_generator, g_sine_wave_64, WAVE_TABLE_SIZE);
+    } else if (g_desired_DAC_output_waveform == 1) {
+        // 方波
+        DDS_SetWaveform(&g_dds_generator, g_square_wave_64, WAVE_TABLE_SIZE);
+    } else if (g_desired_DAC_output_waveform == 2) {
+        // 三角波
+        DDS_SetWaveform(&g_dds_generator, g_triangle_wave_64, WAVE_TABLE_SIZE);
+    }
+
+    DDS_Start(&g_dds_generator);
+
 }
 
 /**
@@ -364,6 +386,8 @@ void update_dac_frequency(void)
 {
     // 频率更新逻辑将在DAC任务中实现
     printf("DAC frequency update requested\n");
+    DDS_SetFrequency(&g_dds_generator, g_desired_DAC_output_frequency);
+
 }
 
 /**

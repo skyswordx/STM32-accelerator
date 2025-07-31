@@ -12,10 +12,6 @@
 #define DAC_REF_VOLTAGE 3.3f
 #define VOLTAGE_TO_DAC_VALUE(voltage) ((uint16_t)((voltage) * DAC_MAX_VALUE / DAC_REF_VOLTAGE))
 
-// 函数声明
-void update_dac_waveform_by_parameters(void);
-void generate_sine_wave(uint16_t* buffer, uint32_t size, uint32_t frequency, float32_t amplitude, float32_t vref);
-void generate_square_wave(uint16_t* buffer, uint32_t size, uint32_t frequency, float32_t amplitude, float32_t vref);
-void generate_triangle_wave(uint16_t* buffer, uint32_t size, uint32_t frequency, float32_t amplitude, float32_t vref);
+
 
 #endif /* MY_DAC_CONFIG_H */
