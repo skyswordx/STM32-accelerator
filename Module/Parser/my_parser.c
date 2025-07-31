@@ -87,7 +87,7 @@ void myParserTask(void const * argument)
 
     printf("Initializing DDS generator...\r\n");
     DAC_ACTUAL_SPAN = DAC_ACTUAL_V_FULL - DAC_ACTUAL_V_ZERO; // 计算实际的电压跨度
-    
+
     // 1. 初始化DDS產生器
     DDS_Init(&g_dds_generator, &hdac1, DAC_CHANNEL_1, &htim4, DDS_UPDATE_FREQUENCY);
 
@@ -107,6 +107,19 @@ void myParserTask(void const * argument)
     // 设置DAC通道2的固定电压输出
     // HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_2, DAC_ALIGN_12B_R, VOLTAGE_TO_DAC_VALUE(g_desired_DAC_single_output_amplitude));
     // HAL_DAC_Start(&hdac1, DAC_CHANNEL_2); // 启动DAC通道2
+
+    /* 初始化内存空间并且启动定时器和双 ADC */
+    // memset(g_adc_dma_buffer, 0, ADC_SAMPLE_SIZE * sizeof(uint16_t));
+    // SCB_CleanDCache_by_Addr((uint32_t*)g_adc_dma_buffer, ADC_SAMPLE_SIZE * sizeof(uint16_t));
+
+    // /* 【ADC 数据流】校准ADC 勿动 */
+    // HAL_ADCEx_Calibration_Start(&hadc2, ADC_CALIB_FACTOR_LINEARITY_REGOFFSET, ADC_SINGLE_ENDED);
+    // HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_FACTOR_LINEARITY_REGOFFSET, ADC_SINGLE_ENDED);
+
+    // /* 【ADC 数据流】初始化同步采样的 ADC 模式 */
+    // HAL_ADC_Start(&hadc2);
+    // HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)g_adc_dma_buffer, ADC_SAMPLE_SIZE);
+
     while (1) {
 
         // 1. 调用扫描函数
