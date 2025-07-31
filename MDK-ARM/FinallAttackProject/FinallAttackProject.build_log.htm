@@ -27,104 +27,6 @@ Project File Date:  07/31/2025
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\KEIL\ARM\ARMCC\Bin'
 Build target 'FinallAttackProject'
-assembling startup_stm32h750xx.s...
-compiling stm32h7xx_hal_timebase_tim.c...
-compiling stm32h7xx_hal_flash_ex.c...
-compiling stm32h7xx_hal_adc.c...
-compiling stm32h7xx_hal_hsem.c...
-compiling stm32h7xx_hal_flash.c...
-compiling freertos.c...
-compiling stm32h7xx_hal_msp.c...
-compiling stm32h7xx_hal_dma_ex.c...
-compiling stm32h7xx_it.c...
-compiling stm32h7xx_hal_gpio.c...
-compiling stm32h7xx_hal_adc_ex.c...
-compiling main.c...
-../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
-  #endif /* INA226_H_ */
-../Module/UART/my_uart_task.h(32): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_UART_TASK_H */
-../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
-  #endif /* MT_MY_ADC_TASK_H */
-../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_ZLCR_TASK_H
-../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
-  #endif /* MT_MY_ADC_TASK_H */
-../Module/Button/my_button_task.h(16): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_BUTTON_TASK_H
-../Module/Parser/my_parser.h(22): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_PARSER_H
-../Core/Src/main.c(232): warning:  #167-D: argument of type "void (*)(const void *)" is incompatible with parameter of type "osThreadFunc_t"
-    UARTProcessingTaskHandle = osThreadNew(StartUARTProcessingTask, NULL, &UARTProcessingTask_attributes);
-../Core/Src/main.c(234): warning:  #167-D: argument of type "void (*)(const void *)" is incompatible with parameter of type "osThreadFunc_t"
-    myParserTaskHandle = osThreadNew(myParserTask, NULL, &myParserTask_attributes);
-../Core/Src/main.c: 10 warnings, 0 errors
-compiling stm32h7xx_hal_rcc.c...
-compiling stm32h7xx_hal_rcc_ex.c...
-compiling stm32h7xx_hal_dma.c...
-compiling stm32h7xx_hal_pwr.c...
-compiling stm32h7xx_hal_mdma.c...
-compiling stm32h7xx_hal_pwr_ex.c...
-compiling croutine.c...
-compiling event_groups.c...
-compiling list.c...
-compiling queue.c...
-compiling stream_buffer.c...
-compiling tasks.c...
-compiling timers.c...
-compiling stm32h7xx_hal_spi.c...
-compiling heap_4.c...
-compiling port.c...
-compiling stm32h7xx_hal.c...
-compiling stm32h7xx_hal_dac.c...
-compiling stm32h7xx_hal_cortex.c...
-compiling stm32h7xx_hal_spi_ex.c...
-compiling stm32h7xx_hal_dac_ex.c...
-compiling stm32h7xx_hal_tim_ex.c...
-compiling stm32h7xx_hal_exti.c...
-compiling stm32h7xx_hal_i2c_ex.c...
-compiling my_pid_config.c...
-../Module/KalmanFilter/my_kalman_filter.h(23): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_KALMAN_FILTER_H */
-..\Module\PID\my_pid_config.c: 1 warning, 0 errors
-compiling stm32h7xx_hal_tim.c...
-compiling stm32h7xx_hal_i2c.c...
-compiling my_dila_config.c...
-..\Module\DILA\my_dila_config.c(187): warning:  #1-D: last line of file ends without a newline
-  }
-..\Module\DILA\my_dila_config.c: 1 warning, 0 errors
-compiling my_czt_config.c...
-..\Module\CZT\my_czt_config.h(78): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_CZT_CONFIG_H
-..\Module\CZT\my_czt_config.c(206): warning:  #1-D: last line of file ends without a newline
-  }
-..\Module\CZT\my_czt_config.c(7): warning:  #177-D: variable "signal_in"  was declared but never referenced
-  static float32_t signal_in[CZT_N];
-..\Module\CZT\my_czt_config.c: 3 warnings, 0 errors
-compiling stm32h7xx_hal_uart.c...
-compiling my_kalman_filter.c...
-..\Module\KalmanFilter\my_kalman_filter.h(23): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_KALMAN_FILTER_H */
-..\Module\KalmanFilter\my_kalman_filter.c(47): warning:  #1-D: last line of file ends without a newline
-  }
-..\Module\KalmanFilter\my_kalman_filter.c: 2 warnings, 0 errors
-compiling stm32h7xx_hal_uart_ex.c...
-compiling system_stm32h7xx.c...
-compiling cmsis_os2.c...
-compiling INA226.c...
-..\Drivers\INA226\INA226.h(15): warning:  #1-D: last line of file ends without a newline
-  #endif /* INA226_H_ */
-..\Drivers\INA226\INA226.c(278): warning:  #1-D: last line of file ends without a newline
-  // }
-..\Drivers\INA226\INA226.c: 2 warnings, 0 errors
-compiling my_dds.c...
-..\Module\DAC\my_dds.h(85): warning:  #1-D: last line of file ends without a newline
-  #endif // DDS_WAVE_GENERATOR_H
-..\Module\DAC\my_dds.c(112): warning:  #1-D: last line of file ends without a newline
-  }
-..\Module\DAC\my_dds.c: 2 warnings, 0 errors
 compiling my_adc_task.c...
 ../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
   #endif /* MT_MY_ADC_TASK_H */
@@ -136,192 +38,19 @@ compiling my_adc_task.c...
   #endif /* MT_MY_ADC_TASK_H */
 ../Module/UART/my_uart_task.h(32): warning:  #1-D: last line of file ends without a newline
   #endif /* MY_UART_TASK_H */
-../Module/TimeDetect/my_time_detect.h(8): warning:  #1-D: last line of file ends without a newline
+../Module/TimeDetect/my_time_detect.h(31): warning:  #1-D: last line of file ends without a newline
   #endif // MY_TIME_DETECT_H
 ../Module/Param/my_parameter_config.h(53): warning:  #1-D: last line of file ends without a newline
   #endif // MY_PARAMETER_CONFIG_H
-..\Module\ADC\my_adc_task.c(311): warning:  #1182-D: a declaration cannot have a label
-                      fundamental_result_t ch1_result, ch2_result;
-..\Module\ADC\my_adc_task.c(388): warning:  #1-D: last line of file ends without a newline
+..\Module\ADC\my_adc_task.c(219): warning:  #1-D: last line of file ends without a newline
   }
+..\Module\ADC\my_adc_task.c(117): warning:  #177-D: variable "adc_mode"  was declared but never referenced
+      adc_mode_t adc_mode = ADC_MODE_NORMAL;
 ..\Module\ADC\my_adc_task.c: 9 warnings, 0 errors
-compiling AD9954.c...
-compiling my_timer_config.c...
-../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_ZLCR_TASK_H
-../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
-  #endif /* MT_MY_ADC_TASK_H */
-..\Module\Timer\my_timer_config.c(208): warning:  #1-D: last line of file ends without a newline
-  }
-..\Module\Timer\my_timer_config.c: 4 warnings, 0 errors
-compiling my_quinn_config.c...
-../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-..\Module\Quinn\my_quinn_config.h(76): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_QUINN_CONFIG_H
-..\Module\Quinn\my_quinn_config.c(159): warning:  #1-D: last line of file ends without a newline
-  }
-..\Module\Quinn\my_quinn_config.c: 3 warnings, 0 errors
-compiling my_dac_config.c...
-../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-../Module/Param/my_parameter_config.h(53): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_PARAMETER_CONFIG_H
-..\Module\DAC\my_dac_config.h(16): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_DAC_CONFIG_H */
-..\Module\DAC\my_dds.h(85): warning:  #1-D: last line of file ends without a newline
-  #endif // DDS_WAVE_GENERATOR_H
-..\Module\DAC\my_dac_config.c(58): warning:  #1-D: last line of file ends without a newline
-  };
-..\Module\DAC\my_dac_config.c: 5 warnings, 0 errors
-compiling my_zlcr_config.c...
-../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-..\Module\ZLCR\my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_ZLCR_TASK_H
-..\Module\ZLCR\my_zlcr_config.c(68): warning:  #223-D: function "generate_logarithmic_frequency_points" declared implicitly
-                  generate_logarithmic_frequency_points(decade_start, decade_stop, points_in_decade, &freq_array[total_points]);
-..\Module\ZLCR\my_zlcr_config.c(74): warning:  #223-D: function "generate_logarithmic_frequency_points" declared implicitly
-                      generate_logarithmic_frequency_points(decade_start, decade_stop, remaining_points, &freq_array[total_points]);
-..\Module\ZLCR\my_zlcr_config.c(100): warning:  #159-D: declaration is incompatible with previous "generate_logarithmic_frequency_points"  (declared at line 68)
-  void generate_logarithmic_frequency_points(uint32_t start_freq, uint32_t stop_freq, uint32_t points, uint32_t* freq_array) {
-..\Module\ZLCR\my_zlcr_config.c(289): warning:  #1-D: last line of file ends without a newline
-   */
-..\Module\ZLCR\my_zlcr_config.c: 6 warnings, 0 errors
-compiling my_freq_config.c...
-..\Module\Frequency\my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-..\Module\Frequency\my_freq_config.c(520): warning:  #1-D: last line of file ends without a newline
-  }
-..\Module\Frequency\my_freq_config.c: 2 warnings, 0 errors
-compiling my_uart_task.c...
-..\Module\UART\my_uart_task.h(32): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_UART_TASK_H */
-../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-../Module/Param/my_parameter_config.h(53): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_PARAMETER_CONFIG_H
-../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_ZLCR_TASK_H
-../Module/Parser/my_parser.h(22): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_PARSER_H
-../Module/DAC/my_dds.h(85): warning:  #1-D: last line of file ends without a newline
-  #endif // DDS_WAVE_GENERATOR_H
-../Module/DAC/my_dac_config.h(16): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_DAC_CONFIG_H */
-..\Module\UART\my_uart_task.c(189): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-              g_desired_dds_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
-..\Module\UART\my_uart_task.c(191): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-              g_desired_dds_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
-..\Module\UART\my_uart_task.c(264): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                  base2_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
-..\Module\UART\my_uart_task.c(267): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                  base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
-..\Module\UART\my_uart_task.c(273): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                  base3_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
-..\Module\UART\my_uart_task.c(276): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                  base3_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
-..\Module\UART\my_uart_task.c(282): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-              base4_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
-..\Module\UART\my_uart_task.c(283): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-              base4_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
-..\Module\UART\my_uart_task.c: 15 warnings, 0 errors
-compiling AD9833.c...
-compiling my_time_detect.c...
-..\Module\TimeDetect\my_time_detect.h(8): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_TIME_DETECT_H
-..\Module\TimeDetect\my_time_detect.c: 1 warning, 0 errors
-compiling my_button_config.c...
-compiling my_button_task.c...
-..\Module\Button\my_button_task.h(16): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_BUTTON_TASK_H
-../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
-  #endif /* INA226_H_ */
-../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_ZLCR_TASK_H
-..\Module\Button\my_button_task.c(16): warning:  #177-D: variable "relay_state"  was declared but never referenced
-  static uint8_t relay_state = 0; // 继电器状态计数器
-..\Module\Button\my_button_task.c: 5 warnings, 0 errors
-compiling MCP4725.c...
-..\Drivers\MCP4725\MCP4725.c(44): warning:  #188-D: enumerated type mixed with another type
-  	_MCP4725._i2cAddress = (uint16_t)(addr<<1);
-..\Drivers\MCP4725\MCP4725.c: 1 warning, 0 errors
-compiling my_parameter_config.c...
-../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-..\Module\Param\my_parameter_config.h(53): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_PARAMETER_CONFIG_H
-..\Module\Param\my_parameter_config.c: 2 warnings, 0 errors
-compiling my_parser.c...
-..\Module\Parser\my_parser.h(22): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_PARSER_H
-../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_ZLCR_TASK_H
-../Module/ADC/my_adc_task.h(24): warning:  #1-D: last line of file ends without a newline
-  #endif /* MT_MY_ADC_TASK_H */
-../Module/DAC/my_dds.h(85): warning:  #1-D: last line of file ends without a newline
-  #endif // DDS_WAVE_GENERATOR_H
-..\Module\Parser\my_parser.c(182): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                              float current_ad9833_voltage = (float)base2_ad9833_amplitude * AD9833_VMAX_V / 255.0;
-..\Module\Parser\my_parser.c(184): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                              current_ad9833_voltage += 0.1;
-..\Module\Parser\my_parser.c(186): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                              if (current_ad9833_voltage > AD9833_VMAX_V) {
-..\Module\Parser\my_parser.c(190): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                              base2_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(current_ad9833_voltage);
-..\Module\Parser\my_parser.c(195): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                              float current_ad9954_voltage = (float)base2_ad9954_amplitude * AD9954_VMAX_V / 16383.0;
-..\Module\Parser\my_parser.c(197): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                              current_ad9954_voltage += 0.1;
-..\Module\Parser\my_parser.c(199): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                              if (current_ad9954_voltage > AD9954_VMAX_V) {
-..\Module\Parser\my_parser.c(203): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                              base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(current_ad9954_voltage);
-..\Module\Parser\my_parser.c(168): warning:  #546-D: transfer of control bypasses initialization of:
-            variable "current_ad9833_voltage"  (declared at line 182)
-            variable "current_ad9954_voltage"  (declared at line 195)
-                      switch (current_function_mode) {
-                      ^
-..\Module\Parser\my_parser.c(381): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                              float current_ad9833_voltage = (float)base2_ad9833_amplitude * AD9833_VMAX_V / 255.0;
-..\Module\Parser\my_parser.c(383): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                              current_ad9833_voltage -= 0.1;
-..\Module\Parser\my_parser.c(385): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                              if (current_ad9833_voltage < 0.0) {
-..\Module\Parser\my_parser.c(389): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                              base2_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(current_ad9833_voltage);
-..\Module\Parser\my_parser.c(394): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                              float current_ad9954_voltage = (float)base2_ad9954_amplitude * AD9954_VMAX_V / 16383.0;
-..\Module\Parser\my_parser.c(396): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                              current_ad9954_voltage -= 0.1;
-..\Module\Parser\my_parser.c(398): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                              if (current_ad9954_voltage < 0.0) {
-..\Module\Parser\my_parser.c(402): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                              base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(current_ad9954_voltage);
-..\Module\Parser\my_parser.c(375): warning:  #546-D: transfer of control bypasses initialization of:
-            variable "current_ad9833_voltage"  (declared at line 381)
-            variable "current_ad9954_voltage"  (declared at line 394)
-                      switch (current_function_mode) {
-                      ^
-..\Module\Parser\my_parser.c(526): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-      if (ad9833_init_voltage > AD9833_VMAX_V) {
-..\Module\Parser\my_parser.c(529): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-      base3_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(ad9833_init_voltage);
-..\Module\Parser\my_parser.c(532): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-      if (ad9954_init_voltage > AD9954_VMAX_V) {
-..\Module\Parser\my_parser.c(535): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-      base3_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(ad9954_init_voltage);
-..\Module\Parser\my_parser.c: 27 warnings, 0 errors
 linking...
-Program Size: Code=62724 RO-data=41116 RW-data=364 ZI-data=210756  
+Program Size: Code=59640 RO-data=40972 RW-data=348 ZI-data=194332  
 FromELF: creating hex file...
-"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 101 Warning(s).
+"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 9 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -344,7 +73,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:02:37
+Build Time Elapsed:  00:00:09
 </pre>
 </body>
 </html>

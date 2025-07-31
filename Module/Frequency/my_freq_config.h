@@ -91,6 +91,6 @@ void my_armrfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
 #define HANNING_WINDOW_FACTOR 2.0f   // 汉宁窗补偿系数
 #define FLAT_TOP_WINDOW_FACTOR 0.216f // 平顶窗补偿系数 (ISO 18431-2标准)
 
-
+float32_t caculate_DCcomponent(float32_t* data, uint32_t length);
 
 #endif /* MY_FREQ_CONFIG_H */
