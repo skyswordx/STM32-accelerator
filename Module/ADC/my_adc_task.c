@@ -18,6 +18,7 @@ extern TIM_HandleTypeDef htim3;  /* 实际使用TIM3作为ADC触发源和时间�
 #define ADC_DMA_TRANSFER_COMPLETED 1
 #define ADC_DMA_TRANSFER_NOT_COMPLETED 0
 extern uint32_t g_desired_ADC_sample_rate_Hz;
+// uint32_t g_ADC_SAMPLE_RATE_Hz = 995062*2; // 2MHz采样率
 uint32_t g_ADC_SAMPLE_RATE_Hz = 2000000; // 2MHz采样率
 
 #define ADC_REF_VOLTAGE 3.3f // ADC参考电压
@@ -64,6 +65,11 @@ float32_t g_adc1_data_8bit[ADC_SAMPLE_SIZE]; // ADC1数据
 float32_t g_adc2_data_8bit[ADC_SAMPLE_SIZE]; // ADC2数据
 // uint16_t debug1[ADC_SAMPLE_SIZE]; // 用于调试的ADC1数据
 // uint16_t debug2[ADC_SAMPLE_SIZE]; // 用于调试的ADC2数据
+
+// --- 新增: 为时域分析提供静态临时缓冲区 ---
+float32_t g_adc1_temp_buffer[ADC_SAMPLE_SIZE];
+float32_t g_adc2_temp_buffer[ADC_SAMPLE_SIZE];
+
 
 uint16_t g_adc_dma_transfer_flag = ADC_DMA_TRANSFER_NOT_COMPLETED;
 
@@ -112,6 +118,12 @@ void StartADCProcessingTask(void *argument) {
     // 【ADC 数据流】 指示 ADC 工作模式，默认为正常模式
     adc_mode_t adc_mode = ADC_MODE_NORMAL;
 
+    // --- 新增: 初始化时域分析的配置 ---
+    time_domain_config_t time_config;
+    time_config.enable_filter = 1;         // 启用滤波器
+    time_config.filter_alpha = 0.05f;      // 设置IIR滤波器系数
+    time_config.hysteresis_v = 0.05f;      // 设置50mV的迟滞电压窗口
+
     for (;;) {
 
         /* 【ADC 数据流】 利用 GPIO 按键触发启动定时器 */
@@ -147,48 +159,41 @@ void StartADCProcessingTask(void *argument) {
              if (g_time_detect_enabled) {
                 time_domain_result_t ch1_time_result, ch2_time_result;
 
-                // 对 ADC1 通道数据进行时域分析 (传入实际采样率 g_ADC_SAMPLE_RATE_Hz)
-                my_time_domain_analysis(g_adc1_data_8bit, ADC_SAMPLE_SIZE, g_ADC_SAMPLE_RATE_Hz, &ch1_time_result);
+                // --- 调用优化的时域分析函数 ---
+                my_time_domain_analysis_optimized(g_adc1_data_8bit, g_adc1_temp_buffer, ADC_SAMPLE_SIZE, g_ADC_SAMPLE_RATE_Hz, &time_config, &ch1_time_result);
+                my_time_domain_analysis_optimized(g_adc2_data_8bit, g_adc2_temp_buffer, ADC_SAMPLE_SIZE, g_ADC_SAMPLE_RATE_Hz, &time_config, &ch2_time_result);
 
-                // 对 ADC2 通道数据进行时域分析 (传入实际采样率 g_ADC_SAMPLE_RATE_Hz)
-                my_time_domain_analysis(g_adc2_data_8bit, ADC_SAMPLE_SIZE, g_ADC_SAMPLE_RATE_Hz, &ch2_time_result);
-
-                // 打印时域分析结果 (已更新)
-                printf("\r\n--- Time Domain Analysis ---\r\n");
+                // --- 打印优化后的分析结果 ---
+                printf("\r\n--- Optimized Time Domain Analysis ---\r\n");
                 printf("--- Channel 1 ---\r\n");
                 printf("  Frequency     : %.3f Hz\r\n", ch1_time_result.frequency);
-                printf("  DC Offset     : %.6f V\r\n", ch1_time_result.dc_offset);
-                printf("  AC RMS        : %.6f V\r\n", ch1_time_result.ac_rms);
-                printf("  Vpp (Peak-Peak) : %.6f V (Vmax - Vmin)\r\n", ch1_time_result.vpp_peak);
-                printf("  Vmax          : %.6f V, Vmin: %.6f V\r\n", ch1_time_result.v_max, ch1_time_result.v_min);
-                // 以下为推算值，可选择性打印
-                printf("  Vpp (Sine)    : %.6f V (Calculated from RMS)\r\n", ch1_time_result.vpp_sine);
-                printf("  Vpp (Square)  : %.6f V (Calculated from RMS)\r\n", ch1_time_result.vpp_square);
+                printf("  Vpp (Peak-Peak) : %.4f V\r\n", ch1_time_result.vpp_peak);
+                printf("  AC RMS        : %.4f V\r\n", ch1_time_result.ac_rms);
+                printf("  DC Offset     : %.4f V\r\n", ch1_time_result.dc_offset);
                 
                 printf("--- Channel 2 ---\r\n");
                 printf("  Frequency     : %.3f Hz\r\n", ch2_time_result.frequency);
-                printf("  DC Offset     : %.6f V\r\n", ch2_time_result.dc_offset);
-                printf("  AC RMS        : %.6f V\r\n", ch2_time_result.ac_rms);
-                printf("  Vpp (Peak-Peak) : %.6f V (Vmax - Vmin)\r\n", ch2_time_result.vpp_peak);
-                printf("  Vmax          : %.6f V, Vmin: %.6f V\r\n", ch2_time_result.v_max, ch2_time_result.v_min);
-                printf("--------------------------\r\n\r\n");
+                printf("  Vpp (Peak-Peak) : %.4f V\r\n", ch2_time_result.vpp_peak);
+                printf("  AC RMS        : %.4f V\r\n", ch2_time_result.ac_rms);
+                printf("  DC Offset     : %.4f V\r\n", ch2_time_result.dc_offset);
+                printf("-------------------------------------\r\n\r\n");
             }
 
-            fundamental_result_t ch1_result, ch2_result;
-                        
+            fundamental_result_t ch1_freq_result, ch2_freq_result;
+
             // 分别计算两个通道的频谱数据并存储到独立的缓冲区中
-            my_armcfft32_apply(g_adc1_data_8bit, &ch1_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
+            my_armcfft32_apply(g_adc1_data_8bit, &ch1_freq_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
             memcpy(g_adc1_spectrum_data, g_fft_output_buffer, (FFT_LENGTH / 2) * sizeof(float32_t));
-                        
-            my_armcfft32_apply(g_adc2_data_8bit, &ch2_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
+
+            my_armcfft32_apply(g_adc2_data_8bit, &ch2_freq_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
             memcpy(g_adc2_spectrum_data, g_fft_output_buffer, (FFT_LENGTH / 2) * sizeof(float32_t));
                         
             // 打印频谱
 
             // 打印频谱分析结果
             printf("=== Spectrum Analysis Results ===\n");
-            printf("ADC1 - Frequency: %lu Hz, Magnitude: %.6f V\n", ch1_result.fundamental_frequency, ch1_result.fundamental_vpp);
-            printf("ADC2 - Frequency: %lu Hz, Magnitude: %.6f V\n", ch2_result.fundamental_frequency, ch2_result.fundamental_vpp);
+            printf("ADC1 - Frequency: %lu Hz, Magnitude: %.6f V\n", ch1_freq_result.fundamental_frequency, ch1_freq_result.fundamental_vpp);
+            printf("ADC2 - Frequency: %lu Hz, Magnitude: %.6f V\n", ch2_freq_result.fundamental_frequency, ch2_freq_result.fundamental_vpp);
 
             switch (g_desired_function_state) {
                 case SPECTRUM_STATE:
