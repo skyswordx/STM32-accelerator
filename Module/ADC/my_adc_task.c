@@ -144,30 +144,31 @@ void StartADCProcessingTask(void *argument) {
                 // printf("ADC1/2:%.3f, %.3f, %lu\n", g_adc1_data_8bit[i], g_adc2_data_8bit[i], g_ADC_SAMPLE_RATE_Hz);
             }
 
-            if (g_time_detect_enabled) {
+             if (g_time_detect_enabled) {
                 time_domain_result_t ch1_time_result, ch2_time_result;
 
-                // 对 ADC1 通道数据进行时域分析
-                my_time_domain_analysis(g_adc1_data_8bit, ADC_SAMPLE_SIZE, &ch1_time_result);
+                // 对 ADC1 通道数据进行时域分析 (传入实际采样率 g_ADC_SAMPLE_RATE_Hz)
+                my_time_domain_analysis(g_adc1_data_8bit, ADC_SAMPLE_SIZE, g_ADC_SAMPLE_RATE_Hz, &ch1_time_result);
 
-                // 对 ADC2 通道数据进行时域分析
-                my_time_domain_analysis(g_adc2_data_8bit, ADC_SAMPLE_SIZE, &ch2_time_result);
+                // 对 ADC2 通道数据进行时域分析 (传入实际采样率 g_ADC_SAMPLE_RATE_Hz)
+                my_time_domain_analysis(g_adc2_data_8bit, ADC_SAMPLE_SIZE, g_ADC_SAMPLE_RATE_Hz, &ch2_time_result);
 
-                // 打印时域分析结果
+                // 打印时域分析结果 (已更新)
                 printf("\r\n--- Time Domain Analysis ---\r\n");
                 printf("--- Channel 1 ---\r\n");
+                printf("  Frequency     : %.3f Hz\r\n", ch1_time_result.frequency);
                 printf("  DC Offset     : %.6f V\r\n", ch1_time_result.dc_offset);
                 printf("  AC RMS        : %.6f V\r\n", ch1_time_result.ac_rms);
-                printf("  Vpp (Sine)    : %.6f V (Calculated from RMS)\r\n", ch1_time_result.vpp_sine);
-                printf("  Vpp (Square)  : %.6f V (Calculated from RMS)\r\n", ch1_time_result.vpp_square);
                 printf("  Vpp (Peak-Peak) : %.6f V (Vmax - Vmin)\r\n", ch1_time_result.vpp_peak);
                 printf("  Vmax          : %.6f V, Vmin: %.6f V\r\n", ch1_time_result.v_max, ch1_time_result.v_min);
+                // 以下为推算值，可选择性打印
+                printf("  Vpp (Sine)    : %.6f V (Calculated from RMS)\r\n", ch1_time_result.vpp_sine);
+                printf("  Vpp (Square)  : %.6f V (Calculated from RMS)\r\n", ch1_time_result.vpp_square);
                 
                 printf("--- Channel 2 ---\r\n");
+                printf("  Frequency     : %.3f Hz\r\n", ch2_time_result.frequency);
                 printf("  DC Offset     : %.6f V\r\n", ch2_time_result.dc_offset);
                 printf("  AC RMS        : %.6f V\r\n", ch2_time_result.ac_rms);
-                printf("  Vpp (Sine)    : %.6f V (Calculated from RMS)\r\n", ch2_time_result.vpp_sine);
-                printf("  Vpp (Square)  : %.6f V (Calculated from RMS)\r\n", ch2_time_result.vpp_square);
                 printf("  Vpp (Peak-Peak) : %.6f V (Vmax - Vmin)\r\n", ch2_time_result.vpp_peak);
                 printf("  Vmax          : %.6f V, Vmin: %.6f V\r\n", ch2_time_result.v_max, ch2_time_result.v_min);
                 printf("--------------------------\r\n\r\n");
@@ -208,7 +209,7 @@ void StartADCProcessingTask(void *argument) {
 
                     }
                     break;
-                }
+            }
         }
        osDelay(100); // 延时100毫秒
     }

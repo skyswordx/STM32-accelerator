@@ -3,7 +3,7 @@
 <title>Static Call Graph - [FinallAttackProject\FinallAttackProject.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image FinallAttackProject\FinallAttackProject.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Thu Jul 31 20:54:37 2025
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Thu Jul 31 21:06:26 2025
 <BR><P>
 <H3>Maximum Stack Usage =        536 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -730,6 +730,7 @@ Global Symbols
 <LI><a href="#[163]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_ADC1_Init
 <LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;arm_fir_init_f32
 <LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DDS_Init
+<LI><a href="#[179]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;my_time_domain_analysis
 <LI><a href="#[dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD9833_Init_GPIO
 </UL>
 
@@ -2109,8 +2110,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[ac]"></a>StartADCProcessingTask</STRONG> (Thumb, 860 bytes, Stack size 104 bytes, my_adc_task.o(i.StartADCProcessingTask))
-<BR><BR>[Stack]<UL><LI>Max Depth = 308<LI>Call Chain = StartADCProcessingTask &rArr; HAL_ADCEx_MultiModeStart_DMA &rArr; HAL_DMA_Start_IT &rArr; DMA_SetConfig
+<P><STRONG><a name="[ac]"></a>StartADCProcessingTask</STRONG> (Thumb, 836 bytes, Stack size 112 bytes, my_adc_task.o(i.StartADCProcessingTask))
+<BR><BR>[Stack]<UL><LI>Max Depth = 316<LI>Call Chain = StartADCProcessingTask &rArr; HAL_ADCEx_MultiModeStart_DMA &rArr; HAL_DMA_Start_IT &rArr; DMA_SetConfig
 </UL>
 <BR>[Calls]<UL><LI><a href="#[176]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_Start
@@ -2599,10 +2600,11 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartADCProcessingTask
 </UL>
 
-<P><STRONG><a name="[179]"></a>my_time_domain_analysis</STRONG> (Thumb, 232 bytes, Stack size 8 bytes, my_time_detect.o(i.my_time_domain_analysis))
-<BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = my_time_domain_analysis &rArr; __hardfp_sqrtf
+<P><STRONG><a name="[179]"></a>my_time_domain_analysis</STRONG> (Thumb, 380 bytes, Stack size 24 bytes, my_time_detect.o(i.my_time_domain_analysis))
+<BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = my_time_domain_analysis &rArr; __hardfp_sqrtf
 </UL>
-<BR>[Calls]<UL><LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__hardfp_sqrtf
+<BR>[Calls]<UL><LI><a href="#[d9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
+<LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__hardfp_sqrtf
 </UL>
 <BR>[Called By]<UL><LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartADCProcessingTask
 </UL>
