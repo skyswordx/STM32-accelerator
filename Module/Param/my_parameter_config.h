@@ -27,6 +27,11 @@ extern uint16_t g_dac_cosine[256];
 extern uint16_t g_dac_square[256];
 extern uint16_t g_dac_triangle[256];
 
+// 25点波形数组声明
+extern uint16_t g_dac_sine_25[25];
+extern uint16_t g_dac_square_25[25];
+extern uint16_t g_dac_triangle_25[25];
+
 // 继电器控制参数
 extern uint8_t g_desired_switch2which_relay;
 

@@ -8,6 +8,8 @@
 #include "my_timer_config.h"
 #include "my_button_config.h"
 
+extern uint16_t g_dac_square_64[64];
+
 
 extern TIM_HandleTypeDef htim4;
 extern DAC_HandleTypeDef hdac1;
@@ -63,6 +65,7 @@ void myParserTask(void const * argument)
 
     
     while (1) {
+        
         // 1. 调用扫描函数
         Matrix_Keypad_Scan();
 
@@ -194,6 +197,13 @@ void myParserTask(void const * argument)
                 case 4:
                     // 按键4在不同函数模式下的逻辑
                     switch (current_function_mode) {
+                        case FUNCTION_MODE_NONE:
+                           
+                            // 在无模式下，按键4可以有特殊功能
+                            HAL_TIM_Base_Stop(&htim4); // 停止定时器
+                            printf("Key 4 pressed in no function mode: Stopping timer\n");
+                            HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1); // 停止DAC DMA
+                            break;
                         case FUNCTION_MODE_BASE2:
                             // 在base2_function模式下，按键4控制所有DDS的频率减小100Hz
                             printf("Key 4 pressed in base2_function mode: Decreasing all DDS frequencies by 100Hz\n");
@@ -223,6 +233,15 @@ void myParserTask(void const * argument)
                 case 5:
                     // 按键5在不同函数模式下的逻辑
                     switch (current_function_mode) {
+                        case FUNCTION_MODE_NONE:
+                            // 在无模式下，按键5可以有特殊功能
+                            printf("Key 5 pressed in no function mode: Custom function for no mode\n");
+                            // 在这里添加无模式下按键5的特殊功能
+
+                            HAL_TIM_Base_Start(&htim4);
+                            HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, (uint32_t*)g_dac_square_64, 64, DAC_ALIGN_12B_R);
+
+                            break;
                         case FUNCTION_MODE_BASE2:
                             // 在base2_function模式下，按键5可以有特殊功能
                             printf("Key 5 pressed in base2_function mode: Special function for base2\n");
