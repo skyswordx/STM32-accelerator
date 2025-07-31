@@ -47,17 +47,4 @@ finallattackproject\my_time_detect.o: ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h
 finallattackproject\my_time_detect.o: ../Drivers/CMSIS/DSP/Include/arm_math.h
 finallattackproject\my_time_detect.o: D:\KEIL\ARM\ARMCC\Bin\..\include\string.h
 finallattackproject\my_time_detect.o: D:\KEIL\ARM\ARMCC\Bin\..\include\float.h
-finallattackproject\my_time_detect.o: ../Module/Frequency/my_freq_config.h
-finallattackproject\my_time_detect.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h
-finallattackproject\my_time_detect.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-finallattackproject\my_time_detect.o: ../Core/Inc/FreeRTOSConfig.h
-finallattackproject\my_time_detect.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
-finallattackproject\my_time_detect.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
-finallattackproject\my_time_detect.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
-finallattackproject\my_time_detect.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
-finallattackproject\my_time_detect.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
-finallattackproject\my_time_detect.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
-finallattackproject\my_time_detect.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
-finallattackproject\my_time_detect.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
-finallattackproject\my_time_detect.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdio.h
 finallattackproject\my_time_detect.o: D:\KEIL\ARM\ARMCC\Bin\..\include\stdlib.h

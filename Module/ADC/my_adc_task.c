@@ -129,8 +129,6 @@ void StartADCProcessingTask(void *argument) {
     // 【ADC 数据流】 指示 ADC 工作模式，默认为正常模式
     adc_mode_t adc_mode = ADC_MODE_NORMAL;
 
-
-
     for (;;) {
 
         /* 【ADC 数据流】 利用 GPIO 按键触发启动定时器 */
@@ -207,8 +205,8 @@ void StartADCProcessingTask(void *argument) {
 
                         my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL); // 启用FIR和窗函数，并使用汉宁窗专用插值
 
-                        printf("ADC1 %lu Hz %.6f V\n", (g_ch1_fundamental.fundamental_frequency), g_ch1_fundamental.fundamental_vrms);
-                        printf("ADC2 %lu Hz %.6f V\n", (g_ch2_fundamental.fundamental_frequency), g_ch2_fundamental.fundamental_vrms);
+                        printf("ADC1 %lu Hz %.6f V\n", (g_ch1_fundamental.fundamental_frequency), g_ch1_fundamental.fundamental_vpp);
+                        printf("ADC2 %lu Hz %.6f V\n", (g_ch2_fundamental.fundamental_frequency), g_ch2_fundamental.fundamental_vpp);
                         printf("ADC phase angle: %.2f\n", (g_ch1_fundamental.fundamental_phase_angle - g_ch2_fundamental.fundamental_phase_angle ));
                         
                         my_zlcr_get_impedance(&g_ch1_fundamental, &g_ch2_fundamental, &g_current_freq_result); // 获取当前频率下的阻抗信息
@@ -284,8 +282,8 @@ void StartADCProcessingTask(void *argument) {
 
                         // 打印频谱分析结果
                         printf("=== Spectrum Analysis Results ===\n");
-                        printf("ADC1 - Frequency: %lu Hz, Magnitude: %.6f V\n", ch1_result.fundamental_frequency, ch1_result.fundamental_vrms);
-                        printf("ADC2 - Frequency: %lu Hz, Magnitude: %.6f V\n", ch2_result.fundamental_frequency, ch2_result.fundamental_vrms);
+                        printf("ADC1 - Frequency: %lu Hz, Magnitude: %.6f V\n", ch1_result.fundamental_frequency, ch1_result.fundamental_vpp);
+                        printf("ADC2 - Frequency: %lu Hz, Magnitude: %.6f V\n", ch2_result.fundamental_frequency, ch2_result.fundamental_vpp);
                     }
                     break;
 
@@ -296,47 +294,10 @@ void StartADCProcessingTask(void *argument) {
                     // 打印ADC1和ADC2的时域数据
                     for (uint32_t i = 0; i < ADC_SAMPLE_SIZE; i++) { // 只打印前10个点作为示例
                         // printf("ADC1[%lu]: %.6f V, ADC2[%lu]: %.6f V\n", i, g_adc1_data_8bit[i], i, g_adc2_data_8bit[i]);
-                         printf("ADC1/2 :%.6f,%.6f\n", g_adc1_data_8bit[i], g_adc2_data_8bit[i]);
+                         printf("raw ADC1/2 :%.6f,%.6f\n", g_adc1_data_8bit[i], g_adc2_data_8bit[i]);
                         // 如果启用了时域检测模块，则进行检测
                         if (g_time_detect_enabled) {
-                            // 初始化时域检测配置
-                            time_detect_config_params_t time_config;
-                            time_config.sample_rate = g_ADC_SAMPLE_RATE_Hz;
-                            time_config.data_length = ADC_SAMPLE_SIZE;
-                            time_config.enable_dc_filter = 1; // 启用直流分量滤除
-                            
-                            // 初始化时域检测模块
-                            my_time_detect_init(&time_config);
-                            
-                            // 启动时域检测（内部使用频域处理模块获取基波频率等参数）
-                            time_detect_result_t result;
-                            if (my_time_detect_start(g_adc1_data_8bit, &result) == 0) {
-                                // 输出检测结果
-                                printf("Time Domain Detection Results:\n");
-                                printf("  DC Component: %.6f V\n", result.dc_component);
-                                printf("  RMS Value: %.6f V\n", result.rms_value);
-                                printf("  Fundamental Frequency: %lu Hz\n", result.fundamental_freq);
-                                printf("  Period Points: %lu\n", result.period_points);
-                                printf("  Waveform Ratio: %.6f\n", result.waveform_ratio);
-                                
-                                // 根据波形类型输出
-                                switch (result.waveform_type) {
-                                    case WAVEFORM_SINE:
-                                        printf("  Waveform Type: Sine Wave\n");
-                                        break;
-                                    case WAVEFORM_SQUARE:
-                                        printf("  Waveform Type: Square Wave\n");
-                                        break;
-                                    case WAVEFORM_TRIANGLE:
-                                        printf("  Waveform Type: Triangle Wave\n");
-                                        break;
-                                    default:
-                                        printf("  Waveform Type: Unknown\n");
-                                        break;
-                                }
-                            } else {
-                                printf("Time domain detection failed!\n");
-                            }
+            
                         }
                     }
                     break;
@@ -366,8 +327,8 @@ void StartADCProcessingTask(void *argument) {
                         my_armcfft32_apply(g_adc1_data_8bit, &g_ch1_fundamental, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
                         my_armcfft32_apply(g_adc2_data_8bit, &g_ch2_fundamental, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
 
-                        printf("ADC1 %lu Hz %.6f V\n", (g_ch1_fundamental.fundamental_frequency), g_ch1_fundamental.fundamental_vrms);
-                        printf("ADC2 %lu Hz %.6f V\n", (g_ch2_fundamental.fundamental_frequency), g_ch2_fundamental.fundamental_vrms);
+                        printf("ADC1 %lu Hz %.6f V\n", (g_ch1_fundamental.fundamental_frequency), g_ch1_fundamental.fundamental_vpp);
+                        printf("ADC2 %lu Hz %.6f V\n", (g_ch2_fundamental.fundamental_frequency), g_ch2_fundamental.fundamental_vpp);
                         printf("ADC phase angle: %.2f\n", (g_ch1_fundamental.fundamental_phase_angle - g_ch2_fundamental.fundamental_phase_angle ));
                         
                         my_zlcr_get_impedance(&g_ch1_fundamental, &g_ch2_fundamental, &g_current_freq_result);
