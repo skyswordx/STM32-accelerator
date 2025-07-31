@@ -26,7 +26,7 @@ const uint16_t g_arbitrary_waveform[WAVE_TABLE_SIZE] = {
     0, 0, 0, 0, 0, 0, 0, 0
 };
 
-#define DDS_UPDATE_FREQUENCY 1000000
+#define DDS_UPDATE_FREQUENCY 995062
 
 void StartDACProcessingTask(void *argument) {
 
@@ -36,17 +36,22 @@ void StartDACProcessingTask(void *argument) {
     // // 启动DAC DMA传输
     // HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, (uint32_t*)g_dac_square_64, 50, DAC_ALIGN_12B_R);
 
+    printf("Initializing DDS generator...\r\n");
     // 1. 初始化DDS產生器
     DDS_Init(&g_dds_generator, &hdac1, DAC_CHANNEL_1, &htim4, DDS_UPDATE_FREQUENCY);
 
+    printf("Setting waveform...\r\n");
     // 2. 設定要使用的波形
     DDS_SetWaveform(&g_dds_generator, g_arbitrary_waveform, WAVE_TABLE_SIZE);
 
+    printf("Setting frequency...\r\n");
     // 3. 設定初始輸出頻率，例如 1000.5 Hz
     DDS_SetFrequency(&g_dds_generator, 1000.5f);
 
+    printf("Starting DDS...\r\n");
     // 4. 啟動DDS引擎（這會自動啟動定時器和DMA）
     DDS_Start(&g_dds_generator);
+    printf("DDS started.\r\n");
 
     // // 设置DAC通道2的固定电压输出
     // HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_2, DAC_ALIGN_12B_R, VOLTAGE_TO_DAC_VALUE(g_desired_DAC_single_output_amplitude));

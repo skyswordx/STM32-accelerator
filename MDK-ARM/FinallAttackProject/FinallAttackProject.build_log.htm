@@ -27,7 +27,24 @@ Project File Date:  07/31/2025
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\KEIL\ARM\ARMCC\Bin'
 Build target 'FinallAttackProject'
-"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 0 Warning(s).
+compiling my_dac_task.c...
+../Module/Frequency/my_freq_config.h(96): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+../Module/Param/my_parameter_config.h(53): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_PARAMETER_CONFIG_H
+..\Module\DAC\my_dac_config.h(21): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_DAC_CONFIG_H */
+..\Module\DAC\my_dac_task.h(15): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_DAC_TASK_H */
+..\Module\DAC\my_dds.h(82): warning:  #1-D: last line of file ends without a newline
+  #endif // DDS_WAVE_GENERATOR_H
+..\Module\DAC\my_dac_task.c(77): warning:  #1-D: last line of file ends without a newline
+  }
+..\Module\DAC\my_dac_task.c: 6 warnings, 0 errors
+linking...
+Program Size: Code=48480 RO-data=2776 RW-data=324 ZI-data=21812  
+FromELF: creating hex file...
+"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 6 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -50,7 +67,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:01
+Build Time Elapsed:  00:00:08
 </pre>
 </body>
 </html>
