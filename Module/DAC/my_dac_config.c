@@ -1,7 +1,12 @@
 #include "my_dac_config.h"
 #include "my_parameter_config.h"  // 包含参数配置头文件
-
 #include "my_dds.h"
+
+
+float DAC_ACTUAL_V_ZERO = 0.085f; // 假設你測得的零點電壓
+float DAC_ACTUAL_V_FULL = 3.407f; // 你測得的滿點電壓
+float DAC_ACTUAL_SPAN;
+
 
 /**
  * @brief 64點正弦波陣列 (12位元解析度)

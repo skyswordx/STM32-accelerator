@@ -2,81 +2,83 @@
 #ifndef DDS_WAVE_GENERATOR_H
 #define DDS_WAVE_GENERATOR_H
 
+
 #include "stm32h7xx_hal.h"
 #include <stdint.h>
 
-// --- Public Configuration ---
-// You can adjust this buffer size. A larger buffer gives the CPU more time
-// to calculate samples but increases latency. 128 or 256 is a good start.
-// IMPORTANT: Must be an even number.
 #define DDS_DMA_BUFFER_SIZE 128
 #define WAVE_TABLE_SIZE 64
 
-// --- Type Definitions ---
-// DDS Generator Handle Structure
 typedef struct {
-    // --- DDS State ---
-    uint64_t phase_accumulator;         // 64-bit for very high precision
-    uint64_t frequency_control_word;    // Controls the output frequency
+    // --- DDS 狀態 ---
+    uint64_t phase_accumulator;
+    uint64_t frequency_control_word;
+    
+    // --- 幅度控制 ---
+    float amplitude; // 範圍：0.0f 到 1.0f
 
-    // --- Waveform Data ---
-    const uint16_t* wave_table;         // Pointer to the arbitrary waveform data
-    uint32_t wave_table_size_log2;      // Log2 of the wave table size for fast shifting
+    // --- 波形數據 ---
+    const uint16_t* wave_table;
+    uint32_t wave_table_size_log2;
 
-    // --- System Configuration ---
-    uint32_t update_frequency;          // The fixed frequency of the DAC trigger timer (f_update)
-
-    // --- HAL Handles ---
+    // --- 系統配置 ---
+    uint32_t update_frequency;
     DAC_HandleTypeDef* hdac;
     uint32_t dac_channel;
     TIM_HandleTypeDef* htimer;
 
-    // --- Internal State ---
-    uint16_t dma_buffer[DDS_DMA_BUFFER_SIZE]; // Internal Ping-Pong buffer
+    // --- 內部狀態 ---
+    uint16_t dma_buffer[DDS_DMA_BUFFER_SIZE];
 
 } DDS_Generator_t;
 
-// --- Public API Functions ---
+// --- 公開 API 函式 ---
 
 /**
- * @brief Initializes the DDS generator structure.
- * @param dds Pointer to the DDS_Generator_t handle.
- * @param hdac Pointer to the DAC HAL handle.
- * @param dac_channel The DAC channel to use (e.g., DAC_CHANNEL_1).
- * @param htimer Pointer to the Timer HAL handle used for triggering.
- * @param update_frequency The fixed update frequency set in the timer (e.g., 1000000 for 1MHz).
+ * @brief 初始化DDS產生器結構。
+ * @param dds 指向 DDS_Generator_t 控制代碼的指標。
+ * @param hdac 指向 DAC HAL 控制代碼的指標。
+ * @param dac_channel 要使用的DAC通道 (例如 DAC_CHANNEL_1)。
+ * @param htimer 用於觸發的Timer HAL控制代碼指標。
+ * @param update_frequency 在定時器中設定的固定更新頻率 (例如 1000000 代表 1MHz)。
  */
 void DDS_Init(DDS_Generator_t* dds, DAC_HandleTypeDef* hdac, uint32_t dac_channel, TIM_HandleTypeDef* htimer, uint32_t update_frequency);
 
 /**
- * @brief Sets the arbitrary waveform table for the DDS generator.
- * @param dds Pointer to the DDS_Generator_t handle.
- * @param table Pointer to the array of waveform data.
- * @param table_size The number of samples in the table. MUST be a power of 2 (e.g., 64, 128, 256).
+ * @brief 設定DDS產生器的波形表。
+ * @param dds 指向 DDS_Generator_t 控制代碼的指標。
+ * @param table 指向波形數據陣列的指標。
+ * @param table_size 表中的取樣點數量。必須是2的冪 (例如 64, 128, 256)。
  */
 void DDS_SetWaveform(DDS_Generator_t* dds, const uint16_t* table, uint32_t table_size);
 
 /**
- * @brief Sets the output frequency of the waveform.
- * @param dds Pointer to the DDS_Generator_t handle.
- * @param frequency The desired output frequency in Hz.
+ * @brief 設定波形的輸出頻率。
+ * @param dds 指向 DDS_Generator_t 控制代碼的指標。
+ * @param frequency 期望的輸出頻率 (Hz)。
  */
 void DDS_SetFrequency(DDS_Generator_t* dds, float frequency);
 
 /**
- * @brief Starts the DDS waveform generation.
- * @param dds Pointer to the DDS_Generator_t handle.
+ * @brief 設定波形的輸出幅度。
+ * @param dds 指向 DDS_Generator_t 控制代碼的指標。
+ * @param amplitude 期望的幅度，範圍從 0.0 (靜音) 到 1.0 (滿幅度)。
+ */
+void DDS_SetAmplitude(DDS_Generator_t* dds, float amplitude);
+
+/**
+ * @brief 啟動DDS波形產生。
+ * @param dds 指向 DDS_Generator_t 控制代碼的指標。
  */
 void DDS_Start(DDS_Generator_t* dds);
 
 /**
- * @brief Stops the DDS waveform generation.
- * @param dds Pointer to the DDS_Generator_t handle.
+ * @brief 停止DDS波形產生。
+ * @param dds 指向 DDS_Generator_t 控制代碼的指標。
  */
 void DDS_Stop(DDS_Generator_t* dds);
 
-// --- Callback Handlers (to be called from HAL DAC callbacks) ---
-// These functions MUST be called from the corresponding HAL callbacks in stm32h7xx_it.c
+// --- 回呼處理函式 (需要在 HAL DAC 回呼中呼叫) ---
 void DDS_Callback_HalfTransfer(DDS_Generator_t* dds);
 void DDS_Callback_FullTransfer(DDS_Generator_t* dds);
 

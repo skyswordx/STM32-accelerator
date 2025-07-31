@@ -15,6 +15,9 @@ extern DDS_Generator_t g_dds_generator;
 extern const uint16_t g_sine_wave_64[WAVE_TABLE_SIZE];
 extern const uint16_t g_square_wave_64[WAVE_TABLE_SIZE];
 extern const uint16_t g_triangle_wave_64[WAVE_TABLE_SIZE];
+extern float DAC_ACTUAL_V_ZERO;
+extern float DAC_ACTUAL_V_FULL;
+extern float DAC_ACTUAL_SPAN;
 
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart6; // 串口屏
@@ -397,6 +400,13 @@ void update_dac_amplitude(void)
 {
     // 幅度更新逻辑将在DAC任务中实现
     printf("DAC amplitude update requested\n");
+    /**
+     * g_desired_DAC_single_output_amplitude 是 0~3.3v
+     * DDS 参数的 amplitude 是 0.0f 到 1.0f
+     */
+
+    float calculated_amplitude = (g_desired_DAC_single_output_amplitude - DAC_ACTUAL_V_ZERO) / DAC_ACTUAL_SPAN;
+    DDS_SetAmplitude(&g_dds_generator, calculated_amplitude);
 }
 
 /**

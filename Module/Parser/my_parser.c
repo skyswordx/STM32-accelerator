@@ -14,6 +14,9 @@ uint16_t g_dac_square_64[64] = {0};
 
 extern TIM_HandleTypeDef htim4;
 extern DAC_HandleTypeDef hdac1;
+extern float DAC_ACTUAL_V_ZERO;
+extern float DAC_ACTUAL_V_FULL;
+extern float DAC_ACTUAL_SPAN;
 
 extern uint8_t g_short_pressed_key; // 短按按键
 extern uint8_t g_long_pressed_key;  // 长按按键
@@ -83,6 +86,8 @@ void myParserTask(void const * argument)
     AD9954_Set_Phase(0);//写相位
 
     printf("Initializing DDS generator...\r\n");
+    DAC_ACTUAL_SPAN = DAC_ACTUAL_V_FULL - DAC_ACTUAL_V_ZERO; // 计算实际的电压跨度
+    
     // 1. 初始化DDS產生器
     DDS_Init(&g_dds_generator, &hdac1, DAC_CHANNEL_1, &htim4, DDS_UPDATE_FREQUENCY);
 

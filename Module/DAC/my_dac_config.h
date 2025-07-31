@@ -9,9 +9,8 @@
 
 // DAC相关常量定义
 #define DAC_MAX_VALUE 4095
-#define DAC_REF_VOLTAGE 3.3f
+#define DAC_REF_VOLTAGE 3.44f
 #define VOLTAGE_TO_DAC_VALUE(voltage) ((uint16_t)((voltage) * DAC_MAX_VALUE / DAC_REF_VOLTAGE))
-
 
 
 #endif /* MY_DAC_CONFIG_H */
