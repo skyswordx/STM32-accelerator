@@ -133,3 +133,38 @@ Done
 
 请你在 my_uart_task.c 中的void parse_serial_lcd_command(char* cmd)实现这个串口屏的命令解析功能，能够根据串口屏发送的命令进入对应的 base2_function、base3_function 或 base4_function 模式
 
+
+
+我在cubemx中设置了一个合适的timer4触发频率，我只需要在代码中使用 `HAL_TIM_Base_Start(&htim4);` 就可以启动定时器
+
+如果我需要使用DMA去把一共数组搬运到DAC让DAC输出波形，我需要使用 `HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, (uint32_t*)g_dac_out_array, length_of_array, DAC_ALIGN_12B_R);` 来启动DMA传输
+
+如果我想要停止定时器触发和DAC的DMA搬运，我需要使用 `HAL_TIM_Base_Stop(&htim4);` 来停止定时器，然后使用 `HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);` 来停止DAC的DMA传输
+
+再次启动定时器和DAC的DMA传输，我只需要再次调用 `HAL_TIM_Base_Start(&htim4);` 和 `HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, (uint32_t*)g_dac_out_array, length_of_array, DAC_ALIGN_12B_R);` 即可。
+
+这是我目前stm32h750系统中使用到DAC任务的接口
+```c
+void StartDACProcessingTask(void *argument) {
+    // 启动定时器
+    HAL_TIM_Base_Start(&htim4);
+    
+    // 首次生成波形数据
+    update_dac_waveform_by_parameters();
+    
+    // 启动DAC DMA传输
+    HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, (uint32_t*)g_dac_square_64, 50, DAC_ALIGN_12B_R);
+
+    // 设置DAC通道2的固定电压输出
+    HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_2, DAC_ALIGN_12B_R, VOLTAGE_TO_DAC_VALUE(g_desired_DAC_single_output_amplitude));
+    HAL_DAC_Start(&hdac1, DAC_CHANNEL_2); // 启动DAC通道2
+    
+    for(;;)
+    {
+        
+        osDelay(100); // 延时100毫秒
+    }
+}
+```
+
+
