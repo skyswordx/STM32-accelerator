@@ -71,14 +71,60 @@ compiling my_parser.c...
 ..\Module\Parser\my_parser.c(449): warning:  #1035-D: single-precision operand implicitly converted to double-precision
       base3_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(ad9954_init_voltage);
 ..\Module\Parser\my_parser.c: 19 warnings, 0 errors
+compiling main.c...
+../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
+  #endif /* INA226_H_ */
+../Module/UART/my_uart_task.h(32): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_UART_TASK_H */
+../Module/ADC/my_adc_task.h(25): warning:  #1-D: last line of file ends without a newline
+  #endif /* MT_MY_ADC_TASK_H */
+../Module/Frequency/my_freq_config.h(81): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_ZLCR_TASK_H
+../Module/ADC/my_adc_task.h(25): warning:  #1-D: last line of file ends without a newline
+  #endif /* MT_MY_ADC_TASK_H */
+../Module/Button/my_button_task.h(16): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_BUTTON_TASK_H
+../Module/Parser/my_parser.h(29): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_PARSER_H
+../Core/Src/main.c(232): warning:  #167-D: argument of type "void (*)(const void *)" is incompatible with parameter of type "osThreadFunc_t"
+    UARTProcessingTaskHandle = osThreadNew(StartUARTProcessingTask, NULL, &UARTProcessingTask_attributes);
+../Core/Src/main.c(234): warning:  #167-D: argument of type "void (*)(const void *)" is incompatible with parameter of type "osThreadFunc_t"
+    myParserTaskHandle = osThreadNew(myParserTask, NULL, &myParserTask_attributes);
+../Core/Src/main.c: 10 warnings, 0 errors
+compiling my_uart_task.c...
+..\Module\UART\my_uart_task.h(32): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_UART_TASK_H */
+../Module/Frequency/my_freq_config.h(81): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+../Module/Param/my_parameter_config.h(53): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_PARAMETER_CONFIG_H
+../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_ZLCR_TASK_H
+../Module/Parser/my_parser.h(29): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_PARSER_H
+../Module/DAC/my_dds.h(85): warning:  #1-D: last line of file ends without a newline
+  #endif // DDS_WAVE_GENERATOR_H
+../Module/DAC/my_dac_config.h(17): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_DAC_CONFIG_H */
+..\Module\UART\my_uart_task.c(191): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+              g_desired_dds_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
+..\Module\UART\my_uart_task.c(193): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+              g_desired_dds_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
+..\Module\UART\my_uart_task.c(267): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+              base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
+..\Module\UART\my_uart_task.c(273): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+              base3_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
+..\Module\UART\my_uart_task.c: 11 warnings, 0 errors
 linking...
 ..\link.sct(16): warning: L6314W: No section matches pattern *(.DTCM).
 ..\link.sct(29): warning: L6314W: No section matches pattern *(.RAM_D2).
 ..\link.sct(36): warning: L6314W: No section matches pattern *(.RAM_D3).
-Program Size: Code=64648 RO-data=39924 RW-data=588 ZI-data=330940  
+Program Size: Code=64684 RO-data=39924 RW-data=588 ZI-data=330940  
 Finished: 0 information, 3 warning and 0 error messages.
 FromELF: creating hex file...
-"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 22 Warning(s).
+"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 43 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -101,7 +147,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:08
+Build Time Elapsed:  00:00:10
 </pre>
 </body>
 </html>
