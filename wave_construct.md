@@ -281,3 +281,5 @@ uint32_t reconstruct_output_waveform(float32_t f0, uint32_t Fs, HarmonicComponen
 );里面
 
 2. 在输出模式下，系统会收到一个信号源输入的周期信号，每隔 20ms 启动一次ADC进行采样，对采样得到的信号进行FFT计算，得到频域的幅度谱和相位谱，之后通过与之前学习到的传递函数进行计算，得到输出信号的幅度谱和相位谱，然后逆解算FFT得到输出信号的时域波形，最后通过软件DDS引擎输出到DAC。
+
+

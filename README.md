@@ -254,11 +254,55 @@ void StartADCProcessingTask(void *argument) {
 
 我现在要测试一下
 
-目前我想要实现一个功能，这可能需要你再给 ADC mode 再配置一个学习成功后模仿输出状态
-1. 第一次按下用户按钮（PC1）后，系统启动学习模式，使用DDS对未知滤波器模块进行扫频，然后使用ADC同步采样，收集滤波器模块的输入输出信号，然后识别学习建模其传递函数，学习成功后，成果就在void identify_filter(
+目前我想要实现一个功能，此方案旨在实现以下流程：
+1. 计算一个外部二阶线性系统对每个谐波分量的影响（增益和相移）即提取出传递函数的幅度和相位响应。
+2. 然后自己的 MCU 系统根据传递函数来模拟外部系统，MCU会采集信号发生器输出的信号，再次利用FFT，判断信号发生器输出信号结果中的基波及谐波（尽量越多越好）的幅度和相位。
+3. 然后在系统中根据传递函数，对提取出来的的基波及谐波经过传递函数，再转换成时域合成经过系统影响后的所有谐波，重建出一个周期的模拟经过被测系统之后的时域稳态输出波形（只需要存储在一个固定大小的数组中即可），然后我自己处理。
+
+
+目前我的 MCU STM32H750 系统已经通过驱动DDS和ADC同步采样实现了要求1
+相关数据保存的结构体如下
+```c
+void identify_filter(
     ContinuousTransferFunction* result,
     const float32_t* w_rad,           // 角频率数组 (rad/s)
-    const float32_t* H_measured_cmplx // 测量的复数响应 (交错格式 [R,I,R,I...])
-);里面
+    const float32_t* H_measured_cmplx // 测量的对应复数响应数组 (交错格式 [R,I,R,I...])
+);
+
+// 输出结果结构体，存放辨识出的连续系统 H(s) 的系数
+// H(s) = (b2*s^2 + b1*s + b0) / (s^2 + a1*s + a0)
+typedef struct {
+    float32_t b0, b1, b2; // 分子系数
+    float32_t a0, a1;     // 分母系数 (a2固定为1)
+    FilterType identified_type;
+} ContinuousTransferFunction;
+```
+但是也只是存储了收集得到的数据，还没有计算指定频率下的增益和相移
+
+对于要求 2，我已经有了一个函数可以计算 FFT 并提取基波的幅度和相位，但是没有实现谐波的幅度和相位提取，我的AD采样和FFT在目前系统采样率和目标信号带宽下精度已经足够了，尽量可以使用现有的函数、或者参考现有的函数来实现谐波的幅度和相位提取，因为我自己做的精度实测下来比较高
+```c
+// 我的 FFT 计算函数
+fundamental_result_t ch1_res, ch2_res;
+float32_t current_freq_hz = SWEEP_F_START_HZ + g_sweep_step * SWEEP_F_STEP_HZ;
+
+// 分析通道1 (输入)
+my_armcfft32_apply(g_adc1_data_8bit, &ch1_res, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
+
+
+typedef struct {
+    float32_t fundamental_vpp;           // 基波峰峰值
+    float32_t fundamental_vrms;          // 基波有效值
+    uint32_t fundamental_frequency;       // 基波频率
+    float32_t fundamental_phase;  // 基波相位（弧度）
+} fundamental_result_t;
+```
+在实现过程中，千万要注意不要有幅度缩放和索引错误
+
+对于要求 3，我只需要最后可以合成重建出来的波形被存储在一个固定大小的数组中即可，我自己会使用定时中断和DAC-DDS去按照指定频率输出这个波形
+
+
+这可能需要你再给 ADC mode 再配置一个学习成功后模仿输出状态
+1. 第一次按下用户按钮（PC1）后，系统启动学习模式，使用DDS对未知滤波器模块进行扫频，然后使用ADC同步采样，收集滤波器模块的输入输出信号，然后识别学习建模其传递函数，学习成功后，成果就在
 
 2. 在输出模式下，系统会收到一个信号源输入的周期信号，每隔 20ms 启动一次ADC进行采样，对采样得到的信号进行FFT计算，得到频域的幅度谱和相位谱，之后通过与之前学习到的传递函数进行计算，得到输出信号的幅度谱和相位谱，然后逆解算FFT得到输出信号的时域波形，最后通过软件DDS引擎输出到DAC。
+
