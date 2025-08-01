@@ -38,6 +38,14 @@ extern uint8_t current_function_mode;  // 当前函数模式
 // 串口屏当前页面跟踪变量
 static uint8_t current_lcd_page = 2;  // 默认在基础功能2页面
 
+// 串口屏设置的参数跟踪变量
+static double lcd_base2_frequency = 1000.0;    // base2 频率，默认1kHz
+static double lcd_base2_voltage = 1.0;         // base2 电压，默认1V
+static double lcd_base3_frequency = 1000.0;    // base3 频率，默认1kHz  
+static double lcd_base3_voltage = 0.78;        // base3 电压，默认0.78V
+static double lcd_base4_frequency = 100.0;     // base4 频率，默认100Hz
+static double lcd_base4_voltage = 1.0;         // base4 电压，默认1V
+
 // base2_function模式下的幅度跟踪变量
 extern uint8_t base2_ad9833_amplitude;  // AD9833幅度初始值
 extern uint16_t base2_ad9954_amplitude;  // AD9954幅度初始值
@@ -280,37 +288,34 @@ void handle_serial_lcd_set_command(char* param, char* value)
     // 解析参数值
     float voltage = atof(value);
     
-    // 根据当前页面和参数类型更新对应的幅度跟踪变量
+    // 根据当前页面和参数类型更新对应的参数跟踪变量
     if (strcmp(param, "DDS_AMP") == 0) {
-        // 更新幅度跟踪变量，不调用实际的硬件设置函数
+        // 更新电压跟踪变量
         if (current_lcd_page == 2) {
             // 在基础功能2页面
-            // base2_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
-            // printf("Base2 AD9833 amplitude updated: %.2f V -> %d\n", voltage, base2_ad9833_amplitude);
-            base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
-            printf("Base2 AD9954 amplitude updated: %.2f V -> %d\n", voltage, base2_ad9954_amplitude);
+            lcd_base2_voltage = voltage;
+            printf("Base2 voltage updated: %.2f V\n", voltage);
         } else if (current_lcd_page == 3) {
             // 在基础功能3页面
-            // base3_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
-            // printf("Base3 AD9833 amplitude updated: %.2f V -> %d\n", voltage, base3_ad9833_amplitude);
-            base3_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
-            printf("Base3 AD9954 amplitude updated: %.2f V -> %d\n", voltage, base3_ad9954_amplitude);
-
+            lcd_base3_voltage = voltage;
+            printf("Base3 voltage updated: %.2f V\n", voltage);
         } else if (current_lcd_page == 4) {
             // 在基础功能4页面
-            base4_desired_model_output_voltage = voltage; // 专门在函数计算
-            printf("Base4 desired model output voltage updated: %.2f V -> %d\n", voltage, base4_desired_model_output_voltage);
-
+            lcd_base4_voltage = voltage;
+            printf("Base4 voltage updated: %.2f V\n", voltage);
         }
     } else if (strcmp(param, "DDS_FREQ") == 0) {
         // 更新频率跟踪变量
         double frequency = atof(value);
         if (current_lcd_page == 2) {
-            base2_current_frequency = frequency;
+            lcd_base2_frequency = frequency;
             printf("Base2 frequency updated: %.2f Hz\n", frequency);
+        } else if (current_lcd_page == 3) {
+            lcd_base3_frequency = frequency;
+            printf("Base3 frequency updated: %.2f Hz\n", frequency);
         } else if (current_lcd_page == 4) {
-            base4_desired_model_output_frequency = frequency;
-            printf("Base4 desired model output frequency updated: %.2f Hz\n", frequency);
+            lcd_base4_frequency = frequency;
+            printf("Base4 frequency updated: %.2f Hz\n", frequency);
         }
     } else {
         printf("Unknown parameter: %s\n", param);
@@ -512,22 +517,22 @@ void parse_serial_lcd_command(char* cmd)
     // I4 - 进入基础功能4页面
 
     if (strcmp(cmd, "S2") == 0) {
-        // 串口屏发送"S2"命令，表示开始测试，MCU接收到该命令后会调用base2_function函数
-        printf("Received S2 command, calling base2_function\n");
+        // 串口屏发送"S2"命令，表示开始测试，MCU接收到该命令后会调用带参数的base2函数
+        printf("Received S2 command, calling uart_base2_function_with_params\n");
         current_lcd_page = 2;  // 更新当前页面跟踪变量
-        base2_function();
+        uart_base2_function_with_params(lcd_base2_frequency, lcd_base2_voltage);
     }
     else if (strcmp(cmd, "S3") == 0) {
-        // 串口屏发送"S3"命令，表示开始测试，MCU接收到该命令后会调用base3_function函数
-        printf("Received S3 command, calling base3_function\n");
+        // 串口屏发送"S3"命令，表示开始测试，MCU接收到该命令后会调用带参数的base3函数
+        printf("Received S3 command, calling uart_base3_function_with_params\n");
         current_lcd_page = 3;  // 更新当前页面跟踪变量
-        base3_function();
+        uart_base3_function_with_params(lcd_base3_frequency, lcd_base3_voltage);
     }
     else if (strcmp(cmd, "S4") == 0) {
-        // 串口屏发送"S4"命令，表示开始测试，MCU接收到该命令后会调用base4_function函数
-        printf("Received S4 command, calling base4_function\n");
+        // 串口屏发送"S4"命令，表示开始测试，MCU接收到该命令后会调用带参数的base4函数
+        printf("Received S4 command, calling uart_base4_function_with_params\n");
         current_lcd_page = 4;  // 更新当前页面跟踪变量
-        base4_function();
+        uart_base4_function_with_params(lcd_base4_voltage, lcd_base4_frequency);
     }
     else if (strcmp(cmd, "I2") == 0) {
         // 串口屏发送"I2"命令，表示进入基础功能2页面
@@ -626,4 +631,48 @@ void uart_base4_function_with_params(double voltage, double frequency)
     AD9954_Set_Fre(frequency);
     
     printf("uart_base4_function_with_params completed\n");
+}
+
+/**
+ * @brief 带参数的 base2 函数，逻辑与 my_parser.c 中的 base2_function() 相同
+ * @param frequency 频率 (Hz)
+ * @param ad9954_voltage AD9954 输出电压 (V)
+ */
+void uart_base2_function_with_params(double frequency, double ad9954_voltage)
+{
+    printf("Executing uart_base2_function_with_params - Frequency: %.2f Hz, AD9954 Voltage: %.2f V\n", frequency, ad9954_voltage);
+    
+    // 设置当前模式为base2_function模式
+    current_function_mode = FUNCTION_MODE_BASE2;
+    
+    // 设置 AD9954 幅度
+    uint16_t ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(ad9954_voltage);
+    AD9954_Set_Amp(ad9954_amplitude);
+    
+    // 设置 AD9954 频率
+    AD9954_Set_Fre(frequency);
+    
+    printf("uart_base2_function_with_params completed\n");
+}
+
+/**
+ * @brief 带参数的 base3 函数，逻辑与 my_parser.c 中的 base3_function() 相同
+ * @param frequency 频率 (Hz) 
+ * @param ad9954_voltage AD9954 输出电压 (V)
+ */
+void uart_base3_function_with_params(double frequency, double ad9954_voltage)
+{
+    printf("Executing uart_base3_function_with_params - Frequency: %.2f Hz, AD9954 Voltage: %.2f V\n", frequency, ad9954_voltage);
+    
+    // 设置当前模式为base3_function模式
+    current_function_mode = FUNCTION_MODE_BASE3;
+    
+    // 设置 AD9954 幅度
+    uint16_t ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(ad9954_voltage);
+    AD9954_Set_Amp(ad9954_amplitude);
+    
+    // 设置 AD9954 频率
+    AD9954_Set_Fre(frequency);
+    
+    printf("uart_base3_function_with_params completed\n");
 }

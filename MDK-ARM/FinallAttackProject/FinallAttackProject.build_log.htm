@@ -30,7 +30,7 @@ Build target 'FinallAttackProject'
 compiling main.c...
 ../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
   #endif /* INA226_H_ */
-../Module/UART/my_uart_task.h(34): warning:  #1-D: last line of file ends without a newline
+../Module/UART/my_uart_task.h(38): warning:  #1-D: last line of file ends without a newline
   #endif /* MY_UART_TASK_H */
 ../Module/ADC/my_adc_task.h(25): warning:  #1-D: last line of file ends without a newline
   #endif /* MT_MY_ADC_TASK_H */
@@ -58,7 +58,7 @@ compiling my_adc_task.c...
   #endif // MY_ZLCR_TASK_H
 ..\Module\ADC\my_adc_task.h(25): warning:  #1-D: last line of file ends without a newline
   #endif /* MT_MY_ADC_TASK_H */
-../Module/UART/my_uart_task.h(34): warning:  #1-D: last line of file ends without a newline
+../Module/UART/my_uart_task.h(38): warning:  #1-D: last line of file ends without a newline
   #endif /* MY_UART_TASK_H */
 ../Module/Param/my_parameter_config.h(53): warning:  #1-D: last line of file ends without a newline
   #endif // MY_PARAMETER_CONFIG_H
@@ -72,7 +72,7 @@ compiling my_adc_task.c...
                       printf("�?1是H实部，左2是H虚部，右边是w_rad\r\n");
 ..\Module\ADC\my_adc_task.c: 10 warnings, 0 errors
 compiling my_uart_task.c...
-..\Module\UART\my_uart_task.h(34): warning:  #1-D: last line of file ends without a newline
+..\Module\UART\my_uart_task.h(38): warning:  #1-D: last line of file ends without a newline
   #endif /* MY_UART_TASK_H */
 ../Module/Frequency/my_freq_config.h(81): warning:  #1-D: last line of file ends without a newline
   #endif /* MY_FREQ_CONFIG_H */
@@ -86,77 +86,23 @@ compiling my_uart_task.c...
   #endif // DDS_WAVE_GENERATOR_H
 ../Module/DAC/my_dac_config.h(17): warning:  #1-D: last line of file ends without a newline
   #endif /* MY_DAC_CONFIG_H */
-..\Module\UART\my_uart_task.c(195): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\Module\UART\my_uart_task.c(203): warning:  #1035-D: single-precision operand implicitly converted to double-precision
               g_desired_dds_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
-..\Module\UART\my_uart_task.c(197): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\Module\UART\my_uart_task.c(205): warning:  #1035-D: single-precision operand implicitly converted to double-precision
               g_desired_dds_amplitude = AD9954_VOLTAGE_TO_DAC((voltage));
-..\Module\UART\my_uart_task.c(290): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-              base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
-..\Module\UART\my_uart_task.c(296): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-              base3_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
-..\Module\UART\my_uart_task.c(302): warning:  #181-D: argument is incompatible with corresponding format string conversion
-              printf("Base4 desired model output voltage updated: %.2f V -> %d\n", voltage, base4_desired_model_output_voltage);
-..\Module\UART\my_uart_task.c(619): warning:  #870-D: invalid multibyte character sequence
+..\Module\UART\my_uart_task.c(624): warning:  #870-D: invalid multibyte character sequence
       printf("应该在表中查找到的传输比�? %.6f, 对应的频�? %.6f Hz\n", transform_ratio, frequency);
-..\Module\UART\my_uart_task.c(619): warning:  #870-D: invalid multibyte character sequence
+..\Module\UART\my_uart_task.c(624): warning:  #870-D: invalid multibyte character sequence
       printf("应该在表中查找到的传输比�? %.6f, 对应的频�? %.6f Hz\n", transform_ratio, frequency);
-..\Module\UART\my_uart_task.c: 14 warnings, 0 errors
-compiling my_parser.c...
-..\Module\Parser\my_parser.h(30): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_PARSER_H
-../Module/Frequency/my_freq_config.h(81): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_ZLCR_TASK_H
-../Module/ADC/my_adc_task.h(25): warning:  #1-D: last line of file ends without a newline
-  #endif /* MT_MY_ADC_TASK_H */
-../Module/Param/my_parameter_config.h(53): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_PARAMETER_CONFIG_H
-../Module/DAC/my_dac_config.h(17): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_DAC_CONFIG_H */
-../Module/DAC/my_dds.h(85): warning:  #1-D: last line of file ends without a newline
-  #endif // DDS_WAVE_GENERATOR_H
-..\Module\Parser\my_parser.c(216): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                              float current_ad9954_voltage = (float)base2_ad9954_amplitude * AD9954_VMAX_V / 16383.0;
-..\Module\Parser\my_parser.c(218): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                              current_ad9954_voltage += 0.1;
-..\Module\Parser\my_parser.c(220): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                              if (current_ad9954_voltage > AD9954_VMAX_V) {
-..\Module\Parser\my_parser.c(224): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                              base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(current_ad9954_voltage);
-..\Module\Parser\my_parser.c(201): warning:  #546-D: transfer of control bypasses initialization of:
-            variable "current_ad9954_voltage"  (declared at line 216)
-                      switch (current_function_mode) {
-                      ^
-..\Module\Parser\my_parser.c(365): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                              float current_ad9954_voltage = (float)base2_ad9954_amplitude * AD9954_VMAX_V / 16383.0;
-..\Module\Parser\my_parser.c(367): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                              current_ad9954_voltage -= 0.1;
-..\Module\Parser\my_parser.c(369): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                              if (current_ad9954_voltage < 0.0) {
-..\Module\Parser\my_parser.c(373): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                              base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(current_ad9954_voltage);
-..\Module\Parser\my_parser.c(358): warning:  #546-D: transfer of control bypasses initialization of:
-            variable "current_ad9954_voltage"  (declared at line 365)
-                      switch (current_function_mode) {
-                      ^
-..\Module\Parser\my_parser.c(447): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-      if (ad9954_init_voltage > AD9954_VMAX_V) {
-..\Module\Parser\my_parser.c(450): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-      base3_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(ad9954_init_voltage);
-..\Module\Parser\my_parser.c(482): warning:  #870-D: invalid multibyte character sequence
-      printf("应该在表中查找到的传输比�? %.6f, 对应的频�? %.6f V\n", transform_ratio, base4_desired_model_output_frequency);
-..\Module\Parser\my_parser.c(482): warning:  #870-D: invalid multibyte character sequence
-      printf("应该在表中查找到的传输比�? %.6f, 对应的频�? %.6f V\n", transform_ratio, base4_desired_model_output_frequency);
-..\Module\Parser\my_parser.c: 21 warnings, 0 errors
+..\Module\UART\my_uart_task.c: 11 warnings, 0 errors
 linking...
 ..\link.sct(16): warning: L6314W: No section matches pattern *(.DTCM).
 ..\link.sct(29): warning: L6314W: No section matches pattern *(.RAM_D2).
 ..\link.sct(36): warning: L6314W: No section matches pattern *(.RAM_D3).
-Program Size: Code=66200 RO-data=40288 RW-data=580 ZI-data=331012  
+Program Size: Code=66456 RO-data=40464 RW-data=636 ZI-data=331020  
 Finished: 0 information, 3 warning and 0 error messages.
 FromELF: creating hex file...
-"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 58 Warning(s).
+"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 34 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -179,7 +125,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:15
+Build Time Elapsed:  00:00:12
 </pre>
 </body>
 </html>

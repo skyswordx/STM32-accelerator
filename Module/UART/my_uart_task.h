@@ -27,6 +27,10 @@ void update_relay_state(void);
 // 新添加的 base4 函数，带参数版本
 void uart_base4_function_with_params(double voltage, double frequency);
 
+// 新添加的带参数版本的 base2 和 base3 函数
+void uart_base2_function_with_params(double frequency, double ad9954_voltage);
+void uart_base3_function_with_params(double frequency, double ad9954_voltage);
+
 void parse_serial_lcd_command(char* cmd);
 
 
