@@ -1664,6 +1664,11 @@
               <FileType>1</FileType>
               <FilePath>..\Module\Parser\filter_identification.c</FilePath>
             </File>
+            <File>
+              <FileName>my_signal_suite.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Module\Parser\my_signal_suite.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

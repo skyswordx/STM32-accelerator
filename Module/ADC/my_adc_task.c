@@ -14,6 +14,7 @@
 // --- 新增: 包含滤波器辨识模块和数学库 ---
 #include "filter_identification.h"
 #include "arm_math.h" // 确保arm_math.h已包含
+#include "my_signal_suite.h" // <-- 新增
 
 extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
@@ -97,6 +98,12 @@ static float32_t g_sweep_H_cmplx[NUM_FREQ_POINTS * 2];       // 复数响应 [R,
 static ContinuousTransferFunction g_identified_tf;         // 存储辨识结果
 static uint32_t g_sweep_step = 0;                          // 当前扫频步数
 
+// --- 新增: 用於信號分析和重建的變數 ---
+static SignalAnalysisResult g_input_signal_analysis;
+static float32_t g_reconstructed_waveform[RECONSTRUCTED_WAVEFORM_SIZE];
+
+
+
 extern fundamental_result_t g_ch1_fundamental; // ADC1 通道 基波结果结构
 extern fundamental_result_t g_ch2_fundamental; // ADC2 通道 基波结果结构
 
@@ -104,7 +111,7 @@ extern arm_cfft_radix4_instance_f32 fft_instance_radix4; // FFT实例
 
 // 外部声明频谱分析模块中的全局变量
 extern float32_t g_fft_output_buffer[FFT_LENGTH]; // FFT输出数组
-
+extern float32_t g_fft_input_buffer[FFT_LENGTH * 2];
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
@@ -272,6 +279,78 @@ void StartADCProcessingTask(void *argument) {
 
                     
                 }
+            } else if (g_adc_mode == ADC_MODE_SIMULATE) {
+                // --- 新增: 模拟模式下的信号分析和重建 ---
+                // 假设 g_adc1_data_8bit 和 g_adc2_data_8bit 已经包含了模拟信号数据
+                // 进行信号分析
+                printf("\r\n--- Entering SIMULATION Mode ---\r\n");
+
+                // =========================================================
+                // 要求2: 分析信號發生器的輸入信號 (ADC1)
+                // =========================================================
+                printf("Step 1: Analyzing input signal from ADC1 for harmonics...\r\n");
+
+                fundamental_result_t input_fundamental;
+                // 執行FFT。注意: my_armcfft32_apply 現在返回一個 float32_t
+                float32_t compensation = my_armcfft32_apply(
+                    g_adc1_data_8bit, 
+                    &input_fundamental, 
+                    0, 
+                    WINDOW_HANNING, 
+                    INTERPOLATION_HANNING_SPECIAL
+                );
+
+                // 基於FFT結果進行諧波分析
+                // 注意 g_fft_input_buffer 和 g_fft_output_buffer 是由 my_armcfft32_apply 填充的全局變數
+                analyze_signal_with_harmonics(
+                    FFT_LENGTH,
+                    g_ADC_SAMPLE_RATE_Hz,
+                    compensation,
+                    g_fft_input_buffer,  // 複數FFT結果
+                    g_fft_output_buffer, // 模值譜
+                    &g_input_signal_analysis
+                );
+
+                // 打印分析結果
+                printf(" -> Input Signal Analysis Complete.\r\n");
+                printf(" -> Fundamental: %.2f Hz, %.4f Vpp, Phase: %.2f rad\r\n",
+                    (float32_t)g_input_signal_analysis.fundamental.fundamental_frequency,
+                    g_input_signal_analysis.fundamental.fundamental_vpp,
+                    g_input_signal_analysis.fundamental.fundamental_phase);
+                printf(" -> Found %d harmonics.\r\n", g_input_signal_analysis.num_harmonics_found);
+                for(int i = 0; i < g_input_signal_analysis.num_harmonics_found; i++) {
+                    printf("    - Harmonic %d: %.2f Hz, %.4f Vpp, Phase: %.2f rad\r\n",
+                        g_input_signal_analysis.harmonics[i].harmonic_order,
+                        g_input_signal_analysis.harmonics[i].frequency_hz,
+                        g_input_signal_analysis.harmonics[i].amplitude_vpp,
+                        g_input_signal_analysis.harmonics[i].phase_rad);
+                }
+
+                // =========================================================
+                // 要求3: 使用辨識出的傳遞函數 g_identified_tf 重建波形
+                // =========================================================
+                printf("\nStep 2: Reconstructing output waveform based on identified TF...\r\n");
+
+                reconstruct_output_waveform(
+                    &g_input_signal_analysis,
+                    &g_identified_tf,
+                    g_reconstructed_waveform
+                );
+
+                printf(" -> Waveform reconstruction complete.\r\n");
+                printf(" -> The reconstructed waveform is stored in 'g_reconstructed_waveform' array (%d points).\r\n", RECONSTRUCTED_WAVEFORM_SIZE);
+
+                // 在這裡，您可以對 g_reconstructed_waveform 進行您需要的處理
+                // 例如，通過DMA傳輸到DAC，或通過UART發送到上位機
+                // 為了演示，我們打印前10個點
+                printf(" -> First 10 points of reconstructed waveform:\r\n");
+                for(int i = 0; i < 10; i++) {
+                    printf("    g_reconstructed_waveform[%d]:%.6f\r\n", i, g_reconstructed_waveform[i]);
+                }
+
+                // 任務完成，返回空閒模式
+                printf("\nSimulation complete. System is now idle. Press user button to start again.\r\n");
+                g_adc_mode = ADC_MODE_IDLE;
             }
 
             // 下面两个是调试用到的，不去理会他们

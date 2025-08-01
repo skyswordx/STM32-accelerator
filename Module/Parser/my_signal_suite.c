@@ -67,7 +67,7 @@ void analyze_signal_with_harmonics(
     result_out->fundamental.fundamental_frequency = (uint32_t)fundamental_freq_hz;
     result_out->fundamental.fundamental_phase = fundamental_phase_rad;
     result_out->fundamental.fundamental_vpp = fundamental_amp_vpp;
-    result_out->fundamental.fundamental_vrms = fundamental_amp_vpp / (2.0f * arm_sqrt_f32(2.0f));
+    result_out->fundamental.fundamental_vrms = fundamental_amp_vpp / (2.0f * sqrtf(2.0f));
 
 
     // 3. 尋找並提取諧波資訊
