@@ -147,44 +147,49 @@ void calculate_system_response_at_freq(
     *phase_shift_rad = phase_num - phase_den;
 }
 
+// In signal_processing_suite.c
 
 void reconstruct_output_waveform(
     const SignalAnalysisResult* analysis_result,
     const ContinuousTransferFunction* system_tf,
-    float32_t* output_waveform)
+    float32_t* output_waveform,
+    uint32_t waveform_size,
+    uint32_t sample_rate)
 {
     // 1. 清空輸出緩衝區
-    arm_fill_f32(0.0f, output_waveform, RECONSTRUCTED_WAVEFORM_SIZE);
+    arm_fill_f32(0.0f, output_waveform, waveform_size);
 
     float32_t gain, phase_shift;
+    float32_t fs = (float32_t)sample_rate; // 將採樣率轉為浮點數
     
     // 2. 處理基波分量
-    // 獲取基波在被測系統上的增益和相移
-    calculate_system_response_at_freq(system_tf, (float32_t)analysis_result->fundamental.fundamental_frequency, &gain, &phase_shift);
-    
-    float32_t new_amp_peak = (analysis_result->fundamental.fundamental_vpp / 2.0f) * gain;
-    float32_t new_phase = analysis_result->fundamental.fundamental_phase + phase_shift;
+    if (analysis_result->fundamental.fundamental_frequency > 0) {
+        calculate_system_response_at_freq(system_tf, (float32_t)analysis_result->fundamental.fundamental_frequency, &gain, &phase_shift);
+        
+        float32_t new_amp_peak = (analysis_result->fundamental.fundamental_vpp / 2.0f) * gain;
+        float32_t new_phase = analysis_result->fundamental.fundamental_phase + phase_shift;
+        float32_t freq_hz = (float32_t)analysis_result->fundamental.fundamental_frequency;
 
-    // 在時域上合成基波
-    for (uint16_t i = 0; i < RECONSTRUCTED_WAVEFORM_SIZE; i++) {
-        // n=1 for fundamental
-        float32_t angle = 2.0f * PI * 1.0f * i / RECONSTRUCTED_WAVEFORM_SIZE + new_phase;
-        output_waveform[i] += new_amp_peak * arm_cos_f32(angle);
+        for (uint32_t i = 0; i < waveform_size; i++) {
+            // *** 使用正確的相位計算公式 ***
+            float32_t angle = 2.0f * PI * freq_hz * i / fs + new_phase;
+            output_waveform[i] += new_amp_peak * arm_cos_f32(angle);
+        }
     }
 
     // 3. 處理所有諧波分量
     for (uint8_t k = 0; k < analysis_result->num_harmonics_found; k++) {
         const HarmonicComponent* harmonic = &analysis_result->harmonics[k];
 
-        // 獲取此諧波在被測系統上的增益和相移
         calculate_system_response_at_freq(system_tf, harmonic->frequency_hz, &gain, &phase_shift);
 
-        new_amp_peak = (harmonic->amplitude_vpp / 2.0f) * gain;
-        new_phase = harmonic->phase_rad + phase_shift;
+        float32_t new_amp_peak = (harmonic->amplitude_vpp / 2.0f) * gain;
+        float32_t new_phase = harmonic->phase_rad + phase_shift;
+        float32_t freq_hz = harmonic->frequency_hz;
         
-        // 在時域上累加合成諧波
-        for (uint16_t i = 0; i < RECONSTRUCTED_WAVEFORM_SIZE; i++) {
-            float32_t angle = 2.0f * PI * harmonic->harmonic_order * i / RECONSTRUCTED_WAVEFORM_SIZE + new_phase;
+        for (uint32_t i = 0; i < waveform_size; i++) {
+            // *** 使用正確的相位計算公式 ***
+            float32_t angle = 2.0f * PI * freq_hz * i / fs + new_phase;
             output_waveform[i] += new_amp_peak * arm_cos_f32(angle);
         }
     }

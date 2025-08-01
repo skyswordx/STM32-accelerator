@@ -102,6 +102,11 @@ static uint32_t g_sweep_step = 0;                          // 当前扫频步数
 static SignalAnalysisResult g_input_signal_analysis;
 static float32_t g_reconstructed_waveform[RECONSTRUCTED_WAVEFORM_SIZE];
 
+// 測試用的全局變數
+static ContinuousTransferFunction g_test_system_tf;
+static SignalAnalysisResult       g_test_signal_analysis;
+static float32_t g_test_reconstructed_waveform[RECONSTRUCTED_WAVEFORM_SIZE];
+
 
 
 extern fundamental_result_t g_ch1_fundamental; // ADC1 通道 基波结果结构
@@ -112,6 +117,128 @@ extern arm_cfft_radix4_instance_f32 fft_instance_radix4; // FFT实例
 // 外部声明频谱分析模块中的全局变量
 extern float32_t g_fft_output_buffer[FFT_LENGTH]; // FFT输出数组
 extern float32_t g_fft_input_buffer[FFT_LENGTH * 2];
+
+
+/**
+ * @brief 運行一個完整的模擬測試案例，用於驗證諧波分析和波形重建功能
+ * @note  此函數不依賴任何硬體ADC採樣，所有數據均在內部生成。
+ */
+void run_simulation_test_case(void)
+{
+    printf("\r\n============================================\r\n");
+    printf("===   Running Simulation Test Case   ===\r\n");
+    printf("============================================\r\n\n");
+
+    // --- 步驟 1: 手動定義一個模擬的「被測系統」(二階低通濾波器) ---
+    // 假設我們辨識出了一個截止頻率為 5kHz 的巴特沃斯低通濾波器
+    // H(s) = w_n^2 / (s^2 + 2*zeta*w_n*s + w_n^2)
+    // f_n = 5000 Hz, w_n = 2*pi*f_n = 31415.9, zeta = 0.707
+    // a1 = 2*zeta*w_n = 44428.8
+    // a0 = w_n^2 = 986960440.1
+    // b2=0, b1=0, b0=a0
+    g_test_system_tf.identified_type = FILTER_TYPE_LPF;
+    g_test_system_tf.a1 = 44428.8f;
+    g_test_system_tf.a0 = 9.87e8f;
+    g_test_system_tf.b2 = 0.0f;
+    g_test_system_tf.b1 = 0.0f;
+    g_test_system_tf.b0 = 9.87e8f;
+
+    printf("[SIM] Step 1: Defined a simulated 2nd-order LPF (fc = 5kHz).\r\n");
+    printf("    H(s) = (b2*s^2+b1*s+b0)/(s^2+a1*s+a0)\r\n");
+    printf("    b0=%e, b1=%e, b2=%e\r\n", g_test_system_tf.b0, g_test_system_tf.b1, g_test_system_tf.b2);
+    printf("    a0=%e, a1=%e\r\n\n", g_test_system_tf.a0, g_test_system_tf.a1);
+
+
+    // --- 步驟 2: 手動定義一個模擬的「輸入信號」(1kHz方波的前幾個諧波) ---
+    // 這份數據是我們要提供給 reconstruct_output_waveform 的輸入之一
+    printf("[SIM] Step 2: Defined a simulated input signal (1kHz square wave-like).\r\n");
+    
+    // 基波
+    g_test_signal_analysis.fundamental.fundamental_frequency = 1000;
+    g_test_signal_analysis.fundamental.fundamental_vpp = 1.0f;
+    g_test_signal_analysis.fundamental.fundamental_phase = 0.0f; // 0 度相位
+    
+    // 諧波 (理想方波只含奇次諧波, 幅度為 1/n)
+    g_test_signal_analysis.num_harmonics_found = 3; // 模擬找到3個諧波
+    // 3次諧波
+    g_test_signal_analysis.harmonics[0].harmonic_order = 3;
+    g_test_signal_analysis.harmonics[0].frequency_hz = 3000.0f;
+    g_test_signal_analysis.harmonics[0].amplitude_vpp = 1.0f / 3.0f;
+    g_test_signal_analysis.harmonics[0].phase_rad = 0.0f;
+    // 5次諧波
+    g_test_signal_analysis.harmonics[1].harmonic_order = 5;
+    g_test_signal_analysis.harmonics[1].frequency_hz = 5000.0f;
+    g_test_signal_analysis.harmonics[1].amplitude_vpp = 1.0f / 5.0f;
+    g_test_signal_analysis.harmonics[1].phase_rad = 0.0f;
+    // 7次諧波
+    g_test_signal_analysis.harmonics[2].harmonic_order = 7;
+    g_test_signal_analysis.harmonics[2].frequency_hz = 7000.0f;
+    g_test_signal_analysis.harmonics[2].amplitude_vpp = 1.0f / 7.0f;
+    g_test_signal_analysis.harmonics[2].phase_rad = 0.0f;
+    
+    printf("    Fundamental: %.1f Hz, %.3f Vpp\r\n", (float32_t)g_test_signal_analysis.fundamental.fundamental_frequency, g_test_signal_analysis.fundamental.fundamental_vpp);
+    for(int i=0; i<g_test_signal_analysis.num_harmonics_found; i++){
+        printf("    Harmonic %d: %.1f Hz, %.3f Vpp\r\n", g_test_signal_analysis.harmonics[i].harmonic_order, g_test_signal_analysis.harmonics[i].frequency_hz, g_test_signal_analysis.harmonics[i].amplitude_vpp);
+    }
+    printf("\n");
+
+    // --- 步驟 3: 【要求1】根據模擬信號，生成FFT處理後的陣列 ---
+    printf("[SIM] Step 3: Generating simulated FFT result arrays...\r\n");
+    
+    // 清空FFT緩衝區
+    memset(g_fft_input_buffer, 0, sizeof(float32_t) * FFT_LENGTH * 2);
+    memset(g_fft_output_buffer, 0, sizeof(float32_t) * FFT_LENGTH);
+    
+    float32_t freq_resolution = (float32_t)g_ADC_SAMPLE_RATE_Hz / FFT_LENGTH;
+    
+    // 處理基波
+    uint16_t bin_index = (uint16_t)roundf(g_test_signal_analysis.fundamental.fundamental_frequency / freq_resolution);
+    // 反向計算FFT模值: Mag = Vpp * N / 2 (假設窗補償係數為1)
+    float32_t magnitude = g_test_signal_analysis.fundamental.fundamental_vpp * FFT_LENGTH / 2.0f;
+    g_fft_output_buffer[bin_index] = magnitude;
+    g_fft_input_buffer[2 * bin_index] = magnitude * arm_cos_f32(g_test_signal_analysis.fundamental.fundamental_phase); // Real part
+    g_fft_input_buffer[2 * bin_index + 1] = magnitude * arm_sin_f32(g_test_signal_analysis.fundamental.fundamental_phase); // Imaginary part
+    
+    // 處理諧波
+    for(int i = 0; i < g_test_signal_analysis.num_harmonics_found; i++) {
+        bin_index = (uint16_t)roundf(g_test_signal_analysis.harmonics[i].frequency_hz / freq_resolution);
+        magnitude = g_test_signal_analysis.harmonics[i].amplitude_vpp * FFT_LENGTH / 2.0f;
+        g_fft_output_buffer[bin_index] = magnitude;
+        g_fft_input_buffer[2 * bin_index] = magnitude * arm_cos_f32(g_test_signal_analysis.harmonics[i].phase_rad);
+        g_fft_input_buffer[2 * bin_index + 1] = magnitude * arm_sin_f32(g_test_signal_analysis.harmonics[i].phase_rad);
+    }
+    printf("    FFT arrays (g_fft_input_buffer, g_fft_output_buffer) generated.\r\n");
+    printf("    Example from g_fft_output_buffer:\r\n");
+    uint16_t f_1k_bin = (uint16_t)roundf(1000.f / freq_resolution);
+    uint16_t f_3k_bin = (uint16_t)roundf(3000.f / freq_resolution);
+    printf("    - Mag at bin for 1kHz (%d): %.2f\r\n", f_1k_bin, g_fft_output_buffer[f_1k_bin]);
+    printf("    - Mag at bin for 3kHz (%d): %.2f\r\n\n", f_3k_bin, g_fft_output_buffer[f_3k_bin]);
+
+
+    // --- 步驟 4: 【要求2】將模擬數據輸入波形重建模塊 ---
+    printf("[SIM] Step 4: Feeding simulated data into waveform reconstruction module...\r\n");
+    
+
+    reconstruct_output_waveform(
+        &g_test_signal_analysis,
+        &g_test_system_tf,
+        g_test_reconstructed_waveform,
+        RECONSTRUCTED_WAVEFORM_SIZE, // 傳入陣列大小
+        g_ADC_SAMPLE_RATE_Hz         // **傳入系統的採樣率**
+    );
+    
+    printf("    Waveform reconstruction complete.\r\n\n");
+    
+    
+    // --- 步驟 5: 顯示最終結果 ---
+    printf("[SIM] Step 5: Displaying final reconstructed waveform data.\r\n");
+    printf("    This waveform simulates the 1kHz square wave after passing through the 5kHz LPF.\r\n");
+    for(int i = 0; i < RECONSTRUCTED_WAVEFORM_SIZE; i++) {
+        printf("Waveform:%d,%f\r\n", i, g_test_reconstructed_waveform[i]);
+    }
+    printf("\r\n=== Simulation Test Case Finished ===\r\n");
+    printf("=======================================\r\n\n");
+}
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
@@ -150,6 +277,7 @@ void StartADCProcessingTask(void *argument) {
 
     printf("System Initialized. Press User Button (PC1) to start Filter Identification Sweep.\r\n");
 
+    run_simulation_test_case(); 
 
     for (;;) {
 
@@ -334,7 +462,9 @@ void StartADCProcessingTask(void *argument) {
                 reconstruct_output_waveform(
                     &g_input_signal_analysis,
                     &g_identified_tf,
-                    g_reconstructed_waveform
+                    g_reconstructed_waveform,
+                    RECONSTRUCTED_WAVEFORM_SIZE, // 傳入陣列大小
+                    g_ADC_SAMPLE_RATE_Hz          // **傳入系統的採樣率**
                 );
 
                 printf(" -> Waveform reconstruction complete.\r\n");

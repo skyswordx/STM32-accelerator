@@ -1,8 +1,8 @@
 # BASE4 Filter Output Control Test Configuration
 
 # === 硬件连接配置 ===
-OSCILLOSCOPE_USB = 'USB0::0x1AB1::0x04B0::DS2F172300309::INSTR'  # 示波器USB连接
-SERIAL_PORT = 'COM10'  # STM32H7串口，请检查设备管理器确认端口号
+OSCILLOSCOPE_USB = 'USB0::0x1AB1::0x04B0::DS2F164350759::INSTR'  # 示波器USB连接
+SERIAL_PORT = 'COM7'  # STM32H7串口，请检查设备管理器确认端口号
 BAUD_RATE = 115200
 SCOPE_CHANNEL = 2           # 使用的示波器通道 (1或2)
 

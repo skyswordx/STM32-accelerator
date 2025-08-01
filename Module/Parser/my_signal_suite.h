@@ -13,7 +13,7 @@
 
 // 2. 您希望重建的波形一個週期包含多少個取樣點？
 //    這個值可以根據您的 DAC 輸出需求來設定，例如 1024 或 2048
-#define RECONSTRUCTED_WAVEFORM_SIZE 1024
+#define RECONSTRUCTED_WAVEFORM_SIZE 4096
 
 
 // --- 新的資料結構 ---
@@ -78,12 +78,16 @@ void calculate_system_response_at_freq(
  * @brief 要求3: 重建經過被測系統影響後的輸出波形
  * @param analysis_result 包含基波和諧波資訊的信號分析結果
  * @param system_tf 描述被測系統的傳遞函數
- * @param output_waveform 指向用於存儲重建波形的陣列 (大小應為 RECONSTRUCTED_WAVEFORM_SIZE)
+ * @param output_waveform 指向用於存儲重建波形的陣列
+ * @param waveform_size output_waveform 陣列的大小
+ * @param sample_rate 用於重建波形的採樣率 (應與分析時的採樣率一致)
  */
 void reconstruct_output_waveform(
     const SignalAnalysisResult* analysis_result,
     const ContinuousTransferFunction* system_tf,
-    float32_t* output_waveform
+    float32_t* output_waveform,
+    uint32_t waveform_size,
+    uint32_t sample_rate
 );
 
 #endif // SIGNAL_PROCESSING_SUITE_H

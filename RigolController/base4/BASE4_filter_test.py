@@ -15,7 +15,7 @@ except ImportError:
     print("警告: 无法加载配置文件，使用默认配置")
     # 默认配置
     OSCILLOSCOPE_USB = 'USB0::0x1AB1::0x04B0::DS2F172300309::INSTR'
-    SERIAL_PORT = 'COM10'
+    SERIAL_PORT = 'COM7'
     BAUD_RATE = 115200
     SCOPE_CHANNEL = 2
     TEST_FREQUENCIES = [1000, 1200, 2000, 5000, 5200, 10000, 20000, 20200, 49800, 50000]
