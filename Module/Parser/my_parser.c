@@ -115,14 +115,11 @@ double base4_table[30]={ // 传输比
 
 void myParserTask(void const * argument)
 {
-    // Initialize the parser
-    // AD9833_Init_GPIO();
-    // AD9954_Init(); // Initialize AD9954
-    // // Set amplitude to 2V for AD9833 using the voltage conversion macro
-    // AD9833_AmpSet(255/2);
+
+    AD9954_Init(); // Initialize AD9954
     
     // Set amplitude to maximum for AD9954 (max value is 16383)
-    AD9954_Set_Amp(16383/10);
+    AD9954_Set_Amp(16383/5);
     AD9954_Set_Phase(0);//写相位
 
     printf("Initializing DDS generator...\r\n");
