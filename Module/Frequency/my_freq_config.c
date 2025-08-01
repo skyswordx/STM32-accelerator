@@ -334,7 +334,13 @@ void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
     }
 #endif
 
-    float32_t fundamental_phase_angle = (atan2f(g_fft_input_buffer[2 * fundamental_index + 1], g_fft_input_buffer[2 * fundamental_index])) * (180.0f / PI) ;
+    float32_t fundamental_phase_angle = atan2f(g_fft_input_buffer[2 * fundamental_index + 1], g_fft_input_buffer[2 * fundamental_index]);
+    if (fundamental_phase_angle < 0.0f) {
+        fundamental_phase_angle += 2.0f * PI;
+    }
+    if (fundamental_phase_angle >= 2.0f * PI) {
+        fundamental_phase_angle -= 2.0f * PI;
+    }
 
     // 应用窗函数补偿系数来修正幅度
     float32_t corrected_magnitude = final_magnitude * window_compensation_factor;
@@ -370,151 +376,5 @@ void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
     // for (uint16_t i = 0; i < FFT_LENGTH; i++) {
     //     phase = atan2f(g_fft_input_buffer[2 * i + 1], g_fft_input_buffer[2 * i]) * (180.0f / PI);
     //     printf("%.6f,%.6f\n", (i * g_ADC_SAMPLE_RATE_Hz / FFT_LENGTH), phase);
-    // }
-}
-
-/**
- * @brief 应用实数FFT算法进行频谱分析
- * @param adc_input 输入的ADC数据缓冲区(长度为 FFT_LENGTH)
- * @param result 基波分析结果输出结构体指针
- * @param enable_fir 是否启用FIR滤波器 (1=启用, 0=禁用)
- * @param window_type 窗函数类型:
- *                    - WINDOW_NONE: 不应用窗函数
- *                    - WINDOW_HANNING: 应用汉宁窗
- *                    - WINDOW_FLAT_TOP: 应用平顶窗(适合高精度幅度测量)
- * @param interpolation_mode 频谱插值模式:
- *                          - INTERPOLATION_DISABLED: 不使用插值
- *                          - INTERPOLATION_PARABOLIC: 二次抛物线插值
- *                          - INTERPOLATION_HANNING_SPECIAL: 汉宁窗专用插值
- * @retval None
- */
-void my_armrfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint8_t enable_fir, window_type_t window_type, spectral_interpolation_mode_t interpolation_mode){
-    
-    float32_t* processing_data = adc_input; // 默认使用原始数据
-    float32_t window_compensation_factor = 1.0f; // 窗函数补偿系数，初始为1
-    
-    // --- 可选：FIR滤波步骤 ---
-    if (enable_fir) {
-        // 初始化FIR滤波器实例
-        // 参数: 实例指针, 滤波器阶数, 反转的系数指针, 状态缓冲区指针, 块大小
-        arm_fir_init_f32(&fir_instance, NUM_TAPS, (float32_t*)fir_coeffs_reversed, fir_state, FFT_LENGTH);//系数在上面有定义，后续可以用MATLAB改一下
-
-        // 应用FIR滤波器
-        // 参数: 实例指针, 输入数据指针, 输出数据指针, 块大小
-        arm_fir_f32(&fir_instance, adc_input, g_filtered_adc_data, FFT_LENGTH);
-        processing_data = g_filtered_adc_data; // 使用滤波后的数据
-    }
-
-    // --- 滤除直流分量（在加窗前进行） ---
-    float32_t mean = caculate_DCcomponent(processing_data, FFT_LENGTH);
-    for(uint32_t idx = 0; idx < FFT_LENGTH; idx++) {
-        processing_data[idx] = processing_data[idx] - mean; // 就地去除直流分量
-    }
-
-    // --- 可选：窗函数步骤 ---
-    if (window_type != WINDOW_NONE) {
-        // 生成指定类型的窗函数
-        window_compensation_factor = generate_window(window_type, g_windowed_adc_data, FFT_LENGTH);
-        
-        // 应用窗函数
-        arm_mult_f32(processing_data, g_windowed_adc_data, g_windowed_adc_data, FFT_LENGTH);
-        processing_data = g_windowed_adc_data; // 使用窗函数处理后的数据
-        
-        // printf("Window applied: compensation factor = %.6f\n", window_compensation_factor);
-    } else {
-        // printf("No window applied: compensation factor = %.6f\n", window_compensation_factor);
-    }
-    //
-
-    // --- 执行FFT并计算幅度谱 ---
-    // 初始化实数FFT实例
-    arm_rfft_4096_fast_init_f32(&rfft_instance);//这里指定了长度，每次计算的时候内部会重新计算旋转因子，库函数中对于特定长度的FFT有特定的优化，可以考虑换成arm_rfft_4096_fast_init_f32
-
-    // 执行FFT。输入是实数，输出是打包的复数格式
-    // 参数: 实例指针, 输入数据指针, 输出数据指针, FFT方向标志(0=正向, 1=反向)
-    arm_rfft_fast_f32(&rfft_instance, processing_data, g_fft_output_buffer, 0);
-
-    // 计算复数FFT输出的幅度
-    // 参数: 输入(打包的复数), 输出(幅度), FFT大小
-    arm_cmplx_mag_f32(g_fft_output_buffer, g_single_magnitude_spectrum, FFT_LENGTH / 2);//对于N点实数FFT输出，由于其共轭对称，取numSamples = N/2
-
-    // --- 处理完成 ---
-    // 此时, 'magnitude_spectrum' 数组中包含了最终的单边幅度谱。
-    // 你可以通过调试器观察这个数组，或者通过UART/SWO将其发送到PC进行绘图验证。
-    // 注意：为了得到与MATLAB相同的物理幅度，还需要进行归一化。
-    // 例如，除以FFT_SIZE，并对除直流和奈奎斯特频率外的所有分量乘以2。
-
-    //在模值中寻找基波分量
-    float32_t fundamental_magnitude = 0.0f; // 基波幅度
-    uint16_t fundamental_index = 0; // 基波索引
-
-    for (uint16_t i = 1; i < FFT_LENGTH / 2 - 1; i++) {
-        // 注意：这里从1开始，跳过直流分量，避免其影响基波检测
-        if (g_single_magnitude_spectrum[i] > fundamental_magnitude) {
-            fundamental_index = i;
-            fundamental_magnitude = g_single_magnitude_spectrum[i];
-        }
-    }
-
-    // --- 频谱插值处理 ---
-    float32_t final_frequency = fundamental_index * (g_ADC_SAMPLE_RATE_Hz / (FFT_LENGTH / 2)); // 默认频率
-    float32_t final_magnitude = fundamental_magnitude; // 默认幅度
-
-    // 如果启用了插值且不是禁用模式，则执行插值
-    if (interpolation_mode != INTERPOLATION_DISABLED) {
-        interpolated_peak_t interpolated_result;
-        arm_status status = perform_spectral_interpolation(g_single_magnitude_spectrum, fundamental_index, interpolation_mode, &interpolated_result);
-        
-        // 如果插值成功，则使用插值结果
-        if (status == ARM_MATH_SUCCESS) {
-            final_frequency = interpolated_result.corrected_frequency;
-            final_magnitude = interpolated_result.corrected_magnitude;
-        }
-        // 如果插值失败（例如边界条件），则使用原始结果
-    }
-
-    // --- Quinn频率估计算法处理 ---
-#ifdef ENABLE_QUINN_FREQUENCY_ESTIMATION
-    // 只有在启用Quinn算法且模块有效时才使用
-    if (g_quinn_module_enabled) {
-        quinn_frequency_result_t quinn_result;
-        // 注意：对于实数FFT，需要使用不同的FFT数据
-        int quinn_status = my_quinn_process(g_fft_output_buffer, fundamental_index, &quinn_result);
-        
-        // 如果Quinn算法执行成功且结果有效，则使用Quinn算法的频率估计
-        if (quinn_status == MY_QUINN_SUCCESS && quinn_result.validity == 1) {
-            final_frequency = quinn_result.frequency;
-            // printf("Using Quinn frequency estimation: %.2f Hz (confidence: %.2f)\n",
-            //        quinn_result.frequency, quinn_result.confidence);
-        }
-        // 否则使用原有的频率估计（FFT或插值结果）
-    }
-#endif
-
-    float32_t fundamental_phase_angle = (atan2f(g_fft_output_buffer[2 * fundamental_index + 1], g_fft_output_buffer[2 * fundamental_index])) * (180.0f / PI) ;
-
-    // 应用窗函数补偿系数来修正幅度
-    float32_t corrected_magnitude = final_magnitude * window_compensation_factor;
-    
-    result->fundamental_vpp = corrected_magnitude * 2.0f / FFT_LENGTH; // 基波峰峰值（已补偿）
-    result->fundamental_vrms = result->fundamental_vpp * sqrtf(2.0f) / 2.0f; // 基波有效值（已补偿）
-    result->fundamental_frequency = (uint16_t)final_frequency; // 使用插值后的频率
-    result->fundamental_phase_angle = fundamental_phase_angle;
-
-    // 注释掉调试打印以减少输出
-    // for (uint16_t i = 0; i < FFT_LENGTH / 2 - 1; i++) {
-    //     printf("Single-Sided Magnitude: %.6f\n", g_single_magnitude_spectrum[i]);
-    // }
-
-    // 可选：打印滤波后的数据进行调试
-    // printf("=== Filtered Data Debug ===\n");
-    // for (uint16_t i = 0; i < FFT_LENGTH; i++) {
-    //     printf("Original/Filtered: %.6f, %.6f\n", adc_input[i], g_filtered_adc_data[i]);
-    // }
-
-    // 可选：打印加窗后的数据进行调试
-    // printf("=== Windowed Data Debug ===\n");
-    // for (uint16_t i = 0; i < FFT_LENGTH; i++) {  // 只打印前10个样本
-    //     printf("Original/Windowed: %.6f, %.6f\n", adc_input[i], g_windowed_adc_data[i]);
     // }
 }

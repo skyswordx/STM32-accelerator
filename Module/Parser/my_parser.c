@@ -121,7 +121,7 @@ void myParserTask(void const * argument)
     AD9833_AmpSet(255/2);
     
     // Set amplitude to maximum for AD9954 (max value is 16383)
-    AD9954_Set_Amp(16383/2);
+    AD9954_Set_Amp(16383/10);
     AD9954_Set_Phase(0);//写相位
 
     printf("Initializing DDS generator...\r\n");

@@ -49,7 +49,7 @@ typedef struct {
     float32_t fundamental_vpp;           // 基波峰峰值
     float32_t fundamental_vrms;          // 基波有效值
     uint32_t fundamental_frequency;       // 基波频率
-    float32_t fundamental_phase_angle;  // 基波相位（角度）
+    float32_t fundamental_phase_angle;  // 基波相位（弧度）
 } fundamental_result_t;
 
 /**
@@ -68,21 +68,6 @@ typedef struct {
  */
 void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint8_t enable_fir, window_type_t window_type, spectral_interpolation_mode_t interpolation_mode);
 
-/**
- * @brief 应用实数FFT算法进行频谱分析
- * @param adc_input 输入的ADC数据缓冲区(长度为 FFT_LENGTH)
- * @param result 基波分析结果输出结构体指针
- * @param enable_fir 是否启用FIR滤波器 (1=启用, 0=禁用)
- * @param window_type 窗函数类型:
- *                    - WINDOW_NONE: 不应用窗函数
- *                    - WINDOW_HANNING: 应用汉宁窗
- *                    - WINDOW_FLAT_TOP: 应用平顶窗(适合高精度幅度测量)
- * @param interpolation_mode 频谱插值模式:
- *                          - INTERPOLATION_DISABLED: 不使用插值
- *                          - INTERPOLATION_PARABOLIC: 二次抛物线插值
- *                          - INTERPOLATION_HANNING_SPECIAL: 汉宁窗专用插值
- */
-void my_armrfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint8_t enable_fir, window_type_t window_type, spectral_interpolation_mode_t interpolation_mode);
 
 /* FIR 低通滤波器 + 窗函数 */
 #define FIR_ORDER   100

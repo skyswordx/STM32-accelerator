@@ -86,7 +86,7 @@ uint16_t g_adc_dma_transfer_flag = ADC_DMA_TRANSFER_NOT_COMPLETED;
 
 
 // 时域检测模块启用标志
-uint8_t g_time_detect_enabled = 1; // 默认禁用
+uint8_t g_time_detect_enabled = 0; // 默认禁用
 
 
 extern DDS_Generator_t g_dds_generator; // 引用全局DDS生成器实例
@@ -120,29 +120,6 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 static adc_mode_t g_adc_mode = ADC_MODE_IDLE;
 
 
-/**
- * @brief 从FFT结果中提取指定频率的相位
- * @param fft_output FFT输出的复数数组
- * @param target_freq_hz 目标频率
- * @param sample_rate_hz 采样率
- * @param fft_len FFT长度
- * @param phase_rad 指向相位结果的指针 (弧度)
- */
-static void get_phase_from_fft(float32_t* fft_output, float32_t target_freq_hz, uint32_t sample_rate_hz, uint32_t fft_len, float32_t* phase_rad)
-{
-    // 计算目标频率在FFT结果中的索引
-    uint32_t target_bin = (uint32_t)roundf((target_freq_hz * fft_len) / sample_rate_hz);
-    if (target_bin >= fft_len / 2) {
-        target_bin = fft_len / 2 - 1;
-    }
-
-    // 提取实部和虚部
-    float32_t real = fft_output[target_bin * 2];
-    float32_t imag = fft_output[target_bin * 2 + 1];
-
-    // 计算相位 (弧度)
-    *phase_rad = atan2f(imag, real);
-}
 
 void StartADCProcessingTask(void *argument) {
     
@@ -177,13 +154,13 @@ void StartADCProcessingTask(void *argument) {
                 while (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_RESET);
                 
                 printf("\r\n--- Starting Filter Identification Sweep ---\r\n");
-                // g_adc_mode = ADC_MODE_SWEEP;
+                g_adc_mode = ADC_MODE_SWEEP;
                 g_sweep_step = 0;
 
                 // 设置DDS到起始频率
                 float32_t current_freq_hz = SWEEP_F_START_HZ + g_sweep_step * SWEEP_F_STEP_HZ;
                 AD9954_Set_Fre(current_freq_hz); // 假设使用AD9954
-                DDS_SetFrequency(&g_dds_generator, current_freq_hz); // 使用 DAC + 软件 DDS
+                // DDS_SetFrequency(&g_dds_generator, current_freq_hz); // 使用 DAC + 软件 DDS
 
                 printf("Step %lu/%d: Freq = %.1f Hz\r\n", g_sweep_step + 1, NUM_FREQ_POINTS, current_freq_hz);
                 
@@ -216,17 +193,15 @@ void StartADCProcessingTask(void *argument) {
                 
                 // 1. 对两个通道进行FFT分析
                 fundamental_result_t ch1_res, ch2_res;
-                float32_t ch1_phase, ch2_phase;
                 float32_t current_freq_hz = SWEEP_F_START_HZ + g_sweep_step * SWEEP_F_STEP_HZ;
 
                 // 分析通道1 (输入)
                 my_armcfft32_apply(g_adc1_data_8bit, &ch1_res, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
-                get_phase_from_fft(g_fft_output_buffer, current_freq_hz, g_ADC_SAMPLE_RATE_Hz, FFT_LENGTH, &ch1_phase);
                 
                 // 分析通道2 (输出)
                 my_armcfft32_apply(g_adc2_data_8bit, &ch2_res, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
-                get_phase_from_fft(g_fft_output_buffer, current_freq_hz, g_ADC_SAMPLE_RATE_Hz, FFT_LENGTH, &ch2_phase);
-
+ 
+                
                 // 2. 计算复数传递函数 H(jω)
                 float32_t h_mag, h_phase, h_real, h_imag;
 
@@ -238,7 +213,7 @@ void StartADCProcessingTask(void *argument) {
                 }
                 
                 // 相位差
-                h_phase = ch2_phase - ch1_phase;
+                h_phase = ch1_res.fundamental_phase_angle - ch2_res.fundamental_phase_angle;
                 
                 // 3. 转换为笛卡尔坐标系 (实部和虚部)
                 h_real = h_mag * arm_cos_f32(h_phase);
@@ -259,7 +234,7 @@ void StartADCProcessingTask(void *argument) {
                            g_sweep_step, NUM_FREQ_POINTS, current_freq_hz, h_mag, h_phase * 180.0f / PI);
                     
                     // 延时一小段时间以等待DDS和被测电路稳定
-                    osDelay(5);
+                    osDelay(50);
                     
                     // 启动下一次ADC采样
                     HAL_TIM_Base_Start(&htim3);
