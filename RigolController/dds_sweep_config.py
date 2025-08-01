@@ -2,7 +2,7 @@
 # 请根据您的实际硬件配置修改以下参数
 
 # === 硬件连接配置 ===
-OSCILLOSCOPE_USB = 'USB0::0x1AB1::0x04B0::DS2F172300309::INSTR'  # 示波器USB连接
+OSCILLOSCOPE_USB = 'USB0::0x1AB1::0x04B0::DS2F164350759::INSTR'  # 示波器USB连接
 SERIAL_PORT = 'COM7'  # STM32H7串口，请检查设备管理器确认端口号
 BAUD_RATE = 115200
 
@@ -20,7 +20,7 @@ FREQ_STEPS = 30        # 频率测试点数 (建议20-100)
 # === 测量参数配置 ===
 MEASUREMENT_AVERAGES = 3    # 每个点测量次数 (建议3-5次)
 STABILIZATION_TIME = 0.5    # 信号稳定等待时间 (秒)
-AUTO_SCALE_TIMEOUT = 3      # Auto Scale等待时间 (秒)
+AUTO_SCALE_TIMEOUT = 2      # Auto Scale等待时间 (秒)
 
 # === STM32H7 DDS命令格式 ===
 # 根据您的固件调整命令格式
@@ -31,11 +31,11 @@ DDS_AMP_CMD = 'SET:DDS_AMP:{:.2f}'        # 幅度设置命令模板 ({}会被�
 # === 示波器通道配置 ===
 SCOPE_CHANNEL = 2           # 使用的示波器通道 (1或2)
 SCOPE_COUPLING = 'DC'       # 耦合方式 ('DC' 或 'AC')
-SCOPE_AVERAGES = 4          # 示波器平均次数
+SCOPE_AVERAGES = 1          # 示波器平均次数
 
 # === 数据验证范围 ===
 MAX_FREQ_ERROR = 50         # 最大允许频率误差 (%)
-MAX_AMP_ERROR = 50          # 最大允许幅度误差 (%)
+MAX_AMP_ERROR = 100          # 最大允许幅度误差 (%)
 MIN_SIGNAL_LEVEL = 0.01     # 最小信号电平 (V)
 MAX_SIGNAL_LEVEL = 10       # 最大信号电平 (V)
 
