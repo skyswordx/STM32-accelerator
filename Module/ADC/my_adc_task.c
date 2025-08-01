@@ -36,7 +36,7 @@ uint32_t g_ADC_SAMPLE_RATE_Hz = 400000; // 默认采样率 400kHz
 #define ADC_RESOLUTION_16BIT 65536.0f // 2^16=65536
 
 // 扫频参数 (必须与 filter_identification.h 中 NUM_FREQ_POINTS 的计算方式保持一致)
-#define SWEEP_F_START_HZ 1000.0f
+#define SWEEP_F_START_HZ 100.0f
 #define SWEEP_F_STOP_HZ  50000.0f
 #define SWEEP_F_STEP_HZ  100.0f
 

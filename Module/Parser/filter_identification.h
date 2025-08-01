@@ -6,7 +6,7 @@
 #include "arm_math.h" // 必须包含的核心库
 
 // 定义仿真参数，最终这些值应由你的测量程序动态填充
-#define NUM_FREQ_POINTS  ((50000 - 1000) / 100 + 1) // (f_stop-f_start)/f_step + 1
+#define NUM_FREQ_POINTS  491
 
 // 定义滤波器类型枚举
 typedef enum {
