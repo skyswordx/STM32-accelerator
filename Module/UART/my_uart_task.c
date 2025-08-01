@@ -57,6 +57,9 @@ extern double base4_ad9954_frequency;    // AD9954当前频率
 extern double base4_desired_model_output_frequency;
 extern double base4_desired_model_output_voltage; // 期望输出电压
 
+// 引用 base4_table 数组（来自 my_parser.c）
+extern double base4_table[30];
+
 void StartUARTProcessingTask(void const * argument)
 {
     // UART任务代码
@@ -243,6 +246,24 @@ void handle_set_command(char* param, char* value)
             g_desired_function_state = DIY_STATE;
         }
         printf("Set function state: %s\n", value);
+    }
+    else if (strcmp(param, "BASE4") == 0) {
+        // 处理 SET:BASE4:voltage&frequency 指令
+        // value 格式应该是 "voltage&frequency"，例如 "1.5&1000"
+        char* voltage_str = strtok(value, "&");
+        char* frequency_str = strtok(NULL, "&");
+        
+        if (voltage_str != NULL && frequency_str != NULL) {
+            double voltage = atof(voltage_str);
+            double frequency = atof(frequency_str);
+            
+            printf("Set BASE4 parameters - Voltage: %.2f V, Frequency: %.2f Hz\n", voltage, frequency);
+            
+            // 调用带参数的 base4 函数
+            uart_base4_function_with_params(voltage, frequency);
+        } else {
+            printf("Invalid BASE4 parameter format. Expected: voltage&frequency\n");
+        }
     }
     else {
         printf("Unknown parameter: %s\n", param);
@@ -568,4 +589,41 @@ void parse_serial_lcd_command(char* cmd)
             printf("Unknown serial LCD command: %s\n", cmd);
         }
     }
+}
+
+/**
+ * @brief 带参数的 base4 函数，逻辑与 my_parser.c 中的 base4_function() 相同
+ * @param voltage 期望输出电压
+ * @param frequency 期望输出频率
+ */
+void uart_base4_function_with_params(double voltage, double frequency)
+{
+    printf("Executing uart_base4_function_with_params - Voltage: %.2f V, Frequency: %.2f Hz\n", voltage, frequency);
+    
+    // 1. 根据频率计算 base4_table 的索引
+    uint16_t idx = (uint16_t)(frequency / 100.0) - 1;
+    
+    // 确保索引在有效范围内
+    if (idx > 29) {
+        idx = 29;
+    }
+    
+    // 2. 从 base4_table 中获取传输比
+    double transform_ratio = base4_table[idx];
+    
+    // 3. 根据传输比和期望输出电压计算各 DDS 应该输出的电压
+    double dds_output_voltage = voltage / transform_ratio;
+    
+    // 4. 设置 AD9954 的幅度和频率
+    double final_ad9954_voltage = dds_output_voltage;
+    printf("应该在表中查找到的传输比： %.6f, 对应的频率 %.6f Hz\n", transform_ratio, frequency);
+    printf("AD9954 最后要设的电压是： %.6f V\n", final_ad9954_voltage);
+    
+    // 5. 将电压转换为DAC寄存器值并设置幅度
+    AD9954_Set_Amp(AD9954_VOLTAGE_TO_DAC(final_ad9954_voltage)); // 设置幅度
+    
+    // 6. 设置频率
+    AD9954_Set_Fre(frequency);
+    
+    printf("uart_base4_function_with_params completed\n");
 }

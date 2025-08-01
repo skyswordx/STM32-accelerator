@@ -478,12 +478,6 @@ void base4_function(void){
     double dds_output_voltage = base4_desired_model_output_voltage / transform_ratio;
     
     // // 5. 设置 AD9954 的幅度和频率
-    // // 确保电压不超过AD9954的最大输出电压
-    // double ad9954_voltage = dds_output_voltage;
-    // if (ad9954_voltage > AD9954_VMAX_V) {
-    //     ad9954_voltage = AD9954_VMAX_V;
-    // }
-    // double finall_ad9954_voltage = calibrate_AD9954_voltage(dds_output_voltage, base4_desired_model_output_frequency);
     double finall_ad9954_voltage = dds_output_voltage;
     printf("应该在表中查找到的传输比： %.6f, 对应的频率 %.6f V\n", transform_ratio, base4_desired_model_output_frequency);
     printf("AD9954 最后要设的电压是： %.6f V\n", finall_ad9954_voltage);

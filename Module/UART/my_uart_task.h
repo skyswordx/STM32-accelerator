@@ -24,6 +24,8 @@ void update_dac_frequency(void);
 void update_dac_amplitude(void);
 void update_relay_state(void);
 
+// 新添加的 base4 函数，带参数版本
+void uart_base4_function_with_params(double voltage, double frequency);
 
 void parse_serial_lcd_command(char* cmd);
 
