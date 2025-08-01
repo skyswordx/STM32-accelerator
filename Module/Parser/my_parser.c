@@ -60,7 +60,7 @@ double base4_desired_model_output_frequency = 100.0; // 期望输出频率
  */
 
 
-DDS_Generator_t g_dds_generator; // 宣告一個DDS產生器實例
+extern DDS_Generator_t g_dds_generator; // 宣告一個DDS產生器實例
 
 const uint16_t g_arbitrary_waveform[WAVE_TABLE_SIZE] = {
     4095, 4095, 4095, 4095, 4095, 4095, 4095, 4095,

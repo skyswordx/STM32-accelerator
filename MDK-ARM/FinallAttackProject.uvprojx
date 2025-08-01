@@ -1504,6 +1504,11 @@
               <FileType>1</FileType>
               <FilePath>..\Module\DAC\my_dds.c</FilePath>
             </File>
+            <File>
+              <FileName>my_dac_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Module\DAC\my_dac_task.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1663,6 +1668,11 @@
               <FileName>filter_identification.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Module\Parser\filter_identification.c</FilePath>
+            </File>
+            <File>
+              <FileName>filter_imitate.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Module\Parser\filter_imitate.c</FilePath>
             </File>
           </Files>
         </Group>

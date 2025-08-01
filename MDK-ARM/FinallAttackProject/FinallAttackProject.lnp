@@ -48,6 +48,7 @@
 "finallattackproject\my_adc_task.o"
 "finallattackproject\my_dac_config.o"
 "finallattackproject\my_dds.o"
+"finallattackproject\my_dac_task.o"
 "finallattackproject\my_timer_config.o"
 "finallattackproject\my_freq_config.o"
 "finallattackproject\my_uart_task.o"
@@ -65,6 +66,7 @@
 "finallattackproject\my_parameter_config.o"
 "finallattackproject\my_parser.o"
 "finallattackproject\filter_identification.o"
+"finallattackproject\filter_imitate.o"
 --library_type=microlib --strict --scatter "..\link.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

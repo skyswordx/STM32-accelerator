@@ -46,6 +46,15 @@ typedef enum {
 
 extern function_state_t g_desired_function_state;
 
+// DAC输出模式（新增）
+typedef enum {
+    DAC_OUTPUT_STATIC = 0,    // 静态输出模式
+    DAC_OUTPUT_WAVEFORM = 1,  // 波形输出模式
+    DAC_OUTPUT_IMITATE = 2    // 模仿输出模式（用于滤波器模仿）
+} dac_output_mode_t;
+
+extern dac_output_mode_t g_dac_output_mode;
+
 // 频谱数据缓冲区
 extern float32_t g_adc1_spectrum_data[FFT_LENGTH / 2];
 extern float32_t g_adc2_spectrum_data[FFT_LENGTH / 2];

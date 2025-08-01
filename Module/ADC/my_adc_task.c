@@ -13,12 +13,15 @@
 
 // --- 新增: 包含滤波器辨识模块和数学库 ---
 #include "filter_identification.h"
+#include "filter_imitate.h"      // 新增：滤波器模仿模块
+#include "my_dac_task.h"         // 新增：DAC任务头文件
 #include "arm_math.h" // 确保arm_math.h已包含
 
 extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
 extern UART_HandleTypeDef huart1;
 extern TIM_HandleTypeDef htim3;  /* 实际使用TIM3作为ADC触发源和时间戳基准 */
+extern TIM_HandleTypeDef htim6;  /* 用于20ms定时触发模仿模式 */
 
 #define ADC_SAMPLE_SIZE (4096)
 #define ADC_DMA_TRANSFER_COMPLETED 1
@@ -90,6 +93,7 @@ uint8_t g_time_detect_enabled = 0; // 默认禁用
 
 
 extern DDS_Generator_t g_dds_generator; // 引用全局DDS生成器实例
+extern dac_output_mode_t g_dac_output_mode; // 引用DAC输出模式
 
 // 用于存储扫频数据的静态数组，防止堆栈溢出
 static float32_t g_sweep_w_rad[NUM_FREQ_POINTS];             // 角频率 (rad/s)
@@ -119,6 +123,20 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 // ADC 工作模式，默认为空闲
 static adc_mode_t g_adc_mode = ADC_MODE_IDLE;
 
+// --- 新增：模仿输出相关变量 ---
+static uint8_t g_imitate_trigger_flag = 0;  // 20ms定时器触发标志
+static float32_t g_imitate_output_buffer[FFT_LENGTH]; // 模仿输出缓冲区
+
+// 20ms定时器中断回调函数（需要在main.c中调用）
+void HAL_TIM_PeriodElapsedCallback_TIM6(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == TIM6) {
+        if (g_adc_mode == ADC_MODE_IMITATE) {
+            g_imitate_trigger_flag = 1; // 设置触发标志
+        }
+    }
+}
+
 
 
 void StartADCProcessingTask(void *argument) {
@@ -141,10 +159,25 @@ void StartADCProcessingTask(void *argument) {
     time_config.filter_alpha = 0.05f;      // 设置IIR滤波器系数
     time_config.hysteresis_v = 0.05f;      // 设置50mV的迟滞电压窗口
 
+    // --- 新增：初始化滤波器模仿模块 ---
+    filter_imitate_init();
+
     printf("System Initialized. Press User Button (PC1) to start Filter Identification Sweep.\r\n");
+    printf("After learning, press User Button again to enter Imitate Mode.\r\n");
 
 
     for (;;) {
+        
+        // --- 新增：处理20ms定时器触发的模仿模式ADC采样 ---
+        if (g_imitate_trigger_flag) {
+            g_imitate_trigger_flag = 0; // 清除标志
+            
+            if (g_adc_mode == ADC_MODE_IMITATE) {
+                // 启动ADC采样
+                printf("20ms Timer triggered - Starting ADC sampling for imitate mode\r\n");
+                HAL_TIM_Base_Start(&htim3);
+            }
+        }
 
         /* 【ADC 数据流】 利用 GPIO 按键触发启动定时器 */
         if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_RESET){
@@ -153,20 +186,48 @@ void StartADCProcessingTask(void *argument) {
                 HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13); // 切换 LED 状态
                 while (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_RESET);
                 
-                printf("\r\n--- Starting Filter Identification Sweep ---\r\n");
-                g_adc_mode = ADC_MODE_SWEEP;
-                g_sweep_step = 0;
+                // 根据当前状态和滤波器模仿模块状态决定下一步操作
+                if (g_adc_mode == ADC_MODE_IDLE) {
+                    // 启动学习模式
+                    printf("\r\n--- Starting Filter Identification Sweep ---\r\n");
+                    g_adc_mode = ADC_MODE_SWEEP;
+                    g_sweep_step = 0;
 
-                // 设置DDS到起始频率
-                float32_t current_freq_hz = SWEEP_F_START_HZ + g_sweep_step * SWEEP_F_STEP_HZ;
-                AD9954_Set_Fre(current_freq_hz); // 假设使用AD9954
-                // DDS_SetFrequency(&g_dds_generator, current_freq_hz); // 使用 DAC + 软件 DDS
+                    // 设置DDS到起始频率
+                    float32_t current_freq_hz = SWEEP_F_START_HZ + g_sweep_step * SWEEP_F_STEP_HZ;
+                    AD9954_Set_Fre(current_freq_hz); // 假设使用AD9954
+                    // DDS_SetFrequency(&g_dds_generator, current_freq_hz); // 使用 DAC + 软件 DDS
 
-                printf("Step %lu/%d: Freq = %.1f Hz\r\n", g_sweep_step + 1, NUM_FREQ_POINTS, current_freq_hz);
-                
-                // 启动ADC采样
-                // switch_timer_sampleRate_Auto(&htim3, g_desired_ADC_sample_rate_Hz, g_desired_ADC_sample_rate_Hz / 100);
-                HAL_TIM_Base_Start(&htim3);
+                    printf("Step %lu/%d: Freq = %.1f Hz\r\n", g_sweep_step + 1, NUM_FREQ_POINTS, current_freq_hz);
+                    
+                    // 启动ADC采样
+                    HAL_TIM_Base_Start(&htim3);
+                    
+                } else if (g_adc_mode == ADC_MODE_IDLE && filter_imitate_get_state() == IMITATE_STATE_READY) {
+                    // 启动模仿模式
+                    printf("\r\n--- Starting Imitate Output Mode ---\r\n");
+                    g_adc_mode = ADC_MODE_IMITATE;
+                    
+                    // 启动20ms定时器（假设TIM6已配置为20ms周期）
+                    // HAL_TIM_Base_Start_IT(&htim6); // 需要在CubeMX中配置TIM6
+                    
+                    // 切换DAC到模仿模式
+                    g_dac_output_mode = DAC_OUTPUT_IMITATE;
+                    
+                    printf("Imitate mode activated. System will sample every 20ms and generate output.\r\n");
+                    
+                } else {
+                    // 停止当前模式，回到空闲
+                    printf("\r\n--- Stopping current mode, returning to IDLE ---\r\n");
+                    g_adc_mode = ADC_MODE_IDLE;
+                    
+                    // 停止所有定时器
+                    HAL_TIM_Base_Stop(&htim3);
+                    HAL_TIM_Base_Stop_IT(&htim6); // 停止TIM6中断
+                    
+                    // 切换DAC到静态模式
+                    g_dac_output_mode = DAC_OUTPUT_STATIC;
+                }
             }
         }
     
@@ -259,10 +320,31 @@ void StartADCProcessingTask(void *argument) {
                         printf("   b0 = %e\r\n", g_identified_tf.b0);
                         printf("   a1 = %e\r\n", g_identified_tf.a1);
                         printf("   a0 = %e\r\n", g_identified_tf.a0);
+                        
+                        // --- 新增：将辨识结果传递给模仿模块 ---
+                        filter_imitate_set_transfer_function(&g_identified_tf);
+                        printf("-> Transfer function loaded into imitate module.\r\n");
+                        printf("-> Press User Button again to start Imitate Mode.\r\n");
                     }
                     
                     printf("\r\nIdentification complete. System is now idle.\r\n");
                     g_adc_mode = ADC_MODE_IDLE; // 返回空闲模式
+                }
+            }
+
+            // --- 新增：模仿模式数据处理 ---
+            if (g_adc_mode == ADC_MODE_IMITATE) {
+                printf("=== Imitate Mode: Processing input signal ===\r\n");
+                
+                // 使用输入信号进行滤波器模仿计算
+                int result = filter_imitate_process_signal(g_adc1_data_8bit, g_imitate_output_buffer, g_ADC_SAMPLE_RATE_Hz);
+                
+                if (result == 0) {
+                    // 成功生成输出信号，发送到DAC
+                    set_dac_imitate_mode(g_imitate_output_buffer, FFT_LENGTH);
+                    printf("Output signal generated and sent to DAC.\r\n");
+                } else {
+                    printf("ERROR: Failed to process imitate signal.\r\n");
                 }
             }
 

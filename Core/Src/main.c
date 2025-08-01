@@ -30,6 +30,7 @@
 #include "arm_math.h"
 #include "my_uart_task.h"
 #include "my_adc_task.h"
+#include "my_dac_task.h"        // 新增：DAC任务头文�?
 #include "my_zlcr_config.h"
 #include "my_button_task.h"
 #include "my_parser.h"
@@ -66,6 +67,7 @@ SPI_HandleTypeDef hspi1;
 
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
+TIM_HandleTypeDef htim6;
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart6;
@@ -83,6 +85,13 @@ const osThreadAttr_t ADCProcessingTask_attributes = {
   .name = "ADCProcessingTask",
   .stack_size = 128 * 16,
   .priority = (osPriority_t) osPriorityHigh,
+};
+
+osThreadId_t DACProcessingTaskHandle;
+const osThreadAttr_t DACProcessingTask_attributes = {
+  .name = "DACProcessingTask",
+  .stack_size = 128 * 8,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 
 osThreadId_t UARTProcessingTaskHandle;
@@ -123,11 +132,13 @@ static void MX_TIM3_Init(void);
 static void MX_DAC1_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_USART6_UART_Init(void);
+static void MX_TIM6_Init(void);
 void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 void StartADCProcessingTask(void *argument);
 void StartDACProcessingTask(void *argument);
+void HAL_TIM_PeriodElapsedCallback_TIM6(TIM_HandleTypeDef *htim); // 声明TIM6回调函数
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -197,6 +208,7 @@ int main(void)
   MX_DAC1_Init();
   MX_TIM4_Init();
   MX_USART6_UART_Init();
+  MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
   
 
@@ -228,6 +240,7 @@ int main(void)
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   ADCProcessingTaskHandle = osThreadNew(StartADCProcessingTask, NULL, &ADCProcessingTask_attributes);
+  DACProcessingTaskHandle = osThreadNew(StartDACProcessingTask, NULL, &DACProcessingTask_attributes);
 
   UARTProcessingTaskHandle = osThreadNew(StartUARTProcessingTask, NULL, &UARTProcessingTask_attributes);
   // ButtonProcessingTaskHandle = osThreadNew(StartButtonProcessingTask, NULL, &ButtonProcessingTask_attributes);
@@ -716,6 +729,44 @@ static void MX_TIM4_Init(void)
 }
 
 /**
+  * @brief TIM6 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM6_Init(void)
+{
+
+  /* USER CODE BEGIN TIM6_Init 0 */
+
+  /* USER CODE END TIM6_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM6_Init 1 */
+
+  /* USER CODE END TIM6_Init 1 */
+  htim6.Instance = TIM6;
+  htim6.Init.Prescaler = 2000;
+  htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim6.Init.Period = 2000;
+  htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM6_Init 2 */
+
+  /* USER CODE END TIM6_Init 2 */
+
+}
+
+/**
   * @brief USART1 Initialization Function
   * @param None
   * @retval None
@@ -991,7 +1042,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-
+  // 处理TIM6�?20ms定时中断，用于滤波器模仿模式
+  if (htim->Instance == TIM6) {
+    HAL_TIM_PeriodElapsedCallback_TIM6(htim);
+  }
   /* USER CODE END Callback 1 */
 }
 
