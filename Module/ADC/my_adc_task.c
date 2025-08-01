@@ -118,6 +118,15 @@ extern arm_cfft_radix4_instance_f32 fft_instance_radix4; // FFT实例
 extern float32_t g_fft_output_buffer[FFT_LENGTH]; // FFT输出数组
 extern float32_t g_fft_input_buffer[FFT_LENGTH * 2];
 
+extern DAC_HandleTypeDef hdac1; // DAC 句柄
+extern DDS_Generator_t g_dds_generator; // 全局DDS生成器实例
+extern TIM_HandleTypeDef htim4;
+extern float DAC_ACTUAL_V_ZERO;
+extern float DAC_ACTUAL_V_FULL;
+extern float DAC_ACTUAL_SPAN;
+#define DDS_UPDATE_FREQUENCY 995062
+
+extern const uint16_t g_triangle_wave_64[WAVE_TABLE_SIZE]; // 三角波表
 
 /**
  * @brief 運行一個完整的模擬測試案例，用於驗證諧波分析和波形重建功能
@@ -238,6 +247,25 @@ void run_simulation_test_case(void)
     }
     printf("\r\n=== Simulation Test Case Finished ===\r\n");
     printf("=======================================\r\n\n");
+
+    // printf("Initializing DDS generator...\r\n");
+    // DAC_ACTUAL_SPAN = DAC_ACTUAL_V_FULL - DAC_ACTUAL_V_ZERO; // 计算实际的电压跨度
+
+    // // 1. 初始化DDS產生器
+    // DDS_Init(&g_dds_generator, &hdac1, DAC_CHANNEL_1, &htim4, DDS_UPDATE_FREQUENCY);
+
+    // printf("Setting waveform...\r\n");
+    // // 2. 設定要使用的波形
+    // DDS_SetWaveform(&g_dds_generator, g_triangle_wave_64, 64);
+
+    // printf("Setting frequency...\r\n");
+    // // 3. 設定初始輸出頻率，例如 1000.0 Hz
+    // DDS_SetFrequency(&g_dds_generator, 1000.0f);
+
+    // printf("Starting DDS...\r\n");
+    // // 4. 啟動DDS引擎（這會自動啟動定時器和DMA）
+    // DDS_Start(&g_dds_generator);
+    // printf("DDS started.\r\n");
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
@@ -277,7 +305,7 @@ void StartADCProcessingTask(void *argument) {
 
     printf("System Initialized. Press User Button (PC1) to start Filter Identification Sweep.\r\n");
 
-    run_simulation_test_case(); 
+    // run_simulation_test_case(); 
 
     for (;;) {
 

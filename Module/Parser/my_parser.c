@@ -111,7 +111,7 @@ double base4_table[30]={ // 传输比
 };
 
 
-#define DDS_UPDATE_FREQUENCY 995062
+
 
 
 void myParserTask(void const * argument)
@@ -123,25 +123,6 @@ void myParserTask(void const * argument)
     AD9954_Set_Amp(16383/5);
     AD9954_Set_Fre(1000.0); // Set initial frequency to 1000 Hz
     AD9954_Set_Phase(0);//写相位
-
-    printf("Initializing DDS generator...\r\n");
-    DAC_ACTUAL_SPAN = DAC_ACTUAL_V_FULL - DAC_ACTUAL_V_ZERO; // 计算实际的电压跨度
-
-    // 1. 初始化DDS產生器
-    DDS_Init(&g_dds_generator, &hdac1, DAC_CHANNEL_1, &htim4, DDS_UPDATE_FREQUENCY);
-
-    printf("Setting waveform...\r\n");
-    // 2. 設定要使用的波形
-    DDS_SetWaveform(&g_dds_generator, g_arbitrary_waveform, WAVE_TABLE_SIZE);
-
-    printf("Setting frequency...\r\n");
-    // 3. 設定初始輸出頻率，例如 1000.0 Hz
-    DDS_SetFrequency(&g_dds_generator, 1000.0f);
-
-    printf("Starting DDS...\r\n");
-    // 4. 啟動DDS引擎（這會自動啟動定時器和DMA）
-    DDS_Start(&g_dds_generator);
-    printf("DDS started.\r\n");
 
     // 设置DAC通道2的固定电压输出
     // HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_2, DAC_ALIGN_12B_R, VOLTAGE_TO_DAC_VALUE(g_desired_DAC_single_output_amplitude));
