@@ -254,7 +254,11 @@ void StartADCProcessingTask(void *argument) {
 
 我现在要测试一下
 
-目前我想要实现一个功能
-0. 给 ADC mode 配置一个输出状态
-1. 按下用户按钮（PC1）后，启动输出模式
-2. 在输出模式下，
+目前我想要实现一个功能，这可能需要你给 ADC mode 再配置一个学习成功后模仿输出状态
+1. 第一次按下用户按钮（PC1）后，系统启动学习模式，使用DDS对未知滤波器模块进行扫频，然后使用ADC同步采样，收集滤波器模块的输入输出信号，然后识别学习建模其传递函数，学习成功后，成果就在void identify_filter(
+    ContinuousTransferFunction* result,
+    const float32_t* w_rad,           // 角频率数组 (rad/s)
+    const float32_t* H_measured_cmplx // 测量的复数响应 (交错格式 [R,I,R,I...])
+);里面
+
+2. 在输出模式下，系统会收到一个信号源输入的周期信号，每隔 20ms 启动一次ADC进行采样，对采样得到的信号进行FFT计算，得到频域的幅度谱和相位谱，之后通过与之前学习到的传递函数进行计算，得到输出信号的幅度谱和相位谱，然后逆解算FFT得到输出信号的时域波形，最后通过软件DDS引擎输出到DAC。
