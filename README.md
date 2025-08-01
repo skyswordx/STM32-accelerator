@@ -254,7 +254,7 @@ void StartADCProcessingTask(void *argument) {
 
 我现在要测试一下
 
-目前我想要实现一个功能，这可能需要你给 ADC mode 再配置一个学习成功后模仿输出状态
+目前我想要实现一个功能，这可能需要你再给 ADC mode 再配置一个学习成功后模仿输出状态
 1. 第一次按下用户按钮（PC1）后，系统启动学习模式，使用DDS对未知滤波器模块进行扫频，然后使用ADC同步采样，收集滤波器模块的输入输出信号，然后识别学习建模其传递函数，学习成功后，成果就在void identify_filter(
     ContinuousTransferFunction* result,
     const float32_t* w_rad,           // 角频率数组 (rad/s)

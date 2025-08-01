@@ -56,3 +56,66 @@ const uint16_t g_triangle_wave_64[WAVE_TABLE_SIZE] = {
    2048, 1920, 1792, 1664, 1536, 1408, 1280, 1152,
    1024,  896,  768,  640,  512,  384,  256,  128
 };
+
+#include <math.h>
+
+
+/**
+ * @brief 根据期望输出的峰峰值电压(Vpp)和频率(Hz)来计算经过校准的DDS幅度设置值。
+ *
+ * 此函数基于对实际硬件测量数据进行的3阶二维多项式拟合。
+ * 模型: target_vpp = f(desired_vpp, frequency_kHz)
+ * 数据有效范围:
+ * - 频率: 100 Hz to 3000 Hz
+ * - 幅度: 0.1 Vpp to 2.0 Vpp
+ *
+ * @param desired_vpp 期望输出的信号峰峰值电压 (单位: V)。
+ * @param frequency_hz 当前信号的频率 (单位: Hz)。
+ *
+ * @return float 应该通过串口发送给DDS的幅度设定值。
+ */
+float get_calibrated_AD9954_amplitude(float desired_vpp, float frequency_hz) {
+    // --- 边界限制 (Clamping) ---
+    // 限制输入值在标定范围内，以保证输出结果的有效性
+    if (desired_vpp < 0.1f) desired_vpp = 0.1f;
+    if (desired_vpp > 2.0f) desired_vpp = 2.0f;
+    if (frequency_hz < 100.0f) frequency_hz = 100.0f;
+    if (frequency_hz > 3000.0f) frequency_hz = 3000.0f;
+
+    // 为了提高多项式拟合的数值稳定性，模型使用kHz为单位
+    float freq_khz = frequency_hz / 1000.0f;
+
+    // 多项式变量
+    float v = desired_vpp;
+    float f = freq_khz;
+    float v2 = v * v;
+    float f2 = f * f;
+    float v3 = v2 * v;
+    float f3 = f2 * f;
+
+    // --- 3阶二维多项式模型系数 ---
+    // target_vpp = c00 + c10*v + c01*f + c20*v^2 + c11*v*f + c02*f^2 + ...
+    const float c00 =  0.089808f;  // Intercept
+    const float c10 =  0.180299f;  // v
+    const float c01 = -0.015243f;  // f
+    const float c20 =  0.375338f;  // v^2
+    const float c11 =  0.098493f;  // v*f
+    const float c02 =  0.007621f;  // f^2
+    const float c30 = -0.061448f;  // v^3
+    const float c21 = -0.052674f;  // v^2*f
+    const float c12 = -0.015509f;  // v*f^2
+    const float c03 = -0.000392f;  // f^3
+
+    // --- 计算最终结果 ---
+    float target_vpp = c00 +
+                       c10 * v   + c01 * f   +
+                       c20 * v2  + c11 * v * f  + c02 * f2  +
+                       c30 * v3  + c21 * v2 * f + c12 * v * f2 + c03 * f3;
+
+    // 最终安全检查，防止计算结果超出合理范围 (e.g., 0V to 2.0V)
+    // 根据您 DDS_AMP_CMD 的范围进行调整
+    if (target_vpp < 0.0f) target_vpp = 0.0f;
+    if (target_vpp > 2.0f) target_vpp = 2.0f;
+
+    return target_vpp;
+}

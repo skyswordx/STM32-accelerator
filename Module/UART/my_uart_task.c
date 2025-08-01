@@ -262,20 +262,19 @@ void handle_serial_lcd_set_command(char* param, char* value)
         // 更新幅度跟踪变量，不调用实际的硬件设置函数
         if (current_lcd_page == 2) {
             // 在基础功能2页面
-            base2_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
-            printf("Base2 AD9833 amplitude updated: %.2f V -> %d\n", voltage, base2_ad9833_amplitude);
+            // base2_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
+            // printf("Base2 AD9833 amplitude updated: %.2f V -> %d\n", voltage, base2_ad9833_amplitude);
             base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
             printf("Base2 AD9954 amplitude updated: %.2f V -> %d\n", voltage, base2_ad9954_amplitude);
         } else if (current_lcd_page == 3) {
             // 在基础功能3页面
-            base3_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
-            printf("Base3 AD9833 amplitude updated: %.2f V -> %d\n", voltage, base3_ad9833_amplitude);
+            // base3_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
+            // printf("Base3 AD9833 amplitude updated: %.2f V -> %d\n", voltage, base3_ad9833_amplitude);
             base3_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(voltage);
             printf("Base3 AD9954 amplitude updated: %.2f V -> %d\n", voltage, base3_ad9954_amplitude);
 
         } else if (current_lcd_page == 4) {
             // 在基础功能4页面
-            // 基础功能4页面既使用AD9954，也使用AD9833
             base4_desired_model_output_voltage = voltage;
             printf("Base4 desired model output voltage updated: %.2f V\n", voltage);
             

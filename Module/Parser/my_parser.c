@@ -7,6 +7,7 @@
 #include "AD9954.h"
 #include "my_timer_config.h"
 #include "my_button_config.h"
+#include "my_dac_config.h"
 #include "my_dds.h"
 
 uint16_t g_dac_square_64[64] = {0};
@@ -115,10 +116,10 @@ double base4_table[30]={ // 传输比
 void myParserTask(void const * argument)
 {
     // Initialize the parser
-    AD9833_Init_GPIO();
-    AD9954_Init(); // Initialize AD9954
-    // Set amplitude to 2V for AD9833 using the voltage conversion macro
-    AD9833_AmpSet(255/2);
+    // AD9833_Init_GPIO();
+    // AD9954_Init(); // Initialize AD9954
+    // // Set amplitude to 2V for AD9833 using the voltage conversion macro
+    // AD9833_AmpSet(255/2);
     
     // Set amplitude to maximum for AD9954 (max value is 16383)
     AD9954_Set_Amp(16383/10);
@@ -209,19 +210,7 @@ void myParserTask(void const * argument)
                             break;
                         case FUNCTION_MODE_BASE2:
                             // 在base2_function模式下，按键2控制所有DDS的幅度增加
-                            printf("Key 2 pressed in base2_function mode: Increasing all DDS amplitude\n");
-                            // 增加AD9833幅度
-                            // 将当前DAC值转换回电压值
-                            float current_ad9833_voltage = (float)base2_ad9833_amplitude * AD9833_VMAX_V / 255.0;
-                            // 增加0.1V
-                            current_ad9833_voltage += 0.1;
-                            // 检查是否超过最大电压
-                            if (current_ad9833_voltage > AD9833_VMAX_V) {
-                                current_ad9833_voltage = AD9833_VMAX_V;
-                            }
-                            // 转换为DAC值
-                            base2_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(current_ad9833_voltage);
-                            AD9833_AmpSet(base2_ad9833_amplitude);
+                            printf("Key 2 pressed in base2_function mode: Increasing all DDS amplitude\n");;
                             
                             // 增加AD9954幅度
                             // 将当前DAC值转换回电压值
@@ -235,8 +224,7 @@ void myParserTask(void const * argument)
                             // 转换为DAC值
                             base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(current_ad9954_voltage);
                             AD9954_Set_Amp(base2_ad9954_amplitude);
-                            
-                            printf("New amplitudes - AD9833: %d, AD9954: %d\n", base2_ad9833_amplitude, base2_ad9954_amplitude);
+                    
                             break;
                         case FUNCTION_MODE_BASE3:
              
@@ -289,9 +277,6 @@ void myParserTask(void const * argument)
                             } else {
                                 base2_current_frequency = 1000.0;
                             }
-                            // 设置AD9833频率
-                            AD9833_WaveSeting(base2_current_frequency, 0, SIN_WAVE, 0);
-                            // 设置AD9954频率
                             AD9954_Set_Fre(base2_current_frequency);
                             printf("New frequency: %.0f Hz\n", base2_current_frequency);
                             break;
@@ -339,9 +324,6 @@ void myParserTask(void const * argument)
                             } else {
                                 base2_current_frequency = 1000000.0;
                             }
-                            // 设置AD9833频率
-                            AD9833_WaveSeting(base2_current_frequency, 0, SIN_WAVE, 0);
-                            // 设置AD9954频率
                             AD9954_Set_Fre(base2_current_frequency);
                             printf("New frequency: %.0f Hz\n", base2_current_frequency);
                             break;
@@ -379,18 +361,6 @@ void myParserTask(void const * argument)
                         case FUNCTION_MODE_BASE2:
                             // 在base2_function模式下，按键8控制所有DDS的幅度减小
                             printf("Key 8 pressed in base2_function mode: Decreasing all DDS amplitude\n");
-                            // 减小AD9833幅度
-                            // 将当前DAC值转换回电压值
-                            float current_ad9833_voltage = (float)base2_ad9833_amplitude * AD9833_VMAX_V / 255.0;
-                            // 减小0.1V
-                            current_ad9833_voltage -= 0.1;
-                            // 检查是否低于0V
-                            if (current_ad9833_voltage < 0.0) {
-                                current_ad9833_voltage = 0.0;
-                            }
-                            // 转换为DAC值
-                            base2_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(current_ad9833_voltage);
-                            AD9833_AmpSet(base2_ad9833_amplitude);
                             
                             // 减小AD9954幅度
                             // 将当前DAC值转换回电压值
@@ -461,52 +431,10 @@ void base2_function(void){
     // 设置当前模式为base2_function模式
     current_function_mode = FUNCTION_MODE_BASE2;
     
-    // 初始化频率跟踪变量
-    // base2_current_frequency = 1000.0; // 从1kHz开始
-    
-    // // 初始化幅度跟踪变量
-    // // 检查电压是否超过最大值
-    // float ad9833_init_voltage = 3.0;
-    // if (ad9833_init_voltage > AD9833_VMAX_V) {
-    //     ad9833_init_voltage = AD9833_VMAX_V;
-    // }
-    // base2_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(ad9833_init_voltage);
-    
-    // float ad9954_init_voltage = 3.0;
-    // if (ad9954_init_voltage > AD9954_VMAX_V) {
-    //     ad9954_init_voltage = AD9954_VMAX_V;
-    // }
-    // base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(ad9954_init_voltage);
-    
-    // // 实现间隔5秒，让AD9954和AD9833依次从1kHz以100Hz递增到1MHz，并且输出的峰峰值为3V
-    // double frequency = base2_current_frequency; // 从1kHz开始
-    
-    // 设置初始幅度
-    AD9833_AmpSet(base2_ad9833_amplitude);
     AD9954_Set_Amp(base2_ad9954_amplitude);
 
-    AD9833_WaveSeting(base2_current_frequency, 0, SIN_WAVE, 0);
     AD9954_Set_Fre(base2_current_frequency);
-    
-    // 循环递增频率直到1MHz
-    // while (frequency <= 1000000.0) {
-    //     // 设置AD9833频率
-    //     AD9833_WaveSeting(frequency, 0, SIN_WAVE, 0);
-    //     printf("AD9833 Frequency set to: %.0f Hz\n", frequency);
-        
-    //     // 设置AD9954频率
-    //     AD9954_Set_Fre(frequency);
-    //     printf("AD9954 Frequency set to: %.0f Hz\n", frequency);
-
-    //     osDelay(200);
-        
-    //     // 频率递增100Hz
-    //     frequency += 100.0;
-    //     // 更新跟踪变量
-    //     base2_current_frequency = frequency;
-    // }
-    
-    // printf("Frequency sweep completed\n");
+  
     printf("base2 completed\n");
 }
 
@@ -516,11 +444,6 @@ void base3_function(void){
     // 设置当前模式为base3_function模式
     current_function_mode = FUNCTION_MODE_BASE3;
 
-    float ad9833_init_voltage = 0.7919;// 0.82
-    if (ad9833_init_voltage > AD9833_VMAX_V) {
-        ad9833_init_voltage = AD9833_VMAX_V;
-    }
-    base3_ad9833_amplitude = AD9833_VOLTAGE_TO_DAC(ad9833_init_voltage);
     
     float ad9954_init_voltage = 0.85;//微调，实际示波器 0.7919
     if (ad9954_init_voltage > AD9954_VMAX_V) {
@@ -528,10 +451,8 @@ void base3_function(void){
     }
     base3_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(ad9954_init_voltage);
 
-    AD9833_AmpSet(base3_ad9833_amplitude);
     AD9954_Set_Amp(base3_ad9954_amplitude);
 
-    AD9833_WaveSeting(1000, 0, SIN_WAVE, 0);
     AD9954_Set_Fre(1000);
 
     printf("base3 completed\n");
@@ -558,21 +479,6 @@ void base4_function(void){
     // 3. 根据传输比和 base4_desired_model_output_voltage 计算各 DDS 应该输出的电压
     double dds_output_voltage = base4_desired_model_output_voltage / transform_ratio;
     
-    // 4. 设置 AD9833 的幅度和频率
-    // 确保电压不超过AD9833的最大输出电压
-    double ad9833_voltage = dds_output_voltage;
-    if (ad9833_voltage > AD9833_VMAX_V) {
-        ad9833_voltage = AD9833_VMAX_V;
-    }
-    
-    // 将电压转换为DAC寄存器值并设置幅度
-    uint8_t ad9833_dac_value = AD9833_VOLTAGE_TO_DAC(ad9833_voltage);
-    AD9833_AmpSet(ad9833_dac_value);
-    
-    // 设置频率
-    base4_ad9833_frequency = base4_desired_model_output_frequency;
-    AD9833_WaveSeting(base4_ad9833_frequency, 0, SIN_WAVE, 0);
-    
     // 5. 设置 AD9954 的幅度和频率
     // 确保电压不超过AD9954的最大输出电压
     double ad9954_voltage = dds_output_voltage;
@@ -587,22 +493,6 @@ void base4_function(void){
     // 设置频率
     base4_ad9954_frequency = base4_desired_model_output_frequency;
     AD9954_Set_Fre(base4_ad9954_frequency);
-    
-    // 6. 设置 DAC DDS 的幅度和频率
-    // 计算幅度值 (0.0 到 1.0)
-    float dac_dds_amplitude = (float)((dds_output_voltage - DAC_ACTUAL_V_ZERO) / DAC_ACTUAL_SPAN);
-    
-    // 确保幅度值在有效范围内
-    if (dac_dds_amplitude < 0.0f) {
-        dac_dds_amplitude = 0.0f;
-    } else if (dac_dds_amplitude > 1.0f) {
-        dac_dds_amplitude = 1.0f;
-    }
-    
-    // 设置幅度和频率
-    base4_dacdds_frequency = (uint16_t)(base4_desired_model_output_frequency); // 转换为Hz
-    DDS_SetAmplitude(&g_dds_generator, dac_dds_amplitude);
-    DDS_SetFrequency(&g_dds_generator, (float)base4_dacdds_frequency);
 
     printf("base4 completed\n");
 }
