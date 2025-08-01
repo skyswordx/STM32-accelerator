@@ -109,6 +109,7 @@ def setup_oscilloscope_for_dds_test(scope, frequency, expected_amplitude):
         
         # 设置采样和触发
         scope.write(':ACQuire:TYPE AVERages')
+        # 注释掉这里的平均设置，因为Auto Scale后会重新设置为2次平均
         # scope.write(f':ACQuire:AVERages {SCOPE_AVERAGES}')
         
         scope.write(f':TRIGger:EDGE:SOURce CHANnel{SCOPE_CHANNEL}')
@@ -221,27 +222,29 @@ def check_measurement_precision(scope):
         print(f"精度检查失败: {e}")
         return False, 0
 
-def auto_scale_if_needed(scope):
-    """仅在精度不够时使用Auto Scale"""
+def auto_scale_always(scope):
+    """每次测量都使用Auto Scale，然后设置2次平均"""
     try:
-        precision_ok, grid_usage = check_measurement_precision(scope)
+        print("执行Auto Scale...")
+        scope.write(':AUToscale')
+        time.sleep(AUTO_SCALE_TIMEOUT)  # 使用配置的等待时间
         
-        if not precision_ok:
-            print(f"信号占用 {grid_usage:.1f} 格，精度不足，使用Auto Scale...")
-            scope.write(':AUToscale')
-            time.sleep(AUTO_SCALE_TIMEOUT)  # 使用配置的等待时间
-            
-            # 读取Auto Scale后的设置
-            timebase = float(scope.query(':TIMebase:SCALE?').strip())
-            v_scale = float(scope.query(f':CHANnel{SCOPE_CHANNEL}:SCALe?').strip())
-            print(f"Auto Scale完成 - 时基: {timebase}s/div, 垂直: {v_scale}V/div")
-            return True
-        else:
-            print(f"信号占用 {grid_usage:.1f} 格，精度足够")
-            return False
+        # 读取Auto Scale后的设置
+        timebase = float(scope.query(':TIMebase:SCALE?').strip())
+        v_scale = float(scope.query(f':CHANnel{SCOPE_CHANNEL}:SCALe?').strip())
+        print(f"Auto Scale完成 - 时基: {timebase}s/div, 垂直: {v_scale}V/div")
+        
+        # 设置2次平均
+        print("设置2次平均...")
+        scope.write(':ACQuire:TYPE AVERages')
+        scope.write(':ACQuire:AVERages 2')
+        time.sleep(0.5)  # 等待设置生效
+        print("2次平均设置完成")
+        
+        return True
             
     except Exception as e:
-        print(f"Auto Scale失败: {e}")
+        print(f"Auto Scale或平均设置失败: {e}")
         return False
 
 def perform_dds_filter_sweep():
@@ -298,7 +301,7 @@ def perform_dds_filter_sweep():
                     continue
                 
                 # 检查并调整精度
-                auto_scale_used = auto_scale_if_needed(scope)
+                auto_scale_used = auto_scale_always(scope)
                 
                 # 多次测量
                 measured_freq, measured_vamp, freq_std, vamp_std = measure_signal_multiple_times(scope, 3)

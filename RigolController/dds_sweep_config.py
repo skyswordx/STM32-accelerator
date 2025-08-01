@@ -8,9 +8,9 @@ BAUD_RATE = 115200
 
 # === 测试参数配置 ===
 # 幅度扫描范围 (峰峰值电压)
-AMPLITUDE_START = 0.1  # 起始幅度 (Vpp)
-AMPLITUDE_END = 2.0    # 结束幅度 (Vpp)
-AMPLITUDE_STEPS = 20   # 幅度测试点数 (建议10-50)
+AMPLITUDE_START = 0.5  # 起始幅度 (Vpp)
+AMPLITUDE_END = 0.5    # 结束幅度 (Vpp)
+AMPLITUDE_STEPS = 1   # 幅度测试点数 (建议10-50)
 
 # 频率扫描范围
 FREQ_START = 100       # 起始频率 (Hz)
@@ -18,13 +18,13 @@ FREQ_END = 3000        # 结束频率 (Hz)
 FREQ_STEPS = 30        # 频率测试点数 (建议20-100)
 
 # === 测量参数配置 ===
-MEASUREMENT_AVERAGES = 3    # 每个点测量次数 (建议3-5次)
+MEASUREMENT_AVERAGES = 5    # 每个点测量次数 (建议3-5次)
 STABILIZATION_TIME = 0.5    # 信号稳定等待时间 (秒)
 AUTO_SCALE_TIMEOUT = 2      # Auto Scale等待时间 (秒)
 
 # === STM32H7 DDS命令格式 ===
 # 根据您的固件调整命令格式
-DDS_TYPE_CMD = 'SET:DDS_TYPE:9833'        # DDS类型设置命令
+DDS_TYPE_CMD = 'SET:DDS_TYPE:9954'        # DDS类型设置命令
 DDS_FREQ_CMD = 'SET:DDS_FREQ:{}'          # 频率设置命令模板 ({}会被替换为频率值)
 DDS_AMP_CMD = 'SET:DDS_AMP:{:.2f}'        # 幅度设置命令模板 ({}会被替换为幅度值)
 
