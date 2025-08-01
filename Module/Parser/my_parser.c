@@ -59,7 +59,7 @@ double base4_desired_model_output_frequency = 100.0; // 期望输出频率
  * 每个元素是一个 double 类型的值，表示 DDS 在这种情况下要输出的幅度
  */
 
-
+extern TIM_HandleTypeDef htim6; // 定时器句柄
 DDS_Generator_t g_dds_generator; // 宣告一個DDS產生器實例
 
 const uint16_t g_arbitrary_waveform[WAVE_TABLE_SIZE] = {
@@ -263,6 +263,8 @@ void myParserTask(void const * argument)
                     // 按键4在不同函数模式下的逻辑
                     switch (current_function_mode) {
                         case FUNCTION_MODE_NONE:
+                            printf("Key 4 pressed in FUNCTION_MODE_NONE: Entering improve1_function\n");
+                            improve1_function();
     
                             break;
                         case FUNCTION_MODE_BASE2:
@@ -292,17 +294,14 @@ void myParserTask(void const * argument)
                     // 按键5在不同函数模式下的逻辑
                     switch (current_function_mode) {
                         case FUNCTION_MODE_NONE:
-
+                            printf("Key 5 pressed in FUNCTION_MODE_NONE: Entering improve2_function\n");
+                            improve2_function();
     
                             break;
-                        case FUNCTION_MODE_BASE2:
-
-                            break;
-                        case FUNCTION_MODE_BASE3:
-
-                            break;
-                        case FUNCTION_MODE_BASE4:
-  
+                        case FUNCTION_MODE_IMPROVE2:
+                            HAL_TIM_Base_Stop_IT(&htim6);
+                            printf("Stopping improve2_function\n");
+                            current_function_mode = FUNCTION_MODE_NONE; // 返回无模式
                             break;
                         default:
                             printf("Key 5 pressed\n");
@@ -510,7 +509,7 @@ void improve2_function(void){
     // 设置当前模式为improve2_function模式
     current_function_mode = FUNCTION_MODE_IMPROVE2;
 
-
+    HAL_TIM_Base_Start_IT(&htim6);
     printf("improve2 completed\n");
 }
 

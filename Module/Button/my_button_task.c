@@ -20,7 +20,6 @@ void StartButtonProcessingTask(void *argument) {
     // INA226 
     INA226_init();
     
-    my_zlcr_dds_init(DDS_TYPE_AD9833);
     // AD9954 DDS
     // AD9954_Set_Fre(1000.0);
     // AD9954_Set_Amp(16383);

@@ -274,6 +274,7 @@ void StartADCProcessingTask(void *argument) {
                 }
             }
 
+            // 下面两个是调试用到的，不去理会他们
             if (g_time_detect_enabled) {
                 time_domain_result_t ch1_time_result, ch2_time_result;
 
@@ -317,8 +318,6 @@ void StartADCProcessingTask(void *argument) {
                 printf("ADC2 - Frequency: %lu Hz, Magnitude: %.6f V\n", ch2_freq_result.fundamental_frequency, ch2_freq_result.fundamental_vpp);
             }
 
-            
-
             switch (g_desired_function_state) {
                 case SPECTRUM_STATE:
                     printf("=== Spectrum Results ===\n");
@@ -343,3 +342,5 @@ void StartADCProcessingTask(void *argument) {
        osDelay(100); // 延时100毫秒
     }
 }
+
+
