@@ -25,5 +25,6 @@ void base4_function(void);
 void improve1_function(void);
 void improve2_function(void);
 
+float calibrate_AD9954_voltage(float desired_output_v, float frequency_hz);
 
 #endif // MY_PARSER_H

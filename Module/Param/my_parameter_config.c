@@ -2,7 +2,7 @@
 
 // DDS相关参数
 uint32_t g_desired_dds_frequency = 1000;        // 默认1kHz
-uint8_t g_desired_dds_type = DDS_TYPE_AD9833;    
+uint8_t g_desired_dds_type = DDS_TYPE_AD9954; // 默认使用AD9954  
 uint32_t g_desired_dds_phase = 0;               // 默认0度
 uint32_t g_desired_dds_amplitude = 0;       // 默认最大幅度
 

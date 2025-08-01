@@ -3,7 +3,7 @@
 <title>Static Call Graph - [FinallAttackProject\FinallAttackProject.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image FinallAttackProject\FinallAttackProject.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Fri Aug 01 20:07:10 2025
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Fri Aug 01 21:04:55 2025
 <BR><P>
 <H3>Maximum Stack Usage =        536 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -2544,8 +2544,8 @@ Global Symbols
 <LI><a href="#[183]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_serial_lcd_command
 </UL>
 
-<P><STRONG><a name="[19e]"></a>base4_function</STRONG> (Thumb, 130 bytes, Stack size 8 bytes, my_parser.o(i.base4_function))
-<BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = base4_function &rArr; AD9954_Set_Amp &rArr; AD9954_Write_nByte &rArr; AD9954_Send_Byte
+<P><STRONG><a name="[19e]"></a>base4_function</STRONG> (Thumb, 148 bytes, Stack size 24 bytes, my_parser.o(i.base4_function))
+<BR><BR>[Stack]<UL><LI>Max Depth = 88<LI>Call Chain = base4_function &rArr; AD9954_Set_Amp &rArr; AD9954_Write_nByte &rArr; AD9954_Send_Byte
 </UL>
 <BR>[Calls]<UL><LI><a href="#[e9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD9954_Set_Fre
 <LI><a href="#[e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD9954_Set_Amp
@@ -2598,7 +2598,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[182]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_uart_command
 </UL>
 
-<P><STRONG><a name="[1af]"></a>handle_serial_lcd_set_command</STRONG> (Thumb, 242 bytes, Stack size 32 bytes, my_uart_task.o(i.handle_serial_lcd_set_command))
+<P><STRONG><a name="[1af]"></a>handle_serial_lcd_set_command</STRONG> (Thumb, 250 bytes, Stack size 32 bytes, my_uart_task.o(i.handle_serial_lcd_set_command))
 <BR><BR>[Stack]<UL><LI>Max Depth = 256<LI>Call Chain = handle_serial_lcd_set_command &rArr; __hardfp_atof &rArr; __strtod_int &rArr; _local_sscanf &rArr; _scanf_real
 </UL>
 <BR>[Calls]<UL><LI><a href="#[150]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
@@ -2608,8 +2608,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[183]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_serial_lcd_command
 </UL>
 
-<P><STRONG><a name="[1b0]"></a>handle_set_command</STRONG> (Thumb, 688 bytes, Stack size 32 bytes, my_uart_task.o(i.handle_set_command))
-<BR><BR>[Stack]<UL><LI>Max Depth = 256<LI>Call Chain = handle_set_command &rArr; __hardfp_atof &rArr; __strtod_int &rArr; _local_sscanf &rArr; _scanf_real
+<P><STRONG><a name="[1b0]"></a>handle_set_command</STRONG> (Thumb, 798 bytes, Stack size 48 bytes, my_uart_task.o(i.handle_set_command))
+<BR><BR>[Stack]<UL><LI>Max Depth = 272<LI>Call Chain = handle_set_command &rArr; __hardfp_atof &rArr; __strtod_int &rArr; _local_sscanf &rArr; _scanf_real
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;update_dac_amplitude
 <LI><a href="#[eb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD9954_Set_Phase
@@ -2686,8 +2686,8 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> entry9a.o(.ARM.Collect$$$$0000000B)
 </UL>
-<P><STRONG><a name="[ae]"></a>myParserTask</STRONG> (Thumb, 774 bytes, Stack size 40 bytes, my_parser.o(i.myParserTask))
-<BR><BR>[Stack]<UL><LI>Max Depth = 164<LI>Call Chain = myParserTask &rArr; DDS_Start &rArr; HAL_DAC_Start_DMA &rArr; HAL_DMA_Start_IT &rArr; DMA_SetConfig
+<P><STRONG><a name="[ae]"></a>myParserTask</STRONG> (Thumb, 790 bytes, Stack size 48 bytes, my_parser.o(i.myParserTask))
+<BR><BR>[Stack]<UL><LI>Max Depth = 172<LI>Call Chain = myParserTask &rArr; DDS_Start &rArr; HAL_DAC_Start_DMA &rArr; HAL_DMA_Start_IT &rArr; DMA_SetConfig
 </UL>
 <BR>[Calls]<UL><LI><a href="#[17a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[1be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_Stop_IT
@@ -2793,7 +2793,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[182]"></a>parse_uart_command</STRONG> (Thumb, 118 bytes, Stack size 24 bytes, my_uart_task.o(i.parse_uart_command))
-<BR><BR>[Stack]<UL><LI>Max Depth = 280<LI>Call Chain = parse_uart_command &rArr; handle_set_command &rArr; __hardfp_atof &rArr; __strtod_int &rArr; _local_sscanf &rArr; _scanf_real
+<BR><BR>[Stack]<UL><LI>Max Depth = 296<LI>Call Chain = parse_uart_command &rArr; handle_set_command &rArr; __hardfp_atof &rArr; __strtod_int &rArr; _local_sscanf &rArr; _scanf_real
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1b0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;handle_set_command
 <LI><a href="#[1ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;handle_legacy_command

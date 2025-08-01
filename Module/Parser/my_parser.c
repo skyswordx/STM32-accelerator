@@ -41,6 +41,7 @@ double base2_current_frequency = 1000.0;  // 当前频率，初始为1kHz
 // base3_function模式下的幅度跟踪变量
 uint8_t base3_ad9833_amplitude = 255;  // AD9833幅度初始值
 uint16_t base3_ad9954_amplitude = 16383;  // AD9954幅度初始值
+double base3_ad9954_frequency = 1000.0;  // AD9954当前频率，初始为1kHz
 
 // base4_function模式下的幅度和频率跟踪变量
 double base4_ad9833_frequency = 100.0;   // AD9833当前频率
@@ -120,6 +121,7 @@ void myParserTask(void const * argument)
     
     // Set amplitude to maximum for AD9954 (max value is 16383)
     AD9954_Set_Amp(16383/5);
+    AD9954_Set_Fre(1000.0); // Set initial frequency to 1000 Hz
     AD9954_Set_Phase(0);//写相位
 
     printf("Initializing DDS generator...\r\n");
@@ -441,7 +443,7 @@ void base3_function(void){
     current_function_mode = FUNCTION_MODE_BASE3;
 
     
-    float ad9954_init_voltage = 0.85;//微调，实际示波器 0.7919
+    float ad9954_init_voltage = 0.78;//微调，实际示波器 0.7919
     if (ad9954_init_voltage > AD9954_VMAX_V) {
         ad9954_init_voltage = AD9954_VMAX_V;
     }
@@ -449,7 +451,7 @@ void base3_function(void){
 
     AD9954_Set_Amp(base3_ad9954_amplitude);
 
-    AD9954_Set_Fre(1000);
+    AD9954_Set_Fre(1000.0); // 设置初始频率为1000Hz
 
     printf("base3 completed\n");
 
@@ -469,26 +471,29 @@ void base4_function(void){
         idx = 29;
     }
     
-    // 2. 从 base4_table 中获取传输比
+    // // 2. 从 base4_table 中获取传输比
     double transform_ratio = base4_table[idx];
     
-    // 3. 根据传输比和 base4_desired_model_output_voltage 计算各 DDS 应该输出的电压
+    // // 3. 根据传输比和 base4_desired_model_output_voltage 计算各 DDS 应该输出的电压
     double dds_output_voltage = base4_desired_model_output_voltage / transform_ratio;
     
-    // 5. 设置 AD9954 的幅度和频率
-    // 确保电压不超过AD9954的最大输出电压
-    double ad9954_voltage = dds_output_voltage;
-    if (ad9954_voltage > AD9954_VMAX_V) {
-        ad9954_voltage = AD9954_VMAX_V;
-    }
+    // // 5. 设置 AD9954 的幅度和频率
+    // // 确保电压不超过AD9954的最大输出电压
+    // double ad9954_voltage = dds_output_voltage;
+    // if (ad9954_voltage > AD9954_VMAX_V) {
+    //     ad9954_voltage = AD9954_VMAX_V;
+    // }
+    // double finall_ad9954_voltage = calibrate_AD9954_voltage(dds_output_voltage, base4_desired_model_output_frequency);
+    double finall_ad9954_voltage = dds_output_voltage;
+    printf("应该在表中查找到的传输比： %.6f, 对应的频率 %.6f V\n", transform_ratio, base4_desired_model_output_frequency);
+    printf("AD9954 最后要设的电压是： %.6f V\n", finall_ad9954_voltage);
     
-    // 将电压转换为DAC寄存器值并设置幅度
-    uint16_t ad9954_dac_value = AD9954_VOLTAGE_TO_DAC(ad9954_voltage);
-    AD9954_Set_Amp(ad9954_dac_value);
-    
+    // // 将电压转换为DAC寄存器值并设置幅度
+    // uint16_t ad9954_dac_value = AD9954_VOLTAGE_TO_DAC(ad9954_voltage);
+    AD9954_Set_Amp(AD9954_VOLTAGE_TO_DAC(finall_ad9954_voltage)); // 设置幅度
+
     // 设置频率
-    base4_ad9954_frequency = base4_desired_model_output_frequency;
-    AD9954_Set_Fre(base4_ad9954_frequency);
+    AD9954_Set_Fre(base4_desired_model_output_frequency);
 
     printf("base4 completed\n");
 }
@@ -511,6 +516,12 @@ void improve2_function(void){
 
     HAL_TIM_Base_Start_IT(&htim6);
     printf("improve2 completed\n");
+}
+
+float calibrate_AD9954_voltage(float desired_output_v, float frequency_hz) {
+    // 校准AD9954电压，确保不超过最大值
+    float setting = (desired_output_v - (7.650e-5f * frequency_hz) - 0.0454f) / 1.0186f;
+    return setting;
 }
 
 void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef* hdac)
