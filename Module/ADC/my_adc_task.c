@@ -230,8 +230,8 @@ void StartADCProcessingTask(void *argument) {
                     // 设置DDS到下一步频率
                     current_freq_hz = SWEEP_F_START_HZ + g_sweep_step * SWEEP_F_STEP_HZ;
                     AD9954_Set_Fre(current_freq_hz);
-                    // printf("Step %lu/%d: Freq = %.1f Hz, H_mag=%.4f, H_phase=%.2f deg\r\n", 
-                    //        g_sweep_step, NUM_FREQ_POINTS, current_freq_hz, h_mag, h_phase * 180.0f / PI);
+                    printf("Step %lu/%d: Freq = %.1f Hz, H_mag=%.4f, H_phase=%.2f deg\r\n", 
+                           g_sweep_step, NUM_FREQ_POINTS, current_freq_hz, h_mag, h_phase * 180.0f / PI);
                     
                     // 延时一小段时间以等待DDS和被测电路稳定
                     osDelay(50);
@@ -263,11 +263,11 @@ void StartADCProcessingTask(void *argument) {
                     
                     printf("\r\nIdentification complete. System is now idle.\r\n");
                     // 直接打印 H complex 和 w_rad
-                    printf("========== H complex  + w_rad ========== ");
-                    printf("左1是H实部，左2是H虚部，右边是w_rad\r\n");
-                    for (int i = 0; i < NUM_FREQ_POINTS; i++) {
-                        printf("%.4f,%.4f,%.4f\n", g_sweep_H_cmplx[i * 2], g_sweep_H_cmplx[i * 2 + 1], g_sweep_w_rad[i]);
-                    }
+                    // printf("========== H complex  + w_rad ========== ");
+                    // printf("左1是H实部，左2是H虚部，右边是w_rad\r\n");
+                    // for (int i = 0; i < NUM_FREQ_POINTS; i++) {
+                    //     printf("%.4f,%.4f,%.4f\n", g_sweep_H_cmplx[i * 2], g_sweep_H_cmplx[i * 2 + 1], g_sweep_w_rad[i]);
+                    // }
                     g_adc_mode = ADC_MODE_IDLE; // 返回空闲模式
 
                     
