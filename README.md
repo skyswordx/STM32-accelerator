@@ -254,4 +254,7 @@ void StartADCProcessingTask(void *argument) {
 
 我现在要测试一下
 
-目前我
+目前我想要实现一个功能
+0. 给 ADC mode 配置一个输出状态
+1. 按下用户按钮（PC1）后，启动输出模式
+2. 在输出模式下，

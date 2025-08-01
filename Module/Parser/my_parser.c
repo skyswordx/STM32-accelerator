@@ -183,19 +183,13 @@ void myParserTask(void const * argument)
                             }
                             break;
                         case FUNCTION_MODE_BASE2:
-                            // 在base2_function模式下，按键1可以有其他功能
-                            printf("Key 1 pressed in base2_function mode: Custom function for base2\n");
-                            // 在base2_function模式下，按键1无特殊功能
+            
                             break;
                         case FUNCTION_MODE_BASE3:
-                            // 在base3_function模式下，按键1可以有其他功能
-                            printf("Key 1 pressed in base3_function mode: Custom function for base3\n");
-                            // 在这里添加base3_function模式下按键1的特殊功能
+                     
                             break;
                         case FUNCTION_MODE_BASE4:
-                            // 在base4_function模式下，按键1可以有其他功能
-                            printf("Key 1 pressed in base4_function mode: Custom function for base4\n");
-                            // 在这里添加base4_function模式下按键1的特殊功能
+               
                             break;
                         default:
                             printf("Key 1 pressed\n");
@@ -245,14 +239,10 @@ void myParserTask(void const * argument)
                             printf("New amplitudes - AD9833: %d, AD9954: %d\n", base2_ad9833_amplitude, base2_ad9954_amplitude);
                             break;
                         case FUNCTION_MODE_BASE3:
-                            // 在base3_function模式下，按键2可以有其他功能
-                            printf("Key 2 pressed in base3_function mode: Custom function for base3\n");
-                            // 在这里添加base3_function模式下按键2的特殊功能
+             
                             break;
                         case FUNCTION_MODE_BASE4:
-                            // 在base4_function模式下，按键2可以有其他功能
-                            printf("Key 2 pressed in base4_function mode: Custom function for base4\n");
-                            // 在这里添加base4_function模式下按键2的特殊功能
+         
                             break;
                         default:
                             printf("Key 2 pressed\n");
@@ -271,18 +261,13 @@ void myParserTask(void const * argument)
                             }
                             break;
                         case FUNCTION_MODE_BASE2:
-                            // 在base2_function模式下，按键3无特殊功能
-                            printf("Key 3 pressed in base2_function mode: No function\n");
+
                             break;
                         case FUNCTION_MODE_BASE3:
-                            // 在base3_function模式下，按键3可以有其他功能
-                            printf("Key 3 pressed in base3_function mode: Custom function for base3\n");
-                            // 在这里添加base3_function模式下按键3的特殊功能
+
                             break;
                         case FUNCTION_MODE_BASE4:
-                            // 在base4_function模式下，按键3可以有其他功能
-                            printf("Key 3 pressed in base4_function mode: Custom function for base4\n");
-                            // 在这里添加base4_function模式下按键3的特殊功能
+
                             break;
                         default:
                             printf("Key 3 pressed\n");
@@ -293,8 +278,7 @@ void myParserTask(void const * argument)
                     // 按键4在不同函数模式下的逻辑
                     switch (current_function_mode) {
                         case FUNCTION_MODE_NONE:
-                           
-               
+    
                             break;
                         case FUNCTION_MODE_BASE2:
                             // 在base2_function模式下，按键4控制所有DDS的频率减小100Hz
@@ -326,28 +310,17 @@ void myParserTask(void const * argument)
                     // 按键5在不同函数模式下的逻辑
                     switch (current_function_mode) {
                         case FUNCTION_MODE_NONE:
-                            // 在无模式下，按键5可以有特殊功能
-                            printf("Key 5 pressed in no function mode: Custom function for no mode\n");
-                            // 在这里添加无模式下按键5的特殊功能
 
-                            HAL_TIM_Base_Start(&htim4);
-                            HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, (uint32_t*)g_dac_square_64, 64, DAC_ALIGN_12B_R);
-
+    
                             break;
                         case FUNCTION_MODE_BASE2:
-                            // 在base2_function模式下，按键5可以有特殊功能
-                            printf("Key 5 pressed in base2_function mode: Special function for base2\n");
-                            // 在这里添加base2_function模式下按键5的特殊功能
+
                             break;
                         case FUNCTION_MODE_BASE3:
-                            // 在base3_function模式下，按键5可以有特殊功能
-                            printf("Key 5 pressed in base3_function mode: Special function for base3\n");
-                            // 在这里添加base3_function模式下按键5的特殊功能
+
                             break;
                         case FUNCTION_MODE_BASE4:
-                            // 在base4_function模式下，按键5可以有特殊功能
-                            printf("Key 5 pressed in base4_function mode: Special function for base4\n");
-                            // 在这里添加base4_function模式下按键5的特殊功能
+  
                             break;
                         default:
                             printf("Key 5 pressed\n");
@@ -387,19 +360,13 @@ void myParserTask(void const * argument)
                     // 按键7在不同函数模式下的逻辑
                     switch (current_function_mode) {
                         case FUNCTION_MODE_BASE2:
-                            // 在base2_function模式下，按键7可以有特殊功能
-                            printf("Key 7 pressed in base2_function mode: Special function for base2\n");
-                            // 在这里添加base2_function模式下按键7的特殊功能
+            
                             break;
                         case FUNCTION_MODE_BASE3:
-                            // 在base3_function模式下，按键7可以有特殊功能
-                            printf("Key 7 pressed in base3_function mode: Special function for base3\n");
-                            // 在这里添加base3_function模式下按键7的特殊功能
+                        
                             break;
                         case FUNCTION_MODE_BASE4:
-                            // 在base4_function模式下，按键7可以有特殊功能
-                            printf("Key 7 pressed in base4_function mode: Special function for base4\n");
-                            // 在这里添加base4_function模式下按键7的特殊功能
+                        
                             break;
                         default:
                             printf("Key 7 pressed\n");
@@ -441,14 +408,10 @@ void myParserTask(void const * argument)
                             printf("New amplitudes - AD9833: %d, AD9954: %d\n", base2_ad9833_amplitude, base2_ad9954_amplitude);
                             break;
                         case FUNCTION_MODE_BASE3:
-                            // 在base3_function模式下，按键8可以有特殊功能
-                            printf("Key 8 pressed in base3_function mode: Special function for base3\n");
-                            // 在这里添加base3_function模式下按键8的特殊功能
+                           
                             break;
                         case FUNCTION_MODE_BASE4:
-                            // 在base4_function模式下，按键8可以有特殊功能
-                            printf("Key 8 pressed in base4_function mode: Special function for base4\n");
-                            // 在这里添加base4_function模式下按键8的特殊功能
+                            
                             break;
                         default:
                             printf("Key 8 pressed\n");
@@ -459,19 +422,13 @@ void myParserTask(void const * argument)
                     // 按键9在不同函数模式下的逻辑
                     switch (current_function_mode) {
                         case FUNCTION_MODE_BASE2:
-                            // 在base2_function模式下，按键9可以有特殊功能
-                            printf("Key 9 pressed in base2_function mode: Special function for base2\n");
-                            // 在这里添加base2_function模式下按键9的特殊功能
+                          
                             break;
                         case FUNCTION_MODE_BASE3:
-                            // 在base3_function模式下，按键9可以有特殊功能
-                            printf("Key 9 pressed in base3_function mode: Special function for base3\n");
-                            // 在这里添加base3_function模式下按键9的特殊功能
+                           
                             break;
                         case FUNCTION_MODE_BASE4:
-                            // 在base4_function模式下，按键9可以有特殊功能
-                            printf("Key 9 pressed in base4_function mode: Special function for base4\n");
-                            // 在这里添加base4_function模式下按键9的特殊功能
+                            
                             break;
                         default:
                             printf("Key 9 pressed\n");
@@ -553,6 +510,7 @@ void base2_function(void){
     printf("base2 completed\n");
 }
 
+// 重要
 void base3_function(void){
     printf("Executing base3_function logic\n");
     // 设置当前模式为base3_function模式
@@ -580,6 +538,7 @@ void base3_function(void){
 
 }
 
+// 重要
 void base4_function(void){
     printf("Executing base4_function logic\n");
     // 设置当前模式为base4_function模式
@@ -654,12 +613,7 @@ void improve1_function(void){
     // 设置当前模式为improve1_function模式
     current_function_mode = FUNCTION_MODE_IMPROVE1;
 
-    // 这里可以添加improve1_function的具体逻辑
-    // 例如：设置特定的频率和幅度，或者执行其他操作
 
-    // 示例：设置AD9833和AD9954的频率和幅度
-    AD9833_WaveSeting(1000, 0, SIN_WAVE, 0); // 设置频率为1000Hz
-    AD9954_Set_Fre(1000); // 设置AD9954频率为1000Hz
 
     printf("improve1 completed\n");
 }
@@ -669,12 +623,6 @@ void improve2_function(void){
     // 设置当前模式为improve2_function模式
     current_function_mode = FUNCTION_MODE_IMPROVE2;
 
-    // 这里可以添加improve2_function的具体逻辑
-    // 例如：设置特定的频率和幅度，或者执行其他操作
-
-    // 示例：设置AD9833和AD9954的频率和幅度
-    AD9833_WaveSeting(2000, 0, SIN_WAVE, 0); // 设置频率为2000Hz
-    AD9954_Set_Fre(2000); // 设置AD9954频率为2000Hz
 
     printf("improve2 completed\n");
 }

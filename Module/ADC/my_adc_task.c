@@ -153,14 +153,9 @@ void StartADCProcessingTask(void *argument) {
     HAL_ADCEx_Calibration_Start(&hadc2, ADC_CALIB_FACTOR_LINEARITY_REGOFFSET, ADC_SINGLE_ENDED);
     HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_FACTOR_LINEARITY_REGOFFSET, ADC_SINGLE_ENDED);
 
-    /* 初始化DDS设备 */
-  
-
     /* 【ADC 数据流】初始化同步采样的 ADC 模式 */
     HAL_ADC_Start(&hadc2);
     HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)g_adc_dma_buffer, ADC_SAMPLE_SIZE);
-
-    // 使用这个接口 HAL_TIM_Base_Start(&htim3) 即可启动 ADC，现在不启动先，等待后续系统功能触发 
 
     // --- 新增: 初始化时域分析的配置 ---
     time_domain_config_t time_config;

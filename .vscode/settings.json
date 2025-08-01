@@ -25,6 +25,7 @@
     "my_parameter_config.h": "c",
     "my_timer_config.h": "c",
     "my_button_task.h": "c",
-    "my_dds.h": "c"
+    "my_dds.h": "c",
+    "filter_identification.h": "c"
   }
 }
