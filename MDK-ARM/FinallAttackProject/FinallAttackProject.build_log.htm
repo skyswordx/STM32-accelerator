@@ -27,50 +27,6 @@ Project File Date:  08/01/2025
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\KEIL\ARM\ARMCC\Bin'
 Build target 'FinallAttackProject'
-compiling main.c...
-../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
-  #endif /* INA226_H_ */
-../Module/UART/my_uart_task.h(38): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_UART_TASK_H */
-../Module/ADC/my_adc_task.h(25): warning:  #1-D: last line of file ends without a newline
-  #endif /* MT_MY_ADC_TASK_H */
-../Module/Frequency/my_freq_config.h(81): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_ZLCR_TASK_H
-../Module/ADC/my_adc_task.h(25): warning:  #1-D: last line of file ends without a newline
-  #endif /* MT_MY_ADC_TASK_H */
-../Module/Button/my_button_task.h(16): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_BUTTON_TASK_H
-../Module/Parser/my_parser.h(30): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_PARSER_H
-../Core/Src/main.c(235): warning:  #167-D: argument of type "void (*)(const void *)" is incompatible with parameter of type "osThreadFunc_t"
-    UARTProcessingTaskHandle = osThreadNew(StartUARTProcessingTask, NULL, &UARTProcessingTask_attributes);
-../Core/Src/main.c(237): warning:  #167-D: argument of type "void (*)(const void *)" is incompatible with parameter of type "osThreadFunc_t"
-    myParserTaskHandle = osThreadNew(myParserTask, NULL, &myParserTask_attributes);
-../Core/Src/main.c: 10 warnings, 0 errors
-compiling my_adc_task.c...
-../Module/ADC/my_adc_task.h(25): warning:  #1-D: last line of file ends without a newline
-  #endif /* MT_MY_ADC_TASK_H */
-../Module/Frequency/my_freq_config.h(81): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_FREQ_CONFIG_H */
-../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_ZLCR_TASK_H
-..\Module\ADC\my_adc_task.h(25): warning:  #1-D: last line of file ends without a newline
-  #endif /* MT_MY_ADC_TASK_H */
-../Module/UART/my_uart_task.h(38): warning:  #1-D: last line of file ends without a newline
-  #endif /* MY_UART_TASK_H */
-../Module/Param/my_parameter_config.h(53): warning:  #1-D: last line of file ends without a newline
-  #endif // MY_PARAMETER_CONFIG_H
-../Module/DAC/my_dds.h(85): warning:  #1-D: last line of file ends without a newline
-  #endif // DDS_WAVE_GENERATOR_H
-../Module/Parser/filter_identification.h(35): warning:  #1-D: last line of file ends without a newline
-  #endif /* INC_FILTER_IDENTIFICATION_H_ */
-..\Module\ADC\my_adc_task.c(209): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                  if (ch1_res.fundamental_vpp < 1e-6) { // 防止除以�?
-..\Module\ADC\my_adc_task.c(267): warning:  #870-D: invalid multibyte character sequence
-                      printf("�?1是H实部，左2是H虚部，右边是w_rad\r\n");
-..\Module\ADC\my_adc_task.c: 10 warnings, 0 errors
 compiling my_uart_task.c...
 ..\Module\UART\my_uart_task.h(38): warning:  #1-D: last line of file ends without a newline
   #endif /* MY_UART_TASK_H */
@@ -95,6 +51,50 @@ compiling my_uart_task.c...
 ..\Module\UART\my_uart_task.c(624): warning:  #870-D: invalid multibyte character sequence
       printf("应该在表中查找到的传输比�? %.6f, 对应的频�? %.6f Hz\n", transform_ratio, frequency);
 ..\Module\UART\my_uart_task.c: 11 warnings, 0 errors
+compiling my_adc_task.c...
+../Module/ADC/my_adc_task.h(25): warning:  #1-D: last line of file ends without a newline
+  #endif /* MT_MY_ADC_TASK_H */
+../Module/Frequency/my_freq_config.h(81): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_ZLCR_TASK_H
+..\Module\ADC\my_adc_task.h(25): warning:  #1-D: last line of file ends without a newline
+  #endif /* MT_MY_ADC_TASK_H */
+../Module/UART/my_uart_task.h(38): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_UART_TASK_H */
+../Module/Param/my_parameter_config.h(53): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_PARAMETER_CONFIG_H
+../Module/DAC/my_dds.h(85): warning:  #1-D: last line of file ends without a newline
+  #endif // DDS_WAVE_GENERATOR_H
+../Module/Parser/filter_identification.h(35): warning:  #1-D: last line of file ends without a newline
+  #endif /* INC_FILTER_IDENTIFICATION_H_ */
+..\Module\ADC\my_adc_task.c(209): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                  if (ch1_res.fundamental_vpp < 1e-6) { // 防止除以�?
+..\Module\ADC\my_adc_task.c(267): warning:  #870-D: invalid multibyte character sequence
+                      printf("�?1是H实部，左2是H虚部，右边是w_rad\r\n");
+..\Module\ADC\my_adc_task.c: 10 warnings, 0 errors
+compiling main.c...
+../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
+  #endif /* INA226_H_ */
+../Module/UART/my_uart_task.h(38): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_UART_TASK_H */
+../Module/ADC/my_adc_task.h(25): warning:  #1-D: last line of file ends without a newline
+  #endif /* MT_MY_ADC_TASK_H */
+../Module/Frequency/my_freq_config.h(81): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_ZLCR_TASK_H
+../Module/ADC/my_adc_task.h(25): warning:  #1-D: last line of file ends without a newline
+  #endif /* MT_MY_ADC_TASK_H */
+../Module/Button/my_button_task.h(16): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_BUTTON_TASK_H
+../Module/Parser/my_parser.h(30): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_PARSER_H
+../Core/Src/main.c(235): warning:  #167-D: argument of type "void (*)(const void *)" is incompatible with parameter of type "osThreadFunc_t"
+    UARTProcessingTaskHandle = osThreadNew(StartUARTProcessingTask, NULL, &UARTProcessingTask_attributes);
+../Core/Src/main.c(237): warning:  #167-D: argument of type "void (*)(const void *)" is incompatible with parameter of type "osThreadFunc_t"
+    myParserTaskHandle = osThreadNew(myParserTask, NULL, &myParserTask_attributes);
+../Core/Src/main.c: 10 warnings, 0 errors
 linking...
 ..\link.sct(16): warning: L6314W: No section matches pattern *(.DTCM).
 ..\link.sct(29): warning: L6314W: No section matches pattern *(.RAM_D2).
@@ -125,7 +125,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:12
+Build Time Elapsed:  00:00:14
 </pre>
 </body>
 </html>

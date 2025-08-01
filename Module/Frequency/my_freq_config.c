@@ -234,7 +234,7 @@ float32_t generate_window(window_type_t window_type, float32_t* window_buffer, u
  * @retval None
  * @note 该函数依赖两个全局缓冲区
  */
-void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint8_t enable_fir, window_type_t window_type, spectral_interpolation_mode_t interpolation_mode)
+float32_t my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint8_t enable_fir, window_type_t window_type, spectral_interpolation_mode_t interpolation_mode)
 {
     // uint8_t ifftFlag = 0;
     // uint8_t doBitReverse = 1;
@@ -377,4 +377,6 @@ void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
     //     phase = atan2f(g_fft_input_buffer[2 * i + 1], g_fft_input_buffer[2 * i]) * (180.0f / PI);
     //     printf("%.6f,%.6f\n", (i * g_ADC_SAMPLE_RATE_Hz / FFT_LENGTH), phase);
     // }
+
+    return window_compensation_factor; 
 }

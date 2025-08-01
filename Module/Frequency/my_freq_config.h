@@ -66,7 +66,7 @@ typedef struct {
  *                          - INTERPOLATION_PARABOLIC: 二次抛物线插值
  *                          - INTERPOLATION_HANNING_SPECIAL: 汉宁窗专用插值
  */
-void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint8_t enable_fir, window_type_t window_type, spectral_interpolation_mode_t interpolation_mode);
+float32_t my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint8_t enable_fir, window_type_t window_type, spectral_interpolation_mode_t interpolation_mode);
 
 
 /* FIR 低通滤波器 + 窗函数 */
