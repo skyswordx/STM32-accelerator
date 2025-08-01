@@ -213,7 +213,7 @@ void StartADCProcessingTask(void *argument) {
                 }
                 
                 // 相位差
-                h_phase = ch1_res.fundamental_phase_angle - ch2_res.fundamental_phase_angle;
+                h_phase = ch1_res.fundamental_phase - ch2_res.fundamental_phase;
                 
                 // 3. 转换为笛卡尔坐标系 (实部和虚部)
                 h_real = h_mag * arm_cos_f32(h_phase);

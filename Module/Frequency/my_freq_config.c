@@ -334,13 +334,7 @@ void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
     }
 #endif
 
-    float32_t fundamental_phase_angle = atan2f(g_fft_input_buffer[2 * fundamental_index + 1], g_fft_input_buffer[2 * fundamental_index]);
-    if (fundamental_phase_angle < 0.0f) {
-        fundamental_phase_angle += 2.0f * PI;
-    }
-    if (fundamental_phase_angle >= 2.0f * PI) {
-        fundamental_phase_angle -= 2.0f * PI;
-    }
+    float32_t fundamental_phase = atan2f(g_fft_input_buffer[2 * fundamental_index + 1], g_fft_input_buffer[2 * fundamental_index]);
 
     // 应用窗函数补偿系数来修正幅度
     float32_t corrected_magnitude = final_magnitude * window_compensation_factor;
@@ -348,7 +342,7 @@ void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
     result->fundamental_vpp = corrected_magnitude * 2.0f / fftLen; // 基波峰峰值（已补偿）
     result->fundamental_vrms = result->fundamental_vpp * sqrtf(2.0f) / 2.0f; // 基波有效值（已补偿）
     result->fundamental_frequency = (uint32_t)final_frequency; // 使用插值后的频率
-    result->fundamental_phase_angle = fundamental_phase_angle;
+    result->fundamental_phase = fundamental_phase;
 
     // printf("Raw magnitude: %.6f, Corrected magnitude: %.6f\n", fundamental_magnitude, corrected_magnitude);
 

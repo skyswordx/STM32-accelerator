@@ -3737,7 +3737,7 @@
       <Doc>
         <Name>..\Module\ADC\my_adc_task.c</Name>
         <ColumnNumber>6</ColumnNumber>
-        <TopLine>169</TopLine>
+        <TopLine>190</TopLine>
         <CurrentLine>191</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>

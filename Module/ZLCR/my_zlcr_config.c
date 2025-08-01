@@ -31,7 +31,7 @@ void my_zlcr_get_impedance(const fundamental_result_t *ch1_fundamental, const fu
     float32_t Vch2 = ch2_fundamental->fundamental_vrms; // ADC2通道的基波有效值
 
     current_freq_result->magnitude = (Rx * Vch1) / Vch2;
-    current_freq_result->phase = ((ch1_fundamental->fundamental_phase_angle - ch2_fundamental->fundamental_phase_angle) - 180.0f); // 相位差
+    current_freq_result->phase = ((ch1_fundamental->fundamental_phase - ch2_fundamental->fundamental_phase)*180/PI - 180.0f); // 相位差
     current_freq_result->frequency = (ch1_fundamental->fundamental_frequency + ch2_fundamental->fundamental_frequency) / 2.0f; // 频率
 
 }

@@ -3,7 +3,7 @@
 <title>Static Call Graph - [FinallAttackProject\FinallAttackProject.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image FinallAttackProject\FinallAttackProject.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Fri Aug 01 14:14:48 2025
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Fri Aug 01 14:23:30 2025
 <BR><P>
 <H3>Maximum Stack Usage =        552 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -2188,7 +2188,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[ac]"></a>StartADCProcessingTask</STRONG> (Thumb, 2202 bytes, Stack size 144 bytes, my_adc_task.o(i.StartADCProcessingTask))
+<P><STRONG><a name="[ac]"></a>StartADCProcessingTask</STRONG> (Thumb, 2176 bytes, Stack size 144 bytes, my_adc_task.o(i.StartADCProcessingTask))
 <BR><BR>[Stack]<UL><LI>Max Depth = 496<LI>Call Chain = StartADCProcessingTask &rArr; identify_filter &rArr; fit_ssk_general_arm &rArr; solve_least_squares_qr &rArr; arm_mat_inverse_f32
 </UL>
 <BR>[Calls]<UL><LI><a href="#[178]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
@@ -2225,9 +2225,9 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 552<LI>Call Chain = StartUARTProcessingTask &rArr; parse_serial_lcd_command &rArr; handle_serial_lcd_set_command &rArr; __hardfp_atof &rArr; __strtod_int &rArr; _local_sscanf &rArr; _scanf_real
 </UL>
 <BR>[Calls]<UL><LI><a href="#[178]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
+<LI><a href="#[15f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_IT
 <LI><a href="#[180]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_uart_command
 <LI><a href="#[181]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_serial_lcd_command
-<LI><a href="#[15f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_IT
 <LI><a href="#[177]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 <LI><a href="#[b8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr
 </UL>
@@ -2676,7 +2676,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(i.main)
 </UL>
-<P><STRONG><a name="[17a]"></a>my_armcfft32_apply</STRONG> (Thumb, 430 bytes, Stack size 56 bytes, my_freq_config.o(i.my_armcfft32_apply))
+<P><STRONG><a name="[17a]"></a>my_armcfft32_apply</STRONG> (Thumb, 398 bytes, Stack size 56 bytes, my_freq_config.o(i.my_armcfft32_apply))
 <BR><BR>[Stack]<UL><LI>Max Depth = 160<LI>Call Chain = my_armcfft32_apply &rArr; arm_cfft_radix4_f32 &rArr; arm_radix4_butterfly_inverse_f32
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;arm_mult_f32
@@ -3435,8 +3435,8 @@ Local Symbols
 <P><STRONG><a name="[a6]"></a>UART_RxISR_16BIT</STRONG> (Thumb, 196 bytes, Stack size 8 bytes, stm32h7xx_hal_uart.o(i.UART_RxISR_16BIT))
 <BR><BR>[Stack]<UL><LI>Max Depth = 56<LI>Call Chain = UART_RxISR_16BIT &rArr; HAL_UART_RxCpltCallback &rArr; HAL_UART_Receive_IT &rArr; UART_Start_Receive_IT
 </UL>
-<BR>[Calls]<UL><LI><a href="#[161]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
-<LI><a href="#[155]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_RxEventCallback
+<BR>[Calls]<UL><LI><a href="#[155]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_RxEventCallback
+<LI><a href="#[161]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
 </UL>
 <BR>[Address Reference Count : 2]<UL><LI> stm32h7xx_hal_uart.o(i.UART_RxISR_16BIT_FIFOEN)
 <LI> stm32h7xx_hal_uart.o(i.UART_Start_Receive_IT)
@@ -3444,17 +3444,17 @@ Local Symbols
 <P><STRONG><a name="[a9]"></a>UART_RxISR_16BIT_FIFOEN</STRONG> (Thumb, 404 bytes, Stack size 32 bytes, stm32h7xx_hal_uart.o(i.UART_RxISR_16BIT_FIFOEN))
 <BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = UART_RxISR_16BIT_FIFOEN &rArr; HAL_UART_RxCpltCallback &rArr; HAL_UART_Receive_IT &rArr; UART_Start_Receive_IT
 </UL>
-<BR>[Calls]<UL><LI><a href="#[161]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
-<LI><a href="#[154]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_ErrorCallback
+<BR>[Calls]<UL><LI><a href="#[154]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_ErrorCallback
 <LI><a href="#[155]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_RxEventCallback
+<LI><a href="#[161]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> stm32h7xx_hal_uart.o(i.UART_Start_Receive_IT)
 </UL>
 <P><STRONG><a name="[a7]"></a>UART_RxISR_8BIT</STRONG> (Thumb, 196 bytes, Stack size 8 bytes, stm32h7xx_hal_uart.o(i.UART_RxISR_8BIT))
 <BR><BR>[Stack]<UL><LI>Max Depth = 56<LI>Call Chain = UART_RxISR_8BIT &rArr; HAL_UART_RxCpltCallback &rArr; HAL_UART_Receive_IT &rArr; UART_Start_Receive_IT
 </UL>
-<BR>[Calls]<UL><LI><a href="#[161]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
-<LI><a href="#[155]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_RxEventCallback
+<BR>[Calls]<UL><LI><a href="#[155]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_RxEventCallback
+<LI><a href="#[161]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
 </UL>
 <BR>[Address Reference Count : 2]<UL><LI> stm32h7xx_hal_uart.o(i.UART_RxISR_8BIT_FIFOEN)
 <LI> stm32h7xx_hal_uart.o(i.UART_Start_Receive_IT)
@@ -3462,9 +3462,9 @@ Local Symbols
 <P><STRONG><a name="[a8]"></a>UART_RxISR_8BIT_FIFOEN</STRONG> (Thumb, 404 bytes, Stack size 32 bytes, stm32h7xx_hal_uart.o(i.UART_RxISR_8BIT_FIFOEN))
 <BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = UART_RxISR_8BIT_FIFOEN &rArr; HAL_UART_RxCpltCallback &rArr; HAL_UART_Receive_IT &rArr; UART_Start_Receive_IT
 </UL>
-<BR>[Calls]<UL><LI><a href="#[161]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
-<LI><a href="#[154]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_ErrorCallback
+<BR>[Calls]<UL><LI><a href="#[154]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_ErrorCallback
 <LI><a href="#[155]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_RxEventCallback
+<LI><a href="#[161]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> stm32h7xx_hal_uart.o(i.UART_Start_Receive_IT)
 </UL>

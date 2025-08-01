@@ -65,7 +65,7 @@ I (D:\KEIL\ARM\ARMCC\include\float.h)(0x5E8E3CC2)
 I (../Module/UART/my_uart_task.h)(0x688B5772)
 I (../Module/ADC/my_adc_task.h)(0x688C3D97)
 I (../Module/Timer/my_timer_config.h)(0x688B5772)
-I (../Module/Frequency/my_freq_config.h)(0x688C59AB)
+I (../Module/Frequency/my_freq_config.h)(0x688C5C3E)
 I (../Module/ZLCR/my_zlcr_config.h)(0x688B5772)
 I (../Module/Button/my_button_task.h)(0x688B5772)
 I (../Module/Parser/my_parser.h)(0x688C182B)
@@ -1691,7 +1691,7 @@ I (../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim.h)(0x6864C526)
 I (../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim_ex.h)(0x6864C526)
 I (../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h)(0x6864C526)
 I (../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h)(0x6864C526)
-F (..\Module\ADC\my_adc_task.c)(0x688C57C9)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Module -I ../Task -I ../Drivers/INA226 -I ../Drivers/AD9954 -I ../Drivers/CMSIS/DSP/Include -I ../Module/DAC -I ../Module/ADC -I ../Module/Timer -I ../Module/Frequency -I ../Module/UART -I ../Module/PID -I ../Module/ZLCR -I ../Drivers/AD9833 -I ../Module/CZT -I ../Module/DILA -I ../Module/Quinn -I ../Module/KalmanFilter -I ../Module/Button -I ../Module/TimeDetect -I ../Drivers/MCP4725 -I ../Module/Param -I ../Module/Parser-I.\RTE\_FinallAttackProject-ID:\KEIL-PACK\ARM\CMSIS\6.1.0\CMSIS\Core\Include-D__UVISION_VERSION="541" -DSTM32H750xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H750xx -DARM_MATH_CM7 -D__CC_ARM -DARM_MATH_DSP -DARM_MATH_MATRIX_CHECK -DARM_MATH_ROUNDING-o finallattackproject\my_adc_task.o --omf_browse finallattackproject\my_adc_task.crf --depend finallattackproject\my_adc_task.d)
+F (..\Module\ADC\my_adc_task.c)(0x688C5C29)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Module -I ../Task -I ../Drivers/INA226 -I ../Drivers/AD9954 -I ../Drivers/CMSIS/DSP/Include -I ../Module/DAC -I ../Module/ADC -I ../Module/Timer -I ../Module/Frequency -I ../Module/UART -I ../Module/PID -I ../Module/ZLCR -I ../Drivers/AD9833 -I ../Module/CZT -I ../Module/DILA -I ../Module/Quinn -I ../Module/KalmanFilter -I ../Module/Button -I ../Module/TimeDetect -I ../Drivers/MCP4725 -I ../Module/Param -I ../Module/Parser-I.\RTE\_FinallAttackProject-ID:\KEIL-PACK\ARM\CMSIS\6.1.0\CMSIS\Core\Include-D__UVISION_VERSION="541" -DSTM32H750xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H750xx -DARM_MATH_CM7 -D__CC_ARM -DARM_MATH_DSP -DARM_MATH_MATRIX_CHECK -DARM_MATH_ROUNDING-o finallattackproject\my_adc_task.o --omf_browse finallattackproject\my_adc_task.crf --depend finallattackproject\my_adc_task.d)
 I (..\Module\ADC\my_adc_task.h)(0x688C3D97)
 I (../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h)(0x6864C44B)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h)(0x6864C44B)
@@ -1753,7 +1753,7 @@ I (D:\KEIL\ARM\ARMCC\include\string.h)(0x5E8E3CC2)
 I (D:\KEIL\ARM\ARMCC\include\float.h)(0x5E8E3CC2)
 I (../Module/Timer/my_timer_config.h)(0x688B5772)
 I (../Module/ADC/my_adc_task.h)(0x688C3D97)
-I (../Module/Frequency/my_freq_config.h)(0x688C59AB)
+I (../Module/Frequency/my_freq_config.h)(0x688C5C3E)
 I (../Module/ZLCR/my_zlcr_config.h)(0x688B5772)
 I (../Module/UART/my_uart_task.h)(0x688B5772)
 I (../Module/TimeDetect/my_time_detect.h)(0x688B7CC2)
@@ -1812,7 +1812,7 @@ I (../Drivers/CMSIS/DSP/Include/arm_math.h)(0x6864C442)
 I (D:\KEIL\ARM\ARMCC\include\string.h)(0x5E8E3CC2)
 I (D:\KEIL\ARM\ARMCC\include\float.h)(0x5E8E3CC2)
 I (../Module/Param/my_parameter_config.h)(0x688C0E83)
-I (../Module/Frequency/my_freq_config.h)(0x688C59AB)
+I (../Module/Frequency/my_freq_config.h)(0x688C5C3E)
 I (../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h)(0x6864C44B)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h)(0x6864C44B)
 I (../Core/Inc/FreeRTOSConfig.h)(0x688B576B)
@@ -1932,10 +1932,10 @@ I (D:\KEIL\ARM\ARMCC\include\string.h)(0x5E8E3CC2)
 I (D:\KEIL\ARM\ARMCC\include\float.h)(0x5E8E3CC2)
 I (../Module/ADC/my_adc_task.h)(0x688C3D97)
 I (../Module/Timer/my_timer_config.h)(0x688B5772)
-I (../Module/Frequency/my_freq_config.h)(0x688C59AB)
+I (../Module/Frequency/my_freq_config.h)(0x688C5C3E)
 I (../Module/ZLCR/my_zlcr_config.h)(0x688B5772)
-F (..\Module\Frequency\my_freq_config.c)(0x688C5B38)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Module -I ../Task -I ../Drivers/INA226 -I ../Drivers/AD9954 -I ../Drivers/CMSIS/DSP/Include -I ../Module/DAC -I ../Module/ADC -I ../Module/Timer -I ../Module/Frequency -I ../Module/UART -I ../Module/PID -I ../Module/ZLCR -I ../Drivers/AD9833 -I ../Module/CZT -I ../Module/DILA -I ../Module/Quinn -I ../Module/KalmanFilter -I ../Module/Button -I ../Module/TimeDetect -I ../Drivers/MCP4725 -I ../Module/Param -I ../Module/Parser-I.\RTE\_FinallAttackProject-ID:\KEIL-PACK\ARM\CMSIS\6.1.0\CMSIS\Core\Include-D__UVISION_VERSION="541" -DSTM32H750xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H750xx -DARM_MATH_CM7 -D__CC_ARM -DARM_MATH_DSP -DARM_MATH_MATRIX_CHECK -DARM_MATH_ROUNDING-o finallattackproject\my_freq_config.o --omf_browse finallattackproject\my_freq_config.crf --depend finallattackproject\my_freq_config.d)
-I (..\Module\Frequency\my_freq_config.h)(0x688C59AB)
+F (..\Module\Frequency\my_freq_config.c)(0x688C5D44)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Module -I ../Task -I ../Drivers/INA226 -I ../Drivers/AD9954 -I ../Drivers/CMSIS/DSP/Include -I ../Module/DAC -I ../Module/ADC -I ../Module/Timer -I ../Module/Frequency -I ../Module/UART -I ../Module/PID -I ../Module/ZLCR -I ../Drivers/AD9833 -I ../Module/CZT -I ../Module/DILA -I ../Module/Quinn -I ../Module/KalmanFilter -I ../Module/Button -I ../Module/TimeDetect -I ../Drivers/MCP4725 -I ../Module/Param -I ../Module/Parser-I.\RTE\_FinallAttackProject-ID:\KEIL-PACK\ARM\CMSIS\6.1.0\CMSIS\Core\Include-D__UVISION_VERSION="541" -DSTM32H750xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H750xx -DARM_MATH_CM7 -D__CC_ARM -DARM_MATH_DSP -DARM_MATH_MATRIX_CHECK -DARM_MATH_ROUNDING-o finallattackproject\my_freq_config.o --omf_browse finallattackproject\my_freq_config.crf --depend finallattackproject\my_freq_config.d)
+I (..\Module\Frequency\my_freq_config.h)(0x688C5C3E)
 I (../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h)(0x6864C44B)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h)(0x6864C44B)
 I (D:\KEIL\ARM\ARMCC\include\stddef.h)(0x5E8E3CC2)
@@ -2055,7 +2055,7 @@ I (D:\KEIL\ARM\ARMCC\include\string.h)(0x5E8E3CC2)
 I (../Module/Param/my_parameter_config.h)(0x688C0E83)
 I (../Drivers/CMSIS/DSP/Include/arm_math.h)(0x6864C442)
 I (D:\KEIL\ARM\ARMCC\include\float.h)(0x5E8E3CC2)
-I (../Module/Frequency/my_freq_config.h)(0x688C59AB)
+I (../Module/Frequency/my_freq_config.h)(0x688C5C3E)
 I (../Module/Button/my_button_config.h)(0x688B5772)
 I (../Module/ZLCR/my_zlcr_config.h)(0x688B5772)
 I (../Drivers/AD9833/AD9833.h)(0x688B576C)
@@ -2071,7 +2071,7 @@ I (D:\KEIL\ARM\ARMCC\include\stdint.h)(0x5E8E3CC2)
 I (../Module/KalmanFilter/my_kalman_filter.h)(0x688B5772)
 I (D:\KEIL\ARM\ARMCC\include\math.h)(0x5E8E3CC2)
 I (D:\KEIL\ARM\ARMCC\include\stddef.h)(0x5E8E3CC2)
-F (..\Module\ZLCR\my_zlcr_config.c)(0x688B5772)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Module -I ../Task -I ../Drivers/INA226 -I ../Drivers/AD9954 -I ../Drivers/CMSIS/DSP/Include -I ../Module/DAC -I ../Module/ADC -I ../Module/Timer -I ../Module/Frequency -I ../Module/UART -I ../Module/PID -I ../Module/ZLCR -I ../Drivers/AD9833 -I ../Module/CZT -I ../Module/DILA -I ../Module/Quinn -I ../Module/KalmanFilter -I ../Module/Button -I ../Module/TimeDetect -I ../Drivers/MCP4725 -I ../Module/Param -I ../Module/Parser-I.\RTE\_FinallAttackProject-ID:\KEIL-PACK\ARM\CMSIS\6.1.0\CMSIS\Core\Include-D__UVISION_VERSION="541" -DSTM32H750xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H750xx -DARM_MATH_CM7 -D__CC_ARM -DARM_MATH_DSP -DARM_MATH_MATRIX_CHECK -DARM_MATH_ROUNDING-o finallattackproject\my_zlcr_config.o --omf_browse finallattackproject\my_zlcr_config.crf --depend finallattackproject\my_zlcr_config.d)
+F (..\Module\ZLCR\my_zlcr_config.c)(0x688C5CAE)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Module -I ../Task -I ../Drivers/INA226 -I ../Drivers/AD9954 -I ../Drivers/CMSIS/DSP/Include -I ../Module/DAC -I ../Module/ADC -I ../Module/Timer -I ../Module/Frequency -I ../Module/UART -I ../Module/PID -I ../Module/ZLCR -I ../Drivers/AD9833 -I ../Module/CZT -I ../Module/DILA -I ../Module/Quinn -I ../Module/KalmanFilter -I ../Module/Button -I ../Module/TimeDetect -I ../Drivers/MCP4725 -I ../Module/Param -I ../Module/Parser-I.\RTE\_FinallAttackProject-ID:\KEIL-PACK\ARM\CMSIS\6.1.0\CMSIS\Core\Include-D__UVISION_VERSION="541" -DSTM32H750xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H750xx -DARM_MATH_CM7 -D__CC_ARM -DARM_MATH_DSP -DARM_MATH_MATRIX_CHECK -DARM_MATH_ROUNDING-o finallattackproject\my_zlcr_config.o --omf_browse finallattackproject\my_zlcr_config.crf --depend finallattackproject\my_zlcr_config.d)
 I (..\Module\ZLCR\my_zlcr_config.h)(0x688B5772)
 I (../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h)(0x6864C44B)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h)(0x6864C44B)
@@ -2131,7 +2131,7 @@ I (D:\KEIL\ARM\ARMCC\include\stdio.h)(0x5E8E3CC2)
 I (../Drivers/CMSIS/DSP/Include/arm_math.h)(0x6864C442)
 I (D:\KEIL\ARM\ARMCC\include\string.h)(0x5E8E3CC2)
 I (D:\KEIL\ARM\ARMCC\include\float.h)(0x5E8E3CC2)
-I (../Module/Frequency/my_freq_config.h)(0x688C59AB)
+I (../Module/Frequency/my_freq_config.h)(0x688C5C3E)
 I (D:\KEIL\ARM\ARMCC\include\stdlib.h)(0x5E8E3CC2)
 I (../Drivers/AD9833/AD9833.h)(0x688B576C)
 I (../Drivers/AD9954/AD9954.h)(0x688B576C)
@@ -2258,7 +2258,7 @@ I (D:\KEIL\ARM\ARMCC\include\stdio.h)(0x5E8E3CC2)
 I (../Drivers/CMSIS/DSP/Include/arm_math.h)(0x6864C442)
 I (D:\KEIL\ARM\ARMCC\include\string.h)(0x5E8E3CC2)
 I (D:\KEIL\ARM\ARMCC\include\float.h)(0x5E8E3CC2)
-I (../Module/Frequency/my_freq_config.h)(0x688C59AB)
+I (../Module/Frequency/my_freq_config.h)(0x688C5C3E)
 F (..\Module\KalmanFilter\my_kalman_filter.c)(0x688B5772)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Module -I ../Task -I ../Drivers/INA226 -I ../Drivers/AD9954 -I ../Drivers/CMSIS/DSP/Include -I ../Module/DAC -I ../Module/ADC -I ../Module/Timer -I ../Module/Frequency -I ../Module/UART -I ../Module/PID -I ../Module/ZLCR -I ../Drivers/AD9833 -I ../Module/CZT -I ../Module/DILA -I ../Module/Quinn -I ../Module/KalmanFilter -I ../Module/Button -I ../Module/TimeDetect -I ../Drivers/MCP4725 -I ../Module/Param -I ../Module/Parser-I.\RTE\_FinallAttackProject-ID:\KEIL-PACK\ARM\CMSIS\6.1.0\CMSIS\Core\Include-D__UVISION_VERSION="541" -DSTM32H750xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H750xx -DARM_MATH_CM7 -D__CC_ARM -DARM_MATH_DSP -DARM_MATH_MATRIX_CHECK -DARM_MATH_ROUNDING-o finallattackproject\my_kalman_filter.o --omf_browse finallattackproject\my_kalman_filter.crf --depend finallattackproject\my_kalman_filter.d)
 I (..\Module\KalmanFilter\my_kalman_filter.h)(0x688B5772)
 I (D:\KEIL\ARM\ARMCC\include\stdbool.h)(0x5E8E3CC2)
@@ -2425,7 +2425,7 @@ I (../Module/ZLCR/my_zlcr_config.h)(0x688B5772)
 I (../Drivers/CMSIS/DSP/Include/arm_math.h)(0x6864C442)
 I (D:\KEIL\ARM\ARMCC\include\string.h)(0x5E8E3CC2)
 I (D:\KEIL\ARM\ARMCC\include\float.h)(0x5E8E3CC2)
-I (../Module/Frequency/my_freq_config.h)(0x688C59AB)
+I (../Module/Frequency/my_freq_config.h)(0x688C5C3E)
 F (..\Drivers\MCP4725\MCP4725.c)(0x688B5770)(--c99 --gnu -c --cpu Cortex-M7.fp.dp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Module -I ../Task -I ../Drivers/INA226 -I ../Drivers/AD9954 -I ../Drivers/CMSIS/DSP/Include -I ../Module/DAC -I ../Module/ADC -I ../Module/Timer -I ../Module/Frequency -I ../Module/UART -I ../Module/PID -I ../Module/ZLCR -I ../Drivers/AD9833 -I ../Module/CZT -I ../Module/DILA -I ../Module/Quinn -I ../Module/KalmanFilter -I ../Module/Button -I ../Module/TimeDetect -I ../Drivers/MCP4725 -I ../Module/Param -I ../Module/Parser-I.\RTE\_FinallAttackProject-ID:\KEIL-PACK\ARM\CMSIS\6.1.0\CMSIS\Core\Include-D__UVISION_VERSION="541" -DSTM32H750xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H750xx -DARM_MATH_CM7 -D__CC_ARM -DARM_MATH_DSP -DARM_MATH_MATRIX_CHECK -DARM_MATH_ROUNDING-o finallattackproject\mcp4725.o --omf_browse finallattackproject\mcp4725.crf --depend finallattackproject\mcp4725.d)
 I (..\Drivers\MCP4725\MCP4725.h)(0x688B5770)
 I (../Core/Inc/main.h)(0x688B576B)
@@ -2519,7 +2519,7 @@ I (../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h)(0x6864C526)
 I (../Drivers/CMSIS/DSP/Include/arm_math.h)(0x6864C442)
 I (D:\KEIL\ARM\ARMCC\include\string.h)(0x5E8E3CC2)
 I (D:\KEIL\ARM\ARMCC\include\float.h)(0x5E8E3CC2)
-I (../Module/Frequency/my_freq_config.h)(0x688C59AB)
+I (../Module/Frequency/my_freq_config.h)(0x688C5C3E)
 I (../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h)(0x6864C44B)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h)(0x6864C44B)
 I (../Core/Inc/FreeRTOSConfig.h)(0x688B576B)
@@ -2596,7 +2596,7 @@ I (../Module/Timer/my_timer_config.h)(0x688B5772)
 I (../Drivers/CMSIS/DSP/Include/arm_math.h)(0x6864C442)
 I (D:\KEIL\ARM\ARMCC\include\float.h)(0x5E8E3CC2)
 I (../Module/ADC/my_adc_task.h)(0x688C3D97)
-I (../Module/Frequency/my_freq_config.h)(0x688C59AB)
+I (../Module/Frequency/my_freq_config.h)(0x688C5C3E)
 I (../Module/ZLCR/my_zlcr_config.h)(0x688B5772)
 I (../Module/Button/my_button_config.h)(0x688B5772)
 I (../Module/DAC/my_dds.h)(0x688B5772)
