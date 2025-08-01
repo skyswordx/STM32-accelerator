@@ -24,7 +24,8 @@ extern TIM_HandleTypeDef htim3;  /* 实际使用TIM3作为ADC触发源和时间�
 #define ADC_DMA_TRANSFER_COMPLETED 1
 #define ADC_DMA_TRANSFER_NOT_COMPLETED 0
 extern uint32_t g_desired_ADC_sample_rate_Hz;
-uint32_t g_ADC_SAMPLE_RATE_Hz = 995062*2; // 2MHz采样率
+uint32_t g_ADC_SAMPLE_RATE_Hz = 400000; // 默认采样率 400kHz
+// uint32_t g_ADC_SAMPLE_RATE_Hz = 995062*2; // 2MHz采样率
 // uint32_t g_ADC_SAMPLE_RATE_Hz = 2000000; // 2MHz采样率
 
 #define ADC_REF_VOLTAGE 3.3f // ADC参考电压
@@ -85,7 +86,7 @@ uint16_t g_adc_dma_transfer_flag = ADC_DMA_TRANSFER_NOT_COMPLETED;
 
 
 // 时域检测模块启用标志
-uint8_t g_time_detect_enabled = 0; // 默认禁用
+uint8_t g_time_detect_enabled = 1; // 默认禁用
 
 
 extern DDS_Generator_t g_dds_generator; // 引用全局DDS生成器实例
@@ -176,7 +177,7 @@ void StartADCProcessingTask(void *argument) {
                 while (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_RESET);
                 
                 printf("\r\n--- Starting Filter Identification Sweep ---\r\n");
-                g_adc_mode = ADC_MODE_SWEEP;
+                // g_adc_mode = ADC_MODE_SWEEP;
                 g_sweep_step = 0;
 
                 // 设置DDS到起始频率
