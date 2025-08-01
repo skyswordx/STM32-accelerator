@@ -649,7 +649,35 @@ void base4_function(void){
 }
 
 
+void improve1_function(void){
+    printf("Executing improve1_function logic\n");
+    // 设置当前模式为improve1_function模式
+    current_function_mode = FUNCTION_MODE_IMPROVE1;
 
+    // 这里可以添加improve1_function的具体逻辑
+    // 例如：设置特定的频率和幅度，或者执行其他操作
+
+    // 示例：设置AD9833和AD9954的频率和幅度
+    AD9833_WaveSeting(1000, 0, SIN_WAVE, 0); // 设置频率为1000Hz
+    AD9954_Set_Fre(1000); // 设置AD9954频率为1000Hz
+
+    printf("improve1 completed\n");
+}
+
+void improve2_function(void){
+    printf("Executing improve2_function logic\n");
+    // 设置当前模式为improve2_function模式
+    current_function_mode = FUNCTION_MODE_IMPROVE2;
+
+    // 这里可以添加improve2_function的具体逻辑
+    // 例如：设置特定的频率和幅度，或者执行其他操作
+
+    // 示例：设置AD9833和AD9954的频率和幅度
+    AD9833_WaveSeting(2000, 0, SIN_WAVE, 0); // 设置频率为2000Hz
+    AD9954_Set_Fre(2000); // 设置AD9954频率为2000Hz
+
+    printf("improve2 completed\n");
+}
 
 void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef* hdac)
 {

@@ -9,6 +9,12 @@
 #include "main.h"           // 添加主头文件
 #include <stdint.h>         // 添加标准整数类型头文件
 #include <string.h>         // 添加字符串处理头文件
+#include "my_dds.h"          // 添加 DDS 头文件
+
+// --- 新增: 包含滤波器辨识模块和数学库 ---
+#include "filter_identification.h"
+#include "arm_math.h" // 确保arm_math.h已包含
+
 extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
 extern UART_HandleTypeDef huart1;
@@ -27,6 +33,11 @@ uint32_t g_ADC_SAMPLE_RATE_Hz = 995062*2; // 2MHz采样率
 #define ADC_RESOLUTION_12BIT 4096.0f // 2^12=4096
 #define ADC_RESOLUTION_14BIT 16384.0f // 2^14=16384
 #define ADC_RESOLUTION_16BIT 65536.0f // 2^16=65536
+
+// 扫频参数 (必须与 filter_identification.h 中 NUM_FREQ_POINTS 的计算方式保持一致)
+#define SWEEP_F_START_HZ 1000.0f
+#define SWEEP_F_STOP_HZ  50000.0f
+#define SWEEP_F_STEP_HZ  100.0f
 
 /**
  * 1. 在 cubemx 中同时更改 2 个 ADC 的分辨率
@@ -74,8 +85,16 @@ uint16_t g_adc_dma_transfer_flag = ADC_DMA_TRANSFER_NOT_COMPLETED;
 
 
 // 时域检测模块启用标志
-uint8_t g_time_detect_enabled = 1; // 默认禁用
+uint8_t g_time_detect_enabled = 0; // 默认禁用
 
+
+extern DDS_Generator_t g_dds_generator; // 引用全局DDS生成器实例
+
+// 用于存储扫频数据的静态数组，防止堆栈溢出
+static float32_t g_sweep_w_rad[NUM_FREQ_POINTS];             // 角频率 (rad/s)
+static float32_t g_sweep_H_cmplx[NUM_FREQ_POINTS * 2];       // 复数响应 [R,I,R,I...]
+static ContinuousTransferFunction g_identified_tf;         // 存储辨识结果
+static uint32_t g_sweep_step = 0;                          // 当前扫频步数
 
 extern fundamental_result_t g_ch1_fundamental; // ADC1 通道 基波结果结构
 extern fundamental_result_t g_ch2_fundamental; // ADC2 通道 基波结果结构
@@ -85,6 +104,7 @@ extern arm_cfft_radix4_instance_f32 fft_instance_radix4; // FFT实例
 // 外部声明频谱分析模块中的全局变量
 extern float32_t g_fft_output_buffer[FFT_LENGTH]; // FFT输出数组
 
+
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
   if(hadc->Instance == ADC1)
@@ -93,6 +113,34 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
     HAL_TIM_Base_Stop(&htim3); // 停止定时器，停止ADC触发
     g_adc_dma_transfer_flag = ADC_DMA_TRANSFER_COMPLETED;
   }
+}
+
+// ADC 工作模式，默认为空闲
+static adc_mode_t g_adc_mode = ADC_MODE_IDLE;
+
+
+/**
+ * @brief 从FFT结果中提取指定频率的相位
+ * @param fft_output FFT输出的复数数组
+ * @param target_freq_hz 目标频率
+ * @param sample_rate_hz 采样率
+ * @param fft_len FFT长度
+ * @param phase_rad 指向相位结果的指针 (弧度)
+ */
+static void get_phase_from_fft(float32_t* fft_output, float32_t target_freq_hz, uint32_t sample_rate_hz, uint32_t fft_len, float32_t* phase_rad)
+{
+    // 计算目标频率在FFT结果中的索引
+    uint32_t target_bin = (uint32_t)roundf((target_freq_hz * fft_len) / sample_rate_hz);
+    if (target_bin >= fft_len / 2) {
+        target_bin = fft_len / 2 - 1;
+    }
+
+    // 提取实部和虚部
+    float32_t real = fft_output[target_bin * 2];
+    float32_t imag = fft_output[target_bin * 2 + 1];
+
+    // 计算相位 (弧度)
+    *phase_rad = atan2f(imag, real);
 }
 
 void StartADCProcessingTask(void *argument) {
@@ -106,7 +154,7 @@ void StartADCProcessingTask(void *argument) {
     HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_FACTOR_LINEARITY_REGOFFSET, ADC_SINGLE_ENDED);
 
     /* 初始化DDS设备 */
-    // 在 Button Task 中调用 my_zlcr_dds_init 函数初始化 DDS 设备
+  
 
     /* 【ADC 数据流】初始化同步采样的 ADC 模式 */
     HAL_ADC_Start(&hadc2);
@@ -114,14 +162,14 @@ void StartADCProcessingTask(void *argument) {
 
     // 使用这个接口 HAL_TIM_Base_Start(&htim3) 即可启动 ADC，现在不启动先，等待后续系统功能触发 
 
-    // 【ADC 数据流】 指示 ADC 工作模式，默认为正常模式
-    adc_mode_t adc_mode = ADC_MODE_NORMAL;
-
     // --- 新增: 初始化时域分析的配置 ---
     time_domain_config_t time_config;
     time_config.enable_filter = 0;         // 启用滤波器
     time_config.filter_alpha = 0.05f;      // 设置IIR滤波器系数
     time_config.hysteresis_v = 0.05f;      // 设置50mV的迟滞电压窗口
+
+    printf("System Initialized. Press User Button (PC1) to start Filter Identification Sweep.\r\n");
+
 
     for (;;) {
 
@@ -132,7 +180,19 @@ void StartADCProcessingTask(void *argument) {
                 HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13); // 切换 LED 状态
                 while (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_RESET);
                 
-                switch_timer_sampleRate_Auto(&htim3, g_desired_ADC_sample_rate_Hz, g_desired_ADC_sample_rate_Hz / 100);
+                printf("\r\n--- Starting Filter Identification Sweep ---\r\n");
+                g_adc_mode = ADC_MODE_SWEEP;
+                g_sweep_step = 0;
+
+                // 设置DDS到起始频率
+                float32_t current_freq_hz = SWEEP_F_START_HZ + g_sweep_step * SWEEP_F_STEP_HZ;
+                AD9954_Set_Fre(current_freq_hz); // 假设使用AD9954
+                DDS_SetFrequency(&g_dds_generator, current_freq_hz); // 使用 DAC + 软件 DDS
+
+                printf("Step %lu/%d: Freq = %.1f Hz\r\n", g_sweep_step + 1, NUM_FREQ_POINTS, current_freq_hz);
+                
+                // 启动ADC采样
+                // switch_timer_sampleRate_Auto(&htim3, g_desired_ADC_sample_rate_Hz, g_desired_ADC_sample_rate_Hz / 100);
                 HAL_TIM_Base_Start(&htim3);
             }
         }
@@ -155,7 +215,87 @@ void StartADCProcessingTask(void *argument) {
                 // printf("ADC1/2:%.3f, %.3f, %lu\n", g_adc1_data_8bit[i], g_adc2_data_8bit[i], g_ADC_SAMPLE_RATE_Hz);
             }
 
-             if (g_time_detect_enabled) {
+              // --- 核心逻辑: 处理扫频数据 ---
+            if (g_adc_mode == ADC_MODE_SWEEP) {
+                
+                // 1. 对两个通道进行FFT分析
+                fundamental_result_t ch1_res, ch2_res;
+                float32_t ch1_phase, ch2_phase;
+                float32_t current_freq_hz = SWEEP_F_START_HZ + g_sweep_step * SWEEP_F_STEP_HZ;
+
+                // 分析通道1 (输入)
+                my_armcfft32_apply(g_adc1_data_8bit, &ch1_res, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
+                get_phase_from_fft(g_fft_output_buffer, current_freq_hz, g_ADC_SAMPLE_RATE_Hz, FFT_LENGTH, &ch1_phase);
+                
+                // 分析通道2 (输出)
+                my_armcfft32_apply(g_adc2_data_8bit, &ch2_res, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
+                get_phase_from_fft(g_fft_output_buffer, current_freq_hz, g_ADC_SAMPLE_RATE_Hz, FFT_LENGTH, &ch2_phase);
+
+                // 2. 计算复数传递函数 H(jω)
+                float32_t h_mag, h_phase, h_real, h_imag;
+
+                // 幅度比
+                if (ch1_res.fundamental_vpp < 1e-6) { // 防止除以零
+                    h_mag = 0.0f;
+                } else {
+                    h_mag = ch2_res.fundamental_vpp / ch1_res.fundamental_vpp;
+                }
+                
+                // 相位差
+                h_phase = ch2_phase - ch1_phase;
+                
+                // 3. 转换为笛卡尔坐标系 (实部和虚部)
+                h_real = h_mag * arm_cos_f32(h_phase);
+                h_imag = h_mag * arm_sin_f32(h_phase);
+                
+                // 4. 存储结果
+                g_sweep_w_rad[g_sweep_step] = 2.0f * PI * current_freq_hz;
+                g_sweep_H_cmplx[g_sweep_step * 2]     = h_real;
+                g_sweep_H_cmplx[g_sweep_step * 2 + 1] = h_imag;
+
+                // 5. 进入下一步或结束扫频
+                g_sweep_step++;
+                if (g_sweep_step < NUM_FREQ_POINTS) {
+                    // 设置DDS到下一步频率
+                    current_freq_hz = SWEEP_F_START_HZ + g_sweep_step * SWEEP_F_STEP_HZ;
+                    AD9954_Set_Fre(current_freq_hz);
+                    printf("Step %lu/%d: Freq = %.1f Hz, H_mag=%.4f, H_phase=%.2f deg\r\n", 
+                           g_sweep_step, NUM_FREQ_POINTS, current_freq_hz, h_mag, h_phase * 180.0f / PI);
+                    
+                    // 延时一小段时间以等待DDS和被测电路稳定
+                    osDelay(5);
+                    
+                    // 启动下一次ADC采样
+                    HAL_TIM_Base_Start(&htim3);
+
+                } else {
+                    // 扫频完成
+                    printf("\r\n--- Sweep Finished. Running Identification Algorithm... ---\r\n");
+                    
+                    // 调用辨识函数
+                    identify_filter(&g_identified_tf, g_sweep_w_rad, g_sweep_H_cmplx);
+
+                    // 打印辨识结果
+                    if (isnan(g_identified_tf.b0)) {
+                        printf("-> ERROR: Identification failed. Matrix solution might have failed.\r\n");
+                    } else {
+                        const char* type_str[] = {"LPF", "HPF", "BPF", "BSF", "Unknown"};
+                        printf("-> Identified Filter Type: %s\r\n", type_str[g_identified_tf.identified_type]);
+                        printf("-> H(s) = (b2*s^2 + b1*s + b0) / (s^2 + a1*s + a0)\r\n");
+                        printf("-> Identified Coefficients:\r\n");
+                        printf("   b2 = %e\r\n", g_identified_tf.b2);
+                        printf("   b1 = %e\r\n", g_identified_tf.b1);
+                        printf("   b0 = %e\r\n", g_identified_tf.b0);
+                        printf("   a1 = %e\r\n", g_identified_tf.a1);
+                        printf("   a0 = %e\r\n", g_identified_tf.a0);
+                    }
+                    
+                    printf("\r\nIdentification complete. System is now idle.\r\n");
+                    g_adc_mode = ADC_MODE_IDLE; // 返回空闲模式
+                }
+            }
+
+            if (g_time_detect_enabled) {
                 time_domain_result_t ch1_time_result, ch2_time_result;
 
                 // --- 调用优化的时域分析函数 ---
@@ -181,53 +321,24 @@ void StartADCProcessingTask(void *argument) {
                 printf("  V Min        : %.4f V\r\n", ch2_time_result.v_min);
 
                 printf("-------------------------------------\r\n\r\n");
+                fundamental_result_t ch1_freq_result, ch2_freq_result;
+
+                // 分别计算两个通道的频谱数据并存储到独立的缓冲区中
+                my_armcfft32_apply(g_adc1_data_8bit, &ch1_freq_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
+                memcpy(g_adc1_spectrum_data, g_fft_output_buffer, (FFT_LENGTH / 2) * sizeof(float32_t));
+
+                my_armcfft32_apply(g_adc2_data_8bit, &ch2_freq_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
+                memcpy(g_adc2_spectrum_data, g_fft_output_buffer, (FFT_LENGTH / 2) * sizeof(float32_t));
+                            
+                // 打印频谱
+
+                // 打印频谱分析结果
+                printf("=== Spectrum Analysis Results ===\n");
+                printf("ADC1 - Frequency: %lu Hz, Magnitude: %.6f V\n", ch1_freq_result.fundamental_frequency, ch1_freq_result.fundamental_vpp);
+                printf("ADC2 - Frequency: %lu Hz, Magnitude: %.6f V\n", ch2_freq_result.fundamental_frequency, ch2_freq_result.fundamental_vpp);
             }
 
-            //  // --- 步骤 2: [核心] 为FFT准备数据 ---
-            // int resample_ok1 = 0;
-            // int resample_ok2 = 0;
-
-            // // 对通道1数据进行重采样
-            // // 注意：这里我们直接对原始数据进行重采样，因为滤波会改变相位，可能影响某些分析
-            // // 如果希望对滤波后数据重采样，可以将 g_adc1_temp_buffer 作为输入
-            // resample_ok1 = my_resample_integer_cycles(g_adc1_data_8bit, ADC_SAMPLE_SIZE, g_adc1_fft_input, FFT_LENGTH, &time_config);
-            // // 对通道2数据进行重采样
-            // resample_ok2 = my_resample_integer_cycles(g_adc2_data_8bit, ADC_SAMPLE_SIZE, g_adc2_fft_input, FFT_LENGTH, &time_config);
-
-
-            // // --- 步骤 3: 使用重采样后的数据进行频谱分析 ---
-            // if (resample_ok1 && resample_ok2) {
-            //     printf("Resampling successful. Performing FFT on integer-cycle data.\r\n");
-                
-            //     fundamental_result_t ch1_result, ch2_result;
-                
-            //     // 【关键】使用重采样后的 g_adc1_fft_input 作为FFT的输入
-            //     my_armcfft32_apply(g_adc1_fft_input, &ch1_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
-            //     // ... (后续的 memcpy 和打印) ...
-
-            //     // 【关键】使用重采样后的 g_adc2_fft_input 作为FFT的输入
-            //     my_armcfft32_apply(g_adc2_fft_input, &ch2_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
-            //     // ... (后续的 memcpy 和打印) ...
-
-            // } else {
-            //     printf("Resampling failed. Skipping FFT.\r\n");
-            // }
-
-            fundamental_result_t ch1_freq_result, ch2_freq_result;
-
-            // 分别计算两个通道的频谱数据并存储到独立的缓冲区中
-            my_armcfft32_apply(g_adc1_data_8bit, &ch1_freq_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
-            memcpy(g_adc1_spectrum_data, g_fft_output_buffer, (FFT_LENGTH / 2) * sizeof(float32_t));
-
-            my_armcfft32_apply(g_adc2_data_8bit, &ch2_freq_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
-            memcpy(g_adc2_spectrum_data, g_fft_output_buffer, (FFT_LENGTH / 2) * sizeof(float32_t));
-                        
-            // 打印频谱
-
-            // 打印频谱分析结果
-            printf("=== Spectrum Analysis Results ===\n");
-            printf("ADC1 - Frequency: %lu Hz, Magnitude: %.6f V\n", ch1_freq_result.fundamental_frequency, ch1_freq_result.fundamental_vpp);
-            printf("ADC2 - Frequency: %lu Hz, Magnitude: %.6f V\n", ch2_freq_result.fundamental_frequency, ch2_freq_result.fundamental_vpp);
+            
 
             switch (g_desired_function_state) {
                 case SPECTRUM_STATE:

@@ -13,8 +13,9 @@
 
 // ADC工作模式枚举类型
 typedef enum {
-    ADC_MODE_NORMAL = 0,     // 正常模式
-    ADC_MODE_SWEEP           // 扫频模式
+    ADC_MODE_IDLE = 0, 
+    ADC_MODE_NORMAL = 1,     // 正常模式
+    ADC_MODE_SWEEP = 2       // 扫频模式
 } adc_mode_t;
 
 extern uint32_t g_ADC_SAMPLE_RATE_Hz;

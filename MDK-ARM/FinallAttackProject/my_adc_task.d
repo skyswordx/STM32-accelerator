@@ -68,3 +68,5 @@ finallattackproject\my_adc_task.o: ../Module/TimeDetect/my_time_detect.h
 finallattackproject\my_adc_task.o: ../Drivers/AD9833/AD9833.h
 finallattackproject\my_adc_task.o: ../Drivers/AD9954/AD9954.h
 finallattackproject\my_adc_task.o: ../Module/Param/my_parameter_config.h
+finallattackproject\my_adc_task.o: ../Module/DAC/my_dds.h
+finallattackproject\my_adc_task.o: ../Module/Parser/filter_identification.h
