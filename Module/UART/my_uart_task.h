@@ -13,6 +13,9 @@ extern uint8_t aRxBuffer;						 //接收中断缓冲
 extern uint8_t uart1_rx_cnt;			 //接收缓冲计数
 extern uint8_t g_uart1_ex_flag; // UART1接收标志
 
+// S6信号重建功能触发标志位声明
+extern uint8_t g_signal_reconstruction_trigger;  // S6命令触发信号重建标志位
+
 // 函数声明
 void StartUARTProcessingTask(void const * argument);
 void parse_uart_command(char* cmd);

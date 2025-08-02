@@ -36,10 +36,7 @@ uint32_t g_ADC_SAMPLE_RATE_Hz = 400000; // 默认采样率 400kHz
 #define ADC_RESOLUTION_14BIT 16384.0f // 2^14=16384
 #define ADC_RESOLUTION_16BIT 65536.0f // 2^16=65536
 
-// 扫频参数 (必须与 filter_identification.h 中 NUM_FREQ_POINTS 的计算方式保持一致)
-#define SWEEP_F_START_HZ 1000.0f
-#define SWEEP_F_STOP_HZ  50000.0f
-#define SWEEP_F_STEP_HZ  100.0f
+
 
 /**
  * 1. 在 cubemx 中同时更改 2 个 ADC 的分辨率
@@ -180,10 +177,11 @@ void StartADCProcessingTask(void *argument) {
             }
         }
 
-        if ( /* 帮我在uart6接收到 "S6" 时调用 */){
+        if (g_signal_reconstruction_trigger == 1){
             printf("\r\n--- Triggering Signal Reconstruction ---\r\n");
             printf("Mathematical Synthesis is currently %s.\r\n", g_enable_math_synthesis ? "ENABLED" : "DISABLED");
             g_adc_mode = ADC_MODE_RECONSTRUCT;
+            g_signal_reconstruction_trigger = 0; // 清除标志位，防止重复触发
             HAL_TIM_Base_Start(&htim3);
         }
     
@@ -279,12 +277,12 @@ void StartADCProcessingTask(void *argument) {
                     }
                     
                     printf("\r\nIdentification complete. System is now idle.\r\n");
-                    // 直接打印 H complex 和 w_rad
-                    // printf("========== H complex  + w_rad ========== ");
-                    printf("左1是H实部，左2是H虚部，右边是w_rad\r\n");
-                    for (int i = 0; i < NUM_FREQ_POINTS; i++) {
-                        printf("%.4f,%.4f,%.4f\n", g_sweep_H_cmplx[i * 2], g_sweep_H_cmplx[i * 2 + 1], g_sweep_w_rad[i]);
-                    }
+                    // // 直接打印 H complex 和 w_rad
+                    // // printf("========== H complex  + w_rad ========== ");
+                    // printf("左1是H实部，左2是H虚部，右边是w_rad\r\n");
+                    // for (int i = 0; i < NUM_FREQ_POINTS; i++) {
+                    //     printf("%.4f,%.4f,%.4f\n", g_sweep_H_cmplx[i * 2], g_sweep_H_cmplx[i * 2 + 1], g_sweep_w_rad[i]);
+                    // }
                     g_adc_mode = ADC_MODE_IDLE; // 返回空闲模式
 
                     
@@ -309,7 +307,13 @@ void StartADCProcessingTask(void *argument) {
                         g_sweep_H_cmplx,
                         NUM_FREQ_POINTS
                     );
+
                     printf("Waveform reconstruction complete.\r\n");
+                    // 3. 在此，`g_reconstructed_waveform` 数组已包含最终结果
+                    // 您可以将其通过串口打印出来，或设置DMA+DAC进行输出
+                    for(int i=0; i<WAVEFORM_RECONSTRUCTION_POINTS; i++) {
+                        printf("rawADC/Recon:%.4f,%.4f\r\n",g_adc1_data_8bit[i] , g_reconstructed_waveform[i]);
+                    }
                     
                 } else {
                     printf("Error: Signal analysis failed.\r\n");

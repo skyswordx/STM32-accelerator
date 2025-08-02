@@ -46,6 +46,9 @@ static double lcd_base3_voltage = 0.78;        // base3 电压，默认0.78V
 static double lcd_base4_frequency = 100.0;     // base4 频率，默认100Hz
 static double lcd_base4_voltage = 1.0;         // base4 电压，默认1V
 
+// S6信号重建功能触发标志位
+uint8_t g_signal_reconstruction_trigger = 0;  // S6命令触发信号重建标志位
+
 // base2_function模式下的幅度跟踪变量
 extern uint8_t base2_ad9833_amplitude;  // AD9833幅度初始值
 extern uint16_t base2_ad9954_amplitude;  // AD9954幅度初始值
@@ -533,6 +536,12 @@ void parse_serial_lcd_command(char* cmd)
         printf("Received S4 command, calling uart_base4_function_with_params\n");
         current_lcd_page = 4;  // 更新当前页面跟踪变量
         uart_base4_function_with_params(lcd_base4_voltage, lcd_base4_frequency);
+    }
+    else if (strcmp(cmd, "S6") == 0) {
+        // 串口屏发送"S6"命令，表示触发improve2波形重建功能
+        printf("Received S6 command, triggering signal reconstruction\n");
+        g_signal_reconstruction_trigger = 1;  // 设置信号重建触发标志位
+        current_function_mode = FUNCTION_MODE_IMPROVE2;  // 设置为improve2模式
     }
     else if (strcmp(cmd, "I2") == 0) {
         // 串口屏发送"I2"命令，表示进入基础功能2页面

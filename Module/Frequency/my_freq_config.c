@@ -330,12 +330,12 @@ void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
 #endif
 
     float32_t fundamental_phase = atan2f(g_fft_input_buffer[2 * fundamental_index + 1], g_fft_input_buffer[2 * fundamental_index]);
-    // if (fundamental_phase < 0.0f) {
-    //     fundamental_phase += 2.0f * PI;
-    // }
-    // if (fundamental_phase >= 2.0f * PI) {
-    //     fundamental_phase -= 2.0f * PI;
-    // }
+    if (fundamental_phase < 0.0f) {
+        fundamental_phase += 2.0f * PI;
+    }
+    if (fundamental_phase >= 2.0f * PI) {
+        fundamental_phase -= 2.0f * PI;
+    }
 
     // 应用窗函数补偿系数来修正幅度
     float32_t corrected_magnitude = final_magnitude * window_compensation_factor;

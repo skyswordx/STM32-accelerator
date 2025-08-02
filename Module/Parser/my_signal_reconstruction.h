@@ -7,7 +7,7 @@
 
 // --- 数据结构定义 ---
 
-#define MAX_HARMONICS 10 // 定义最多分析的谐波数量
+#define MAX_HARMONICS 25 // 定义最多分析的谐波数量
 #define WAVEFORM_RECONSTRUCTION_POINTS 1024 // 定义重建波形的采样点数
 
 /**
@@ -35,7 +35,7 @@ typedef enum {
 typedef enum {
     METHOD_FAILED = 0,
     METHOD_MATH_SYNTHESIS = 1,
-    METHOD_GENERIC_FFT = 2 // 移除了预测式，简化为两级回退
+    METHOD_GENERIC_FFT = 2 // 简化为两级回退
 } analysis_method_t;
 
 
