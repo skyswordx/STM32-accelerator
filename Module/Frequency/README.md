@@ -157,3 +157,12 @@ my_armcfft32_apply_old(adc_data, &result, 1, 1, INTERPOLATION_HANNING_SPECIAL);
 2. 平顶窗适合幅度测量，但频率分辨率较低
 3. 在选择窗函数时需要根据应用需求权衡精度和分辨率
 4. 不同窗函数的计算开销略有差异，平顶窗的生成需要更多的三角函数计算
+
+
+
+我现在需要修改一下触发 g_signal_reconstruction_trigger，然后进入 adc_task 中的(g_signal_reconstruction_trigger == 1) 分支的逻辑
+1. 第一次的触发源还是和原来一样，需要解析串口屏的 "S6" 命令才能开始第一次触发（在my_uart_parser.c中解析 "S6" 命令），这个触发源是由串口屏的按钮触发的
+2. 在第一次触发ADC采样，然后根据已经存下来的幅相特性算出波形，然后成功设置软件的DDS-DAC输出之后，后续的触发就可以由 timer6 的定时中断修改 g_signal_reconstruction_trigger 触发
+3. 每一次触发的流程逻辑是每一次触发都要经过 ADC 采样一次数据，根据幅相特性算出float的g_reconstructed_waveform，并且这个float的类型还要转换成uint16并且归一化到4095，最终更新 g_reconstructed_waveform_uint16
+4. 由于一旦进入上一次触发后，DAC的DMA就会不断地搬运 g_reconstructed_waveform_uint16 的数据到DAC输出，所以每次触发都要重新计算 g_reconstructed_waveform 和 g_reconstructed_waveform_uint16以便更新数据，但是，为了避免在每次更新时，由于更新数据导致DAC输出的波形出现突变，我们可以设置一个类似 pingpongs 双缓冲的机制，使用两个缓冲区交替更新数据。
+5. 具体的timer6中断函数在main函数中已经有了，注意不要重复定义，开启定时器6的中断使用 `HAL_TIM_Base_Start_IT(&htim6);`，关闭定时器6的中断使用 `HAL_TIM_Base_Stop_IT(&htim6);`

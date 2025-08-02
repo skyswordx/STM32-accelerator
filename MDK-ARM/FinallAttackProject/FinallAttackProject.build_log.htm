@@ -27,7 +27,85 @@ Project File Date:  08/02/2025
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\KEIL\ARM\ARMCC\Bin'
 Build target 'FinallAttackProject'
-"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 0 Warning(s).
+assembling startup_stm32h750xx.s...
+compiling my_parser.c...
+..\Module\Parser\my_parser.h(30): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_PARSER_H
+../Module/Frequency/my_freq_config.h(87): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_ZLCR_TASK_H
+../Module/ADC/my_adc_task.h(26): warning:  #1-D: last line of file ends without a newline
+  #endif /* MT_MY_ADC_TASK_H */
+../Module/Param/my_parameter_config.h(53): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_PARAMETER_CONFIG_H
+../Module/DAC/my_dac_config.h(17): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_DAC_CONFIG_H */
+../Module/DAC/my_dds.h(87): warning:  #1-D: last line of file ends without a newline
+  #endif // DDS_WAVE_GENERATOR_H
+..\Module\Parser\my_parser.c(204): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              float current_ad9954_voltage = (float)base2_ad9954_amplitude * AD9954_VMAX_V / 16383.0;
+..\Module\Parser\my_parser.c(206): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              current_ad9954_voltage += 0.1;
+..\Module\Parser\my_parser.c(208): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              if (current_ad9954_voltage > AD9954_VMAX_V) {
+..\Module\Parser\my_parser.c(212): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(current_ad9954_voltage);
+..\Module\Parser\my_parser.c(189): warning:  #546-D: transfer of control bypasses initialization of:
+            variable "current_ad9954_voltage"  (declared at line 204)
+                      switch (current_function_mode) {
+                      ^
+..\Module\Parser\my_parser.c(353): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              float current_ad9954_voltage = (float)base2_ad9954_amplitude * AD9954_VMAX_V / 16383.0;
+..\Module\Parser\my_parser.c(355): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              current_ad9954_voltage -= 0.1;
+..\Module\Parser\my_parser.c(357): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              if (current_ad9954_voltage < 0.0) {
+..\Module\Parser\my_parser.c(361): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(current_ad9954_voltage);
+..\Module\Parser\my_parser.c(346): warning:  #546-D: transfer of control bypasses initialization of:
+            variable "current_ad9954_voltage"  (declared at line 353)
+                      switch (current_function_mode) {
+                      ^
+..\Module\Parser\my_parser.c(435): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+      if (ad9954_init_voltage > AD9954_VMAX_V) {
+..\Module\Parser\my_parser.c(438): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+      base3_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(ad9954_init_voltage);
+..\Module\Parser\my_parser.c(470): warning:  #870-D: invalid multibyte character sequence
+      printf("应该在表中查找到的传输比�? %.6f, 对应的频�? %.6f V\n", transform_ratio, base4_desired_model_output_frequency);
+..\Module\Parser\my_parser.c(470): warning:  #870-D: invalid multibyte character sequence
+      printf("应该在表中查找到的传输比�? %.6f, 对应的频�? %.6f V\n", transform_ratio, base4_desired_model_output_frequency);
+..\Module\Parser\my_parser.c: 21 warnings, 0 errors
+compiling main.c...
+../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
+  #endif /* INA226_H_ */
+../Module/UART/my_uart_task.h(41): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_UART_TASK_H */
+../Module/ADC/my_adc_task.h(26): warning:  #1-D: last line of file ends without a newline
+  #endif /* MT_MY_ADC_TASK_H */
+../Module/Frequency/my_freq_config.h(87): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_ZLCR_TASK_H
+../Module/ADC/my_adc_task.h(26): warning:  #1-D: last line of file ends without a newline
+  #endif /* MT_MY_ADC_TASK_H */
+../Module/Button/my_button_task.h(16): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_BUTTON_TASK_H
+../Module/Parser/my_parser.h(30): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_PARSER_H
+../Core/Src/main.c(235): warning:  #167-D: argument of type "void (*)(const void *)" is incompatible with parameter of type "osThreadFunc_t"
+    UARTProcessingTaskHandle = osThreadNew(StartUARTProcessingTask, NULL, &UARTProcessingTask_attributes);
+../Core/Src/main.c(237): warning:  #167-D: argument of type "void (*)(const void *)" is incompatible with parameter of type "osThreadFunc_t"
+    myParserTaskHandle = osThreadNew(myParserTask, NULL, &myParserTask_attributes);
+../Core/Src/main.c: 10 warnings, 0 errors
+linking...
+..\link.sct(16): warning: L6314W: No section matches pattern *(.DTCM).
+..\link.sct(29): warning: L6314W: No section matches pattern *(.RAM_D2).
+..\link.sct(36): warning: L6314W: No section matches pattern *(.RAM_D3).
+Program Size: Code=69020 RO-data=40412 RW-data=644 ZI-data=331564  
+Finished: 0 information, 3 warning and 0 error messages.
+FromELF: creating hex file...
+"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 34 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -50,7 +128,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:01
+Build Time Elapsed:  00:00:14
 </pre>
 </body>
 </html>
