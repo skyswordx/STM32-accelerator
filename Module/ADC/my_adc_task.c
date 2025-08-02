@@ -25,7 +25,7 @@ extern TIM_HandleTypeDef htim3;  /* 实际使用TIM3作为ADC触发源和时间�
 #define ADC_DMA_TRANSFER_COMPLETED 1
 #define ADC_DMA_TRANSFER_NOT_COMPLETED 0
 extern uint32_t g_desired_ADC_sample_rate_Hz;
-uint32_t g_ADC_SAMPLE_RATE_Hz = 400000; // 默认采样率 400kHz
+uint32_t g_ADC_SAMPLE_RATE_Hz = 409840; // 默认采样率 409.84kHz
 // uint32_t g_ADC_SAMPLE_RATE_Hz = 995062*2; // 2MHz采样率
 // uint32_t g_ADC_SAMPLE_RATE_Hz = 2000000; // 2MHz采样率
 
