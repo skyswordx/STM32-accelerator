@@ -10,6 +10,7 @@
 #include "my_dac_config.h"
 #include "my_dds.h"
 
+#include "my_uart_task.h"
 uint16_t g_dac_square_64[64] = {0};
 
 
@@ -604,7 +605,7 @@ void myParserTask(void const * argument)
                             key3_pressed_count++;
                             if (key3_pressed_count == 1) {
                                 printf("First press of key 3, entering base4_function\n");
-                                base4_function();
+                                uart_base4_function_with_params(base4_desired_model_output_voltage, base4_desired_model_output_frequency);
                             }
                             break;
                         case FUNCTION_MODE_BASE2:
@@ -815,41 +816,6 @@ void base3_function(void){
 
     printf("base3 completed\n");
 
-}
-
-// 重要
-void base4_function(void){
-    printf("Executing base4_function logic\n");
-    // 设置当前模式为base4_function模式
-    current_function_mode = FUNCTION_MODE_BASE4;
-
-    // 1. 根据 base4_desired_model_output_frequency 计算 base4_table 的索引
-    uint16_t idx = (uint16_t)(base4_desired_model_output_frequency / 100.0) - 1;
-    
-    // 确保索引在有效范围内
-    if (idx > 29) {
-        idx = 29;
-    }
-    
-    // // 2. 从 base4_table 中获取传输比
-    double transform_ratio = base4_table[idx];
-    
-    // // 3. 根据传输比和 base4_desired_model_output_voltage 计算各 DDS 应该输出的电压
-    double dds_output_voltage = base4_desired_model_output_voltage / transform_ratio;
-    
-    // // 5. 设置 AD9954 的幅度和频率
-    double finall_ad9954_voltage = dds_output_voltage;
-    printf("应该在表中查找到的传输比： %.6f, 对应的频率 %.6f V\n", transform_ratio, base4_desired_model_output_frequency);
-    printf("AD9954 最后要设的电压是： %.6f V\n", finall_ad9954_voltage);
-    
-    // // 将电压转换为DAC寄存器值并设置幅度
-    // uint16_t ad9954_dac_value = AD9954_VOLTAGE_TO_DAC(ad9954_voltage);
-    AD9954_Set_Amp(AD9954_VOLTAGE_TO_DAC(finall_ad9954_voltage)); // 设置幅度
-
-    // 设置频率
-    AD9954_Set_Fre(base4_desired_model_output_frequency);
-
-    printf("base4 completed\n");
 }
 
 

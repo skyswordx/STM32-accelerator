@@ -70,3 +70,4 @@ finallattackproject\my_parser.o: ../Module/Button/my_button_config.h
 finallattackproject\my_parser.o: ../Module/DAC/my_dac_config.h
 finallattackproject\my_parser.o: ../Module/Param/my_parameter_config.h
 finallattackproject\my_parser.o: ../Module/DAC/my_dds.h
+finallattackproject\my_parser.o: ../Module/UART/my_uart_task.h

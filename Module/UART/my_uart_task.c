@@ -65,8 +65,8 @@ extern double base4_ad9954_frequency;    // AD9954当前频率
 extern double base4_desired_model_output_frequency;
 extern double base4_desired_model_output_voltage; // 期望输出电压
 
-// 引用 base4_table 数组（来自 my_parser.c）
-extern double base4_table[30];
+// 引用 base4_table 二维数组（来自 my_parser.c）
+extern double base4_table[30][11];
 
 void StartUARTProcessingTask(void const * argument)
 {
@@ -597,37 +597,53 @@ void parse_serial_lcd_command(char* cmd)
 }
 
 /**
- * @brief 带参数的 base4 函数，逻辑与 my_parser.c 中的 base4_function() 相同
- * @param voltage 期望输出电压
- * @param frequency 期望输出频率
+ * @brief 带参数的 base4 函数，根据 base4_table[30][11] 二维表查找DDS幅度值
+ * @param voltage 期望输出电压 (1.0V-2.0V)
+ * @param frequency 期望输出频率 (100Hz-3000Hz)
  */
 void uart_base4_function_with_params(double voltage, double frequency)
 {
     printf("Executing uart_base4_function_with_params - Voltage: %.2f V, Frequency: %.2f Hz\n", voltage, frequency);
     
-    // 1. 根据频率计算 base4_table 的索引
-    uint16_t idx = (uint16_t)(frequency / 100.0) - 1;
+    // 1. 计算频率索引 (100Hz-3000Hz, 步长100Hz)
+    // 频率范围: 100Hz = 索引0, 200Hz = 索引1, ..., 3000Hz = 索引29
+    int freq_idx = (int)((frequency - 100.0) / 100.0 + 0.5);  // 四舍五入到最近的索引
     
-    // 确保索引在有效范围内
-    if (idx > 29) {
-        idx = 29;
+    // 限制频率索引在有效范围内 [0, 29]
+    if (freq_idx < 0) {
+        freq_idx = 0;
+        printf("频率 %.2f Hz 低于最小值，使用 100Hz (索引 0)\n", frequency);
+    } else if (freq_idx > 29) {
+        freq_idx = 29;
+        printf("频率 %.2f Hz 高于最大值，使用 3000Hz (索引 29)\n", frequency);
     }
     
-    // 2. 从 base4_table 中获取传输比
-    double transform_ratio = base4_table[idx];
+    // 2. 计算电压索引 (1.0V-2.0V, 步长0.1V)
+    // 电压范围: 1.0V = 索引0, 1.1V = 索引1, ..., 2.0V = 索引10
+    int volt_idx = (int)((voltage - 1.0) / 0.1 + 0.5);  // 四舍五入到最近的索引
     
-    // 3. 根据传输比和期望输出电压计算各 DDS 应该输出的电压
-    double dds_output_voltage = voltage / transform_ratio;
+    // 限制电压索引在有效范围内 [0, 10]
+    if (volt_idx < 0) {
+        volt_idx = 0;
+        printf("电压 %.2f V 低于最小值，使用 1.0V (索引 0)\n", voltage);
+    } else if (volt_idx > 10) {
+        volt_idx = 10;
+        printf("电压 %.2f V 高于最大值，使用 2.0V (索引 10)\n", voltage);
+    }
     
-    // 4. 设置 AD9954 的幅度和频率
-    double final_ad9954_voltage = dds_output_voltage;
-    printf("应该在表中查找到的传输比： %.6f, 对应的频率 %.6f Hz\n", transform_ratio, frequency);
-    printf("AD9954 最后要设的电压是： %.6f V\n", final_ad9954_voltage);
+    // 3. 从 base4_table 二维数组中获取对应的DDS幅度值
+    double dds_amplitude_value = base4_table[freq_idx][volt_idx];
     
-    // 5. 将电压转换为DAC寄存器值并设置幅度
-    AD9954_Set_Amp(AD9954_VOLTAGE_TO_DAC(final_ad9954_voltage)); // 设置幅度
+    // 4. 转换为AD9954的DAC值并设置幅度
+    uint16_t ad9954_dac_value = AD9954_VOLTAGE_TO_DAC(dds_amplitude_value);
     
-    // 6. 设置频率
+    printf("频率索引: %d (%.0f Hz), 电压索引: %d (%.1f V)\n", 
+           freq_idx, 100.0 + freq_idx * 100.0, volt_idx, 1.0 + volt_idx * 0.1);
+    printf("从 base4_table[%d][%d] 获取 DDS 幅度值: %.6f V\n", freq_idx, volt_idx, dds_amplitude_value);
+    printf("转换为 AD9954 DAC 值: %d\n", ad9954_dac_value);
+    
+    // 5. 设置 AD9954 的幅度和频率
+    AD9954_Set_Amp(ad9954_dac_value);
     AD9954_Set_Fre(frequency);
     
     printf("uart_base4_function_with_params completed\n");
