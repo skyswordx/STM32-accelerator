@@ -22,11 +22,21 @@ Dialog DLL:      TCM.DLL V1.56.4.0
  
 <h2>Project:</h2>
 D:\Musii-SnapShot\GithubRepo\STM32-accelerator\MDK-ARM\FinallAttackProject.uvprojx
-Project File Date:  08/01/2025
+Project File Date:  08/02/2025
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\KEIL\ARM\ARMCC\Bin'
 Build target 'FinallAttackProject'
+compiling freertos.c...
+compiling stm32h7xx_hal_gpio.c...
+compiling stm32h7xx_hal_flash.c...
+compiling stm32h7xx_hal_hsem.c...
+compiling stm32h7xx_hal_dma.c...
+compiling stm32h7xx_it.c...
+compiling stm32h7xx_hal_flash_ex.c...
+compiling stm32h7xx_hal_msp.c...
+compiling stm32h7xx_hal_rcc_ex.c...
+compiling stm32h7xx_hal_dma_ex.c...
 compiling main.c...
 ../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
   #endif /* INA226_H_ */
@@ -49,6 +59,83 @@ compiling main.c...
 ../Core/Src/main.c(237): warning:  #167-D: argument of type "void (*)(const void *)" is incompatible with parameter of type "osThreadFunc_t"
     myParserTaskHandle = osThreadNew(myParserTask, NULL, &myParserTask_attributes);
 ../Core/Src/main.c: 10 warnings, 0 errors
+compiling stm32h7xx_hal_rcc.c...
+compiling stm32h7xx_hal_adc.c...
+compiling stm32h7xx_hal_timebase_tim.c...
+compiling stm32h7xx_hal_adc_ex.c...
+compiling stm32h7xx_hal_spi.c...
+compiling stm32h7xx_hal_i2c_ex.c...
+compiling stm32h7xx_hal_exti.c...
+compiling stm32h7xx_hal_dac.c...
+compiling croutine.c...
+compiling stm32h7xx_hal_cortex.c...
+compiling event_groups.c...
+compiling list.c...
+compiling queue.c...
+compiling stream_buffer.c...
+compiling stm32h7xx_hal_mdma.c...
+compiling tasks.c...
+compiling timers.c...
+compiling heap_4.c...
+compiling port.c...
+compiling stm32h7xx_hal_dac_ex.c...
+compiling stm32h7xx_hal.c...
+compiling stm32h7xx_hal_i2c.c...
+compiling stm32h7xx_hal_spi_ex.c...
+compiling stm32h7xx_hal_uart.c...
+compiling stm32h7xx_hal_tim.c...
+compiling stm32h7xx_hal_pwr.c...
+compiling my_pid_config.c...
+../Module/KalmanFilter/my_kalman_filter.h(23): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_KALMAN_FILTER_H */
+..\Module\PID\my_pid_config.c: 1 warning, 0 errors
+compiling stm32h7xx_hal_tim_ex.c...
+compiling stm32h7xx_hal_pwr_ex.c...
+compiling my_dila_config.c...
+..\Module\DILA\my_dila_config.c(187): warning:  #1-D: last line of file ends without a newline
+  }
+..\Module\DILA\my_dila_config.c: 1 warning, 0 errors
+compiling my_czt_config.c...
+..\Module\CZT\my_czt_config.h(78): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_CZT_CONFIG_H
+..\Module\CZT\my_czt_config.c(206): warning:  #1-D: last line of file ends without a newline
+  }
+..\Module\CZT\my_czt_config.c(7): warning:  #177-D: variable "signal_in"  was declared but never referenced
+  static float32_t signal_in[CZT_N];
+..\Module\CZT\my_czt_config.c: 3 warnings, 0 errors
+compiling my_kalman_filter.c...
+..\Module\KalmanFilter\my_kalman_filter.h(23): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_KALMAN_FILTER_H */
+..\Module\KalmanFilter\my_kalman_filter.c(47): warning:  #1-D: last line of file ends without a newline
+  }
+..\Module\KalmanFilter\my_kalman_filter.c: 2 warnings, 0 errors
+compiling stm32h7xx_hal_uart_ex.c...
+compiling system_stm32h7xx.c...
+compiling my_zlcr_config.c...
+../Module/Frequency/my_freq_config.h(81): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+..\Module\ZLCR\my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_ZLCR_TASK_H
+..\Module\ZLCR\my_zlcr_config.c(68): warning:  #223-D: function "generate_logarithmic_frequency_points" declared implicitly
+                  generate_logarithmic_frequency_points(decade_start, decade_stop, points_in_decade, &freq_array[total_points]);
+..\Module\ZLCR\my_zlcr_config.c(74): warning:  #223-D: function "generate_logarithmic_frequency_points" declared implicitly
+                      generate_logarithmic_frequency_points(decade_start, decade_stop, remaining_points, &freq_array[total_points]);
+..\Module\ZLCR\my_zlcr_config.c(100): warning:  #159-D: declaration is incompatible with previous "generate_logarithmic_frequency_points"  (declared at line 68)
+  void generate_logarithmic_frequency_points(uint32_t start_freq, uint32_t stop_freq, uint32_t points, uint32_t* freq_array) {
+..\Module\ZLCR\my_zlcr_config.c(289): warning:  #1-D: last line of file ends without a newline
+   */
+..\Module\ZLCR\my_zlcr_config.c: 6 warnings, 0 errors
+compiling my_freq_config.c...
+..\Module\Frequency\my_freq_config.h(81): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+..\Module\Frequency\my_freq_config.c: 1 warning, 0 errors
+compiling INA226.c...
+..\Drivers\INA226\INA226.h(15): warning:  #1-D: last line of file ends without a newline
+  #endif /* INA226_H_ */
+..\Drivers\INA226\INA226.c(278): warning:  #1-D: last line of file ends without a newline
+  // }
+..\Drivers\INA226\INA226.c: 2 warnings, 0 errors
+compiling AD9954.c...
 compiling my_adc_task.c...
 ../Module/ADC/my_adc_task.h(25): warning:  #1-D: last line of file ends without a newline
   #endif /* MT_MY_ADC_TASK_H */
@@ -71,6 +158,51 @@ compiling my_adc_task.c...
 ..\Module\ADC\my_adc_task.c(267): warning:  #870-D: invalid multibyte character sequence
                       printf("�?1是H实部，左2是H虚部，右边是w_rad\r\n");
 ..\Module\ADC\my_adc_task.c: 10 warnings, 0 errors
+compiling filter_identification.c...
+..\Module\Parser\filter_identification.h(35): warning:  #1-D: last line of file ends without a newline
+  #endif /* INC_FILTER_IDENTIFICATION_H_ */
+..\Module\Parser\filter_identification.c(554): warning:  #1-D: last line of file ends without a newline
+  }
+..\Module\Parser\filter_identification.c: 2 warnings, 0 errors
+compiling my_dds.c...
+..\Module\DAC\my_dds.h(85): warning:  #1-D: last line of file ends without a newline
+  #endif // DDS_WAVE_GENERATOR_H
+..\Module\DAC\my_dds.c(112): warning:  #1-D: last line of file ends without a newline
+  }
+..\Module\DAC\my_dds.c: 2 warnings, 0 errors
+compiling AD9833.c...
+compiling my_time_detect.c...
+compiling my_timer_config.c...
+../Module/Frequency/my_freq_config.h(81): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_ZLCR_TASK_H
+../Module/ADC/my_adc_task.h(25): warning:  #1-D: last line of file ends without a newline
+  #endif /* MT_MY_ADC_TASK_H */
+..\Module\Timer\my_timer_config.c(208): warning:  #1-D: last line of file ends without a newline
+  }
+..\Module\Timer\my_timer_config.c: 4 warnings, 0 errors
+compiling my_quinn_config.c...
+../Module/Frequency/my_freq_config.h(81): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+..\Module\Quinn\my_quinn_config.h(76): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_QUINN_CONFIG_H
+..\Module\Quinn\my_quinn_config.c(159): warning:  #1-D: last line of file ends without a newline
+  }
+..\Module\Quinn\my_quinn_config.c: 3 warnings, 0 errors
+compiling my_dac_config.c...
+../Module/Frequency/my_freq_config.h(81): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+../Module/Param/my_parameter_config.h(53): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_PARAMETER_CONFIG_H
+..\Module\DAC\my_dac_config.h(17): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_DAC_CONFIG_H */
+..\Module\DAC\my_dds.h(85): warning:  #1-D: last line of file ends without a newline
+  #endif // DDS_WAVE_GENERATOR_H
+..\Module\DAC\my_dac_config.c(121): warning:  #1-D: last line of file ends without a newline
+  }
+..\Module\DAC\my_dac_config.c: 5 warnings, 0 errors
+compiling cmsis_os2.c...
 compiling my_uart_task.c...
 ..\Module\UART\my_uart_task.h(38): warning:  #1-D: last line of file ends without a newline
   #endif /* MY_UART_TASK_H */
@@ -95,6 +227,77 @@ compiling my_uart_task.c...
 ..\Module\UART\my_uart_task.c(624): warning:  #870-D: invalid multibyte character sequence
       printf("应该在表中查找到的传输比�? %.6f, 对应的频�? %.6f Hz\n", transform_ratio, frequency);
 ..\Module\UART\my_uart_task.c: 11 warnings, 0 errors
+compiling my_button_config.c...
+compiling MCP4725.c...
+..\Drivers\MCP4725\MCP4725.c(44): warning:  #188-D: enumerated type mixed with another type
+  	_MCP4725._i2cAddress = (uint16_t)(addr<<1);
+..\Drivers\MCP4725\MCP4725.c: 1 warning, 0 errors
+compiling my_parser.c...
+..\Module\Parser\my_parser.h(30): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_PARSER_H
+../Module/Frequency/my_freq_config.h(81): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_ZLCR_TASK_H
+../Module/ADC/my_adc_task.h(25): warning:  #1-D: last line of file ends without a newline
+  #endif /* MT_MY_ADC_TASK_H */
+../Module/Param/my_parameter_config.h(53): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_PARAMETER_CONFIG_H
+../Module/DAC/my_dac_config.h(17): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_DAC_CONFIG_H */
+../Module/DAC/my_dds.h(85): warning:  #1-D: last line of file ends without a newline
+  #endif // DDS_WAVE_GENERATOR_H
+..\Module\Parser\my_parser.c(216): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              float current_ad9954_voltage = (float)base2_ad9954_amplitude * AD9954_VMAX_V / 16383.0;
+..\Module\Parser\my_parser.c(218): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              current_ad9954_voltage += 0.1;
+..\Module\Parser\my_parser.c(220): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              if (current_ad9954_voltage > AD9954_VMAX_V) {
+..\Module\Parser\my_parser.c(224): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(current_ad9954_voltage);
+..\Module\Parser\my_parser.c(201): warning:  #546-D: transfer of control bypasses initialization of:
+            variable "current_ad9954_voltage"  (declared at line 216)
+                      switch (current_function_mode) {
+                      ^
+..\Module\Parser\my_parser.c(365): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              float current_ad9954_voltage = (float)base2_ad9954_amplitude * AD9954_VMAX_V / 16383.0;
+..\Module\Parser\my_parser.c(367): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              current_ad9954_voltage -= 0.1;
+..\Module\Parser\my_parser.c(369): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              if (current_ad9954_voltage < 0.0) {
+..\Module\Parser\my_parser.c(373): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                              base2_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(current_ad9954_voltage);
+..\Module\Parser\my_parser.c(358): warning:  #546-D: transfer of control bypasses initialization of:
+            variable "current_ad9954_voltage"  (declared at line 365)
+                      switch (current_function_mode) {
+                      ^
+..\Module\Parser\my_parser.c(447): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+      if (ad9954_init_voltage > AD9954_VMAX_V) {
+..\Module\Parser\my_parser.c(450): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+      base3_ad9954_amplitude = AD9954_VOLTAGE_TO_DAC(ad9954_init_voltage);
+..\Module\Parser\my_parser.c(482): warning:  #870-D: invalid multibyte character sequence
+      printf("应该在表中查找到的传输比�? %.6f, 对应的频�? %.6f V\n", transform_ratio, base4_desired_model_output_frequency);
+..\Module\Parser\my_parser.c(482): warning:  #870-D: invalid multibyte character sequence
+      printf("应该在表中查找到的传输比�? %.6f, 对应的频�? %.6f V\n", transform_ratio, base4_desired_model_output_frequency);
+..\Module\Parser\my_parser.c: 21 warnings, 0 errors
+compiling my_parameter_config.c...
+../Module/Frequency/my_freq_config.h(81): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+..\Module\Param\my_parameter_config.h(53): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_PARAMETER_CONFIG_H
+..\Module\Param\my_parameter_config.c: 2 warnings, 0 errors
+compiling my_button_task.c...
+..\Module\Button\my_button_task.h(16): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_BUTTON_TASK_H
+../Drivers/INA226/INA226.h(15): warning:  #1-D: last line of file ends without a newline
+  #endif /* INA226_H_ */
+../Module/Frequency/my_freq_config.h(81): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_ZLCR_TASK_H
+..\Module\Button\my_button_task.c(16): warning:  #177-D: variable "relay_state"  was declared but never referenced
+  static uint8_t relay_state = 0; // 继电器状态计数器
+..\Module\Button\my_button_task.c: 5 warnings, 0 errors
 linking...
 ..\link.sct(16): warning: L6314W: No section matches pattern *(.DTCM).
 ..\link.sct(29): warning: L6314W: No section matches pattern *(.RAM_D2).
@@ -102,7 +305,7 @@ linking...
 Program Size: Code=66456 RO-data=40464 RW-data=636 ZI-data=331020  
 Finished: 0 information, 3 warning and 0 error messages.
 FromELF: creating hex file...
-"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 34 Warning(s).
+"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 95 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -125,7 +328,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:12
+Build Time Elapsed:  00:01:57
 </pre>
 </body>
 </html>

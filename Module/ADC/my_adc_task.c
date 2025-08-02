@@ -14,6 +14,7 @@
 // --- 新增: 包含滤波器辨识模块和数学库 ---
 #include "filter_identification.h"
 #include "arm_math.h" // 确保arm_math.h已包含
+#include "my_signal_reconstruction.h"
 
 extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
@@ -90,6 +91,15 @@ uint8_t g_time_detect_enabled = 0; // 默认禁用
 
 
 extern DDS_Generator_t g_dds_generator; // 引用全局DDS生成器实例
+
+
+// --- 用于信号重建的全局变量 ---
+static harmonic_component_t g_final_harmonics[MAX_HARMONICS];
+static int32_t g_num_final_harmonics = 0;
+static float32_t g_reconstructed_waveform[WAVEFORM_RECONSTRUCTION_POINTS];
+// --- 数学合成法使能开关 (1 = 使能, 0 = 禁用) ---
+// 您可以通过串口命令、按键等方式在运行时修改此变量的值
+static volatile uint8_t g_enable_math_synthesis = 1; 
 
 // 用于存储扫频数据的静态数组，防止堆栈溢出
 static float32_t g_sweep_w_rad[NUM_FREQ_POINTS];             // 角频率 (rad/s)
@@ -168,6 +178,13 @@ void StartADCProcessingTask(void *argument) {
                 // switch_timer_sampleRate_Auto(&htim3, g_desired_ADC_sample_rate_Hz, g_desired_ADC_sample_rate_Hz / 100);
                 HAL_TIM_Base_Start(&htim3);
             }
+        }
+
+        if ( /* 帮我在uart6接收到 "S6" 时调用 */){
+            printf("\r\n--- Triggering Signal Reconstruction ---\r\n");
+            printf("Mathematical Synthesis is currently %s.\r\n", g_enable_math_synthesis ? "ENABLED" : "DISABLED");
+            g_adc_mode = ADC_MODE_RECONSTRUCT;
+            HAL_TIM_Base_Start(&htim3);
         }
     
 
@@ -272,8 +289,32 @@ void StartADCProcessingTask(void *argument) {
 
                     
                 }
-            }
+            } else if (g_adc_mode == ADC_MODE_RECONSTRUCT) {
+                // 1. 调用顶层分析函数，传入使能开关的状态
+                analysis_method_t method_used = analyze_and_select_best_method(
+                    g_final_harmonics,
+                    &g_num_final_harmonics,
+                    g_adc1_data_8bit, // 使用 CH1 (输入) 数据进行分析
+                    g_enable_math_synthesis // 传入数学合成法使能开关
+                );
 
+                 if (method_used != METHOD_FAILED) {
+                    // 2. 使用分析得到的谐波分量，进行波形重建
+                    reconstruct_output_waveform(
+                        g_reconstructed_waveform,
+                        WAVEFORM_RECONSTRUCTION_POINTS,
+                        g_final_harmonics,
+                        g_num_final_harmonics,
+                        g_sweep_w_rad,
+                        g_sweep_H_cmplx,
+                        NUM_FREQ_POINTS
+                    );
+                    printf("Waveform reconstruction complete.\r\n");
+                    
+                } else {
+                    printf("Error: Signal analysis failed.\r\n");
+                }
+            }
             // 下面两个是调试用到的，不去理会他们
             if (g_time_detect_enabled) {
                 time_domain_result_t ch1_time_result, ch2_time_result;
