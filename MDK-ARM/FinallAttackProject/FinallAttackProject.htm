@@ -3,9 +3,9 @@
 <title>Static Call Graph - [FinallAttackProject\FinallAttackProject.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image FinallAttackProject\FinallAttackProject.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Sat Aug 02 13:20:12 2025
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Sat Aug 02 13:46:29 2025
 <BR><P>
-<H3>Maximum Stack Usage =        712 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
+<H3>Maximum Stack Usage =        688 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
 StartADCProcessingTask &rArr; analyze_and_select_best_method &rArr; analyze_generic_fft &rArr; arm_cfft_radix4_f32 &rArr; arm_radix4_butterfly_inverse_f32
 <P>
@@ -2234,8 +2234,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[ac]"></a>StartADCProcessingTask</STRONG> (Thumb, 2602 bytes, Stack size 216 bytes, my_adc_task.o(i.StartADCProcessingTask))
-<BR><BR>[Stack]<UL><LI>Max Depth = 712<LI>Call Chain = StartADCProcessingTask &rArr; analyze_and_select_best_method &rArr; analyze_generic_fft &rArr; arm_cfft_radix4_f32 &rArr; arm_radix4_butterfly_inverse_f32
+<P><STRONG><a name="[ac]"></a>StartADCProcessingTask</STRONG> (Thumb, 2498 bytes, Stack size 192 bytes, my_adc_task.o(i.StartADCProcessingTask))
+<BR><BR>[Stack]<UL><LI>Max Depth = 688<LI>Call Chain = StartADCProcessingTask &rArr; analyze_and_select_best_method &rArr; analyze_generic_fft &rArr; arm_cfft_radix4_f32 &rArr; arm_radix4_butterfly_inverse_f32
 </UL>
 <BR>[Calls]<UL><LI><a href="#[17c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_Start

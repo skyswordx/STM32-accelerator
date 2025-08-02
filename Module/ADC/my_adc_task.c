@@ -318,47 +318,34 @@ void StartADCProcessingTask(void *argument) {
                     // Create a uint16_t array for the reconstructed waveform
                     uint16_t g_reconstructed_waveform_uint16[WAVEFORM_RECONSTRUCTION_POINTS];
                     
-                    // Linear mapping from floating-point values to 12-bit DAC range (0-4095)
-                    // Find min and max values in the reconstructed waveform
-                    float32_t min_val = g_reconstructed_waveform[0];
-                    float32_t max_val = g_reconstructed_waveform[0];
-                    for(int i=0; i<WAVEFORM_RECONSTRUCTION_POINTS; i++) {
-                        if(g_reconstructed_waveform[i] < min_val) min_val = g_reconstructed_waveform[i];
-                        if(g_reconstructed_waveform[i] > max_val) max_val = g_reconstructed_waveform[i];
-                    }
+                    const float32_t dac_center_voltage = DAC_ACTUAL_V_ZERO + (DAC_ACTUAL_SPAN / 2.0f);
+                    const uint16_t DAC_DIGITAL_MAX = 4095;
 
-                    // Calculate the range of input values
-                    float32_t input_range = max_val - min_val;
-                    printf("Input waveform - Min: %.4f, Max: %.4f, Range: %.4f\r\n", min_val, max_val, input_range);
-
-                    // Define output range for DAC (12-bit)
-                    const uint16_t OUTPUT_MIN = 0;
-                    const uint16_t OUTPUT_MAX = 4095;
-                    const float32_t OUTPUT_RANGE = (float32_t)(OUTPUT_MAX - OUTPUT_MIN);
-
-                    // Perform linear mapping: output = OUTPUT_MIN + (input - min_val) * (OUTPUT_RANGE / input_range)
-                    for(int i=0; i<WAVEFORM_RECONSTRUCTION_POINTS; i++) {
-                        // Apply linear mapping formula with bounds checking
-                        if(input_range > 0.0001f) {
-                            // Map value using linear transformation
-                            float32_t mapped_value = OUTPUT_MIN + (g_reconstructed_waveform[i] - min_val) * (OUTPUT_RANGE / input_range);
-                            // Apply bounds checking and rounding
-                            if(mapped_value < OUTPUT_MIN) mapped_value = OUTPUT_MIN;
-                            if(mapped_value > OUTPUT_MAX) mapped_value = OUTPUT_MAX;
-                            g_reconstructed_waveform_uint16[i] = (uint16_t)(mapped_value + 0.5f);
-                        } else {
-                            // If range is too small, set to mid-point value
-                            g_reconstructed_waveform_uint16[i] = (OUTPUT_MAX + OUTPUT_MIN) / 2;
+                    for(int i = 0; i < WAVEFORM_RECONSTRUCTION_POINTS; i++) {
+                        // a. 获取计算出的交流电压值
+                        float32_t ac_voltage = g_reconstructed_waveform[i];
+                        
+                        // b. 加上直流偏置，使波形中心对齐到DAC的中心电压
+                        float32_t desired_voltage = ac_voltage + dac_center_voltage;
+                        
+                        // c. 检查并处理削波 (Clamping)，防止电压超出DAC物理范围
+                        if (desired_voltage > DAC_ACTUAL_V_FULL) {
+                            desired_voltage = DAC_ACTUAL_V_FULL;
+                        } else if (desired_voltage < DAC_ACTUAL_V_ZERO) {
+                            desired_voltage = DAC_ACTUAL_V_ZERO;
                         }
                         
-                        // Print both raw ADC and normalized reconstructed values for debugging (for first few samples)
-                        if(i < 20) { // Limit to first 20 samples to avoid flooding the console
-                            printf("rawADC/Recon/u16:%.4f,%.4f,%u\r\n", g_adc1_data_8bit[i % ADC_SAMPLE_SIZE], g_reconstructed_waveform[i], g_reconstructed_waveform_uint16[i]);
+                        // d. 根据固定的电压-数值关系进行线性转换
+                        if (DAC_ACTUAL_SPAN > 0.001f) {
+                            float32_t mapped_value = ((desired_voltage - DAC_ACTUAL_V_ZERO) / DAC_ACTUAL_SPAN) * DAC_DIGITAL_MAX;
+                            g_reconstructed_waveform_uint16[i] = (uint16_t)(mapped_value + 0.5f); // +0.5f 用于四舍五入
+                        } else {
+                            g_reconstructed_waveform_uint16[i] = DAC_DIGITAL_MAX / 2;
                         }
                     }
+                    printf("Waveform mapped to fixed DAC voltage range: %.2fV - %.2fV\r\n", DAC_ACTUAL_V_ZERO, DAC_ACTUAL_V_FULL);
 
-                    printf("Waveform normalized to DAC range: %u-%u\r\n", OUTPUT_MIN, OUTPUT_MAX);
-                    
+                
                     printf("Initializing DDS generator...\r\n");
                     DAC_ACTUAL_SPAN = DAC_ACTUAL_V_FULL - DAC_ACTUAL_V_ZERO; // 计算实际的电压跨度
 
@@ -371,7 +358,7 @@ void StartADCProcessingTask(void *argument) {
 
                     printf("Setting frequency...\r\n");
                     // 3. 設定初始輸出頻率，例如 1000.0 Hz
-                    DDS_SetFrequency(&g_dds_generator, 1000.0f);
+                    DDS_SetFrequency(&g_dds_generator, g_final_harmonics[0].frequency);
 
                     printf("Starting DDS...\r\n");
                     // 4. 啟動DDS引擎（這會自動啟動定時器和DMA）
