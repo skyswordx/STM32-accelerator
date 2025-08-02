@@ -16,6 +16,9 @@ extern uint8_t aRxBuffer;						 //接收中断缓冲
 extern uint8_t uart1_rx_cnt;			 //接收缓冲计数
 extern uint8_t g_uart1_ex_flag; // UART1接收标志
 
+// S5扫频重建功能触发标志位声明
+extern uint8_t g_sweep_reconstruction_trigger;   // S5命令触发扫频重建标志位
+
 // S6信号重建功能触发标志位声明
 extern uint8_t g_signal_reconstruction_trigger;  // S6命令触发信号重建标志位
 extern uint8_t g_signal_reconstruction_active;   // 信号重建模式激活标志位（用于Timer6中断判断）

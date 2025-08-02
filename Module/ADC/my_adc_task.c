@@ -107,7 +107,7 @@ static uint16_t* g_active_buffer = g_reconstructed_waveform_uint16_buffer0;     
 static uint16_t* g_update_buffer = g_reconstructed_waveform_uint16_buffer1;              // 当前更新的缓冲区指针
 // --- 数学合成法使能开关 (1 = 使能, 0 = 禁用) ---
 // 您可以通过串口命令、按键等方式在运行时修改此变量的值
-static volatile uint8_t g_enable_math_synthesis = 1; 
+static volatile uint8_t g_enable_math_synthesis = 0; 
 
 // 用于存储扫频数据的静态数组，防止堆栈溢出
 static float32_t g_sweep_w_rad[NUM_FREQ_POINTS];             // 角频率 (rad/s)
@@ -117,6 +117,9 @@ static uint32_t g_sweep_step = 0;                          // 当前扫频步数
 
 extern fundamental_result_t g_ch1_fundamental; // ADC1 通道 基波结果结构
 extern fundamental_result_t g_ch2_fundamental; // ADC2 通道 基波结果结构
+
+// 外部标志位声明
+extern uint8_t g_sweep_reconstruction_trigger;  // S5命令触发扫频重建标志位
 
 extern arm_cfft_radix4_instance_f32 fft_instance_radix4; // FFT实例
 
@@ -186,6 +189,24 @@ void StartADCProcessingTask(void *argument) {
                 // switch_timer_sampleRate_Auto(&htim3, g_desired_ADC_sample_rate_Hz, g_desired_ADC_sample_rate_Hz / 100);
                 HAL_TIM_Base_Start(&htim3);
             }
+        }
+
+        /* 【串口屏 S5 命令】检测S5扫频重建触发标志位 */
+        if (g_sweep_reconstruction_trigger == 1){
+            printf("\r\n--- Triggering Sweep Reconstruction via S5 Command ---\r\n");
+            g_adc_mode = ADC_MODE_SWEEP;
+            g_sweep_step = 0;
+            g_sweep_reconstruction_trigger = 0; // 清除标志位，防止重复触发
+
+            // 设置DDS到起始频率
+            float32_t current_freq_hz = SWEEP_F_START_HZ + g_sweep_step * SWEEP_F_STEP_HZ;
+            AD9954_Set_Fre(current_freq_hz); // 假设使用AD9954
+            // DDS_SetFrequency(&g_dds_generator, current_freq_hz); // 使用 DAC + 软件 DDS
+
+            printf("Step %lu/%d: Freq = %.1f Hz\r\n", g_sweep_step + 1, NUM_FREQ_POINTS, current_freq_hz);
+            
+            // 启动ADC采样
+            HAL_TIM_Base_Start(&htim3);
         }
 
         if (g_signal_reconstruction_trigger == 1){

@@ -46,6 +46,9 @@ static double lcd_base3_voltage = 0.78;        // base3 电压，默认0.78V
 static double lcd_base4_frequency = 100.0;     // base4 频率，默认100Hz
 static double lcd_base4_voltage = 1.0;         // base4 电压，默认1V
 
+// S5扫频重建功能触发标志位
+uint8_t g_sweep_reconstruction_trigger = 0;      // S5命令触发扫频重建标志位
+
 // S6信号重建功能触发标志位
 uint8_t g_signal_reconstruction_trigger = 0;  // S6命令触发信号重建标志位
 uint8_t g_signal_reconstruction_active = 0;   // 信号重建模式激活标志位（用于Timer6中断判断）
@@ -541,6 +544,12 @@ void parse_serial_lcd_command(char* cmd)
         printf("Received S4 command, calling uart_base4_function_with_params\n");
         current_lcd_page = 4;  // 更新当前页面跟踪变量
         uart_base4_function_with_params(lcd_base4_voltage, lcd_base4_frequency);
+    }
+    else if (strcmp(cmd, "S5") == 0) {
+        // 串口屏发送"S5"命令，表示触发improve1扫频重建功能
+        printf("Received S5 command, triggering sweep reconstruction (improve1)\n");
+        g_sweep_reconstruction_trigger = 1;  // 设置扫频重建触发标志位
+        current_function_mode = FUNCTION_MODE_IMPROVE1;  // 设置为improve1模式
     }
     else if (strcmp(cmd, "S6") == 0) {
         // 串口屏发送"S6"命令，表示触发improve2波形重建功能
