@@ -88,7 +88,11 @@ uint8_t g_time_detect_enabled = 0; // 默认禁用
 
 
 extern DDS_Generator_t g_dds_generator; // 引用全局DDS生成器实例
-
+extern TIM_HandleTypeDef htim4;
+extern DAC_HandleTypeDef hdac1;
+extern float DAC_ACTUAL_V_ZERO;
+extern float DAC_ACTUAL_V_FULL;
+extern float DAC_ACTUAL_SPAN;
 
 // --- 用于信号重建的全局变量 ---
 static harmonic_component_t g_final_harmonics[MAX_HARMONICS];
@@ -311,13 +315,72 @@ void StartADCProcessingTask(void *argument) {
                     printf("Waveform reconstruction complete.\r\n");
                     // 3. 在此，`g_reconstructed_waveform` 数组已包含最终结果
                     // 您可以将其通过串口打印出来，或设置DMA+DAC进行输出
-                    for(int i=0; i<WAVEFORM_RECONSTRUCTION_POINTS; i++) {
-                        printf("rawADC/Recon:%.4f,%.4f\r\n",g_adc1_data_8bit[i] , g_reconstructed_waveform[i]);
-                    }
+                    // Create a uint16_t array for the reconstructed waveform
+                    uint16_t g_reconstructed_waveform_uint16[WAVEFORM_RECONSTRUCTION_POINTS];
                     
+                    // Linear mapping from floating-point values to 12-bit DAC range (0-4095)
+                    // Find min and max values in the reconstructed waveform
+                    float32_t min_val = g_reconstructed_waveform[0];
+                    float32_t max_val = g_reconstructed_waveform[0];
+                    for(int i=0; i<WAVEFORM_RECONSTRUCTION_POINTS; i++) {
+                        if(g_reconstructed_waveform[i] < min_val) min_val = g_reconstructed_waveform[i];
+                        if(g_reconstructed_waveform[i] > max_val) max_val = g_reconstructed_waveform[i];
+                    }
+
+                    // Calculate the range of input values
+                    float32_t input_range = max_val - min_val;
+                    printf("Input waveform - Min: %.4f, Max: %.4f, Range: %.4f\r\n", min_val, max_val, input_range);
+
+                    // Define output range for DAC (12-bit)
+                    const uint16_t OUTPUT_MIN = 0;
+                    const uint16_t OUTPUT_MAX = 4095;
+                    const float32_t OUTPUT_RANGE = (float32_t)(OUTPUT_MAX - OUTPUT_MIN);
+
+                    // Perform linear mapping: output = OUTPUT_MIN + (input - min_val) * (OUTPUT_RANGE / input_range)
+                    for(int i=0; i<WAVEFORM_RECONSTRUCTION_POINTS; i++) {
+                        // Apply linear mapping formula with bounds checking
+                        if(input_range > 0.0001f) {
+                            // Map value using linear transformation
+                            float32_t mapped_value = OUTPUT_MIN + (g_reconstructed_waveform[i] - min_val) * (OUTPUT_RANGE / input_range);
+                            // Apply bounds checking and rounding
+                            if(mapped_value < OUTPUT_MIN) mapped_value = OUTPUT_MIN;
+                            if(mapped_value > OUTPUT_MAX) mapped_value = OUTPUT_MAX;
+                            g_reconstructed_waveform_uint16[i] = (uint16_t)(mapped_value + 0.5f);
+                        } else {
+                            // If range is too small, set to mid-point value
+                            g_reconstructed_waveform_uint16[i] = (OUTPUT_MAX + OUTPUT_MIN) / 2;
+                        }
+                        
+                        // Print both raw ADC and normalized reconstructed values for debugging (for first few samples)
+                        if(i < 20) { // Limit to first 20 samples to avoid flooding the console
+                            printf("rawADC/Recon/u16:%.4f,%.4f,%u\r\n", g_adc1_data_8bit[i % ADC_SAMPLE_SIZE], g_reconstructed_waveform[i], g_reconstructed_waveform_uint16[i]);
+                        }
+                    }
+
+                    printf("Waveform normalized to DAC range: %u-%u\r\n", OUTPUT_MIN, OUTPUT_MAX);
+                    
+                    printf("Initializing DDS generator...\r\n");
+                    DAC_ACTUAL_SPAN = DAC_ACTUAL_V_FULL - DAC_ACTUAL_V_ZERO; // 计算实际的电压跨度
+
+                    // 1. 初始化DDS產生器
+                    DDS_Init(&g_dds_generator, &hdac1, DAC_CHANNEL_1, &htim4, DDS_UPDATE_FREQUENCY);
+
+                    printf("Setting waveform...\r\n");
+                    // 2. 設定要使用的波形
+                    DDS_SetWaveform(&g_dds_generator, g_reconstructed_waveform_uint16, WAVE_TABLE_SIZE);
+
+                    printf("Setting frequency...\r\n");
+                    // 3. 設定初始輸出頻率，例如 1000.0 Hz
+                    DDS_SetFrequency(&g_dds_generator, 1000.0f);
+
+                    printf("Starting DDS...\r\n");
+                    // 4. 啟動DDS引擎（這會自動啟動定時器和DMA）
+                    DDS_Start(&g_dds_generator);
+                    printf("DDS started.\r\n");
                 } else {
                     printf("Error: Signal analysis failed.\r\n");
                 }
+                g_adc_mode = ADC_MODE_IDLE; // 返回空闲模式
             }
             // 下面两个是调试用到的，不去理会他们
             if (g_time_detect_enabled) {

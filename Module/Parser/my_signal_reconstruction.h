@@ -8,7 +8,7 @@
 // --- 数据结构定义 ---
 
 #define MAX_HARMONICS 25 // 定义最多分析的谐波数量
-#define WAVEFORM_RECONSTRUCTION_POINTS 1024 // 定义重建波形的采样点数
+#define WAVEFORM_RECONSTRUCTION_POINTS 64 // 定义重建波形的采样点数
 
 /**
  * @brief 存储单个频率分量（基波或谐波）的信息
