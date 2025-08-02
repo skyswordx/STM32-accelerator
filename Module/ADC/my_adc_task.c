@@ -27,6 +27,9 @@ extern TIM_HandleTypeDef htim6;  /* Timer6用于定时触发信号重建 */
 #define ADC_DMA_TRANSFER_NOT_COMPLETED 0
 extern uint32_t g_desired_ADC_sample_rate_Hz;
 uint32_t g_ADC_SAMPLE_RATE_Hz = 409840; // 默认采样率 409.84kHz
+
+extern UART_HandleTypeDef huart6; // 串口屏
+
 // uint32_t g_ADC_SAMPLE_RATE_Hz = 995062*2; // 2MHz采样率
 // uint32_t g_ADC_SAMPLE_RATE_Hz = 2000000; // 2MHz采样率
 
@@ -305,16 +308,41 @@ void StartADCProcessingTask(void *argument) {
                     // 打印辨识结果
                     if (isnan(g_identified_tf.b0)) {
                         printf("-> ERROR: Identification failed. Matrix solution might have failed.\r\n");
+
+                        g_identified_tf.identified_type = FILTER_TYPE_UNKNOWN; // 设置为未知类型
+                        // 发送错误信息到串口屏
+                        char display_buffer[64];
+                        int len = sprintf(display_buffer, "t0.txt=\"%s\"", "Unknown");
+                        display_buffer[len] = 0xFF;
+                        display_buffer[len+1] = 0xFF;
+                        display_buffer[len+2] = 0xFF;
+                        HAL_UART_Transmit(&huart6, (uint8_t*)display_buffer, len+3, 100);
                     } else {
                         const char* type_str[] = {"LPF", "HPF", "BPF", "BSF", "Unknown"};
-                        printf("-> Identified Filter Type: %s\r\n", type_str[g_identified_tf.identified_type]);
-                        printf("-> H(s) = (b2*s^2 + b1*s + b0) / (s^2 + a1*s + a0)\r\n");
-                        printf("-> Identified Coefficients:\r\n");
-                        printf("   b2 = %e\r\n", g_identified_tf.b2);
-                        printf("   b1 = %e\r\n", g_identified_tf.b1);
-                        printf("   b0 = %e\r\n", g_identified_tf.b0);
-                        printf("   a1 = %e\r\n", g_identified_tf.a1);
-                        printf("   a0 = %e\r\n", g_identified_tf.a0);
+                        // Create a buffer for the formatted string
+                        char display_buffer[64]; // Buffer size should be enough for the command
+
+                        // Format the filter type into the buffer
+                        int len = sprintf(display_buffer, "t0.txt=\"%s\"", type_str[g_identified_tf.identified_type]);
+
+                        // Manually append the three 0xFF bytes
+                        display_buffer[len] = 0xFF;
+                        display_buffer[len+1] = 0xFF;
+                        display_buffer[len+2] = 0xFF;
+
+                        // Send the command to the display via UART6
+                        HAL_UART_Transmit(&huart6, (uint8_t*)display_buffer, len+3, 100);
+
+                        // Also print to UART1 for debugging
+                        printf("-> Filter type identified: %s\r\n", type_str[g_identified_tf.identified_type]);
+                        // printf("-> H(s) = (b2*s^2 + b1*s + b0) / (s^2 + a1*s + a0)\r\n");
+                        // printf("-> Identified Coefficients:\r\n");
+                        // printf("   b2 = %e\r\n", g_identified_tf.b2);
+                        // printf("   b1 = %e\r\n", g_identified_tf.b1);
+                        // printf("   b0 = %e\r\n", g_identified_tf.b0);
+                        // printf("   a1 = %e\r\n", g_identified_tf.a1);
+                        // printf("   a0 = %e\r\n", g_identified_tf.a0);
+                  
                     }
                     
                     printf("\r\nIdentification complete. System is now idle.\r\n");
@@ -333,7 +361,7 @@ void StartADCProcessingTask(void *argument) {
                 analysis_method_t method_used = analyze_and_select_best_method(
                     g_final_harmonics,
                     &g_num_final_harmonics,
-                    g_adc1_data_8bit, // 使用 CH1 (输入) 数据进行分析
+                    g_adc2_data_8bit, // 使用 CH1 (输入) 数据进行分析
                     g_enable_math_synthesis // 传入数学合成法使能开关
                 );
 
@@ -422,69 +450,69 @@ void StartADCProcessingTask(void *argument) {
                 g_adc_mode = ADC_MODE_IDLE; // 返回空闲模式
             }
             // 下面两个是调试用到的，不去理会他们
-            if (g_time_detect_enabled) {
-                time_domain_result_t ch1_time_result, ch2_time_result;
+            // if (g_time_detect_enabled) {
+            //     time_domain_result_t ch1_time_result, ch2_time_result;
 
-                // --- 调用优化的时域分析函数 ---
-                my_time_domain_analysis_optimized(g_adc1_data_8bit, g_adc1_temp_buffer, ADC_SAMPLE_SIZE, g_ADC_SAMPLE_RATE_Hz, &time_config, &ch1_time_result);
-                my_time_domain_analysis_optimized(g_adc2_data_8bit, g_adc2_temp_buffer, ADC_SAMPLE_SIZE, g_ADC_SAMPLE_RATE_Hz, &time_config, &ch2_time_result);
+            //     // --- 调用优化的时域分析函数 ---
+            //     my_time_domain_analysis_optimized(g_adc1_data_8bit, g_adc1_temp_buffer, ADC_SAMPLE_SIZE, g_ADC_SAMPLE_RATE_Hz, &time_config, &ch1_time_result);
+            //     my_time_domain_analysis_optimized(g_adc2_data_8bit, g_adc2_temp_buffer, ADC_SAMPLE_SIZE, g_ADC_SAMPLE_RATE_Hz, &time_config, &ch2_time_result);
 
-                // --- 打印优化后的分析结果 ---
-                printf("\r\n--- Optimized Time Domain Analysis ---\r\n");
-                printf("--- Channel 1 ---\r\n");
-                printf("  Frequency     : %.3f Hz\r\n", ch1_time_result.frequency);
-                printf("  Vpp (Peak-Peak) : %.4f V\r\n", ch1_time_result.vpp_peak);
-                printf("  AC RMS        : %.4f V\r\n", ch1_time_result.ac_rms);
-                printf("  DC Offset     : %.4f V\r\n", ch1_time_result.dc_offset);
-                printf("  V Max        : %.4f V\r\n", ch1_time_result.v_max);
-                printf("  V Min        : %.4f V\r\n", ch1_time_result.v_min);
+            //     // --- 打印优化后的分析结果 ---
+            //     printf("\r\n--- Optimized Time Domain Analysis ---\r\n");
+            //     printf("--- Channel 1 ---\r\n");
+            //     printf("  Frequency     : %.3f Hz\r\n", ch1_time_result.frequency);
+            //     printf("  Vpp (Peak-Peak) : %.4f V\r\n", ch1_time_result.vpp_peak);
+            //     printf("  AC RMS        : %.4f V\r\n", ch1_time_result.ac_rms);
+            //     printf("  DC Offset     : %.4f V\r\n", ch1_time_result.dc_offset);
+            //     printf("  V Max        : %.4f V\r\n", ch1_time_result.v_max);
+            //     printf("  V Min        : %.4f V\r\n", ch1_time_result.v_min);
                 
-                printf("--- Channel 2 ---\r\n");
-                printf("  Frequency     : %.3f Hz\r\n", ch2_time_result.frequency);
-                printf("  Vpp (Peak-Peak) : %.4f V\r\n", ch2_time_result.vpp_peak);
-                printf("  AC RMS        : %.4f V\r\n", ch2_time_result.ac_rms);
-                printf("  DC Offset     : %.4f V\r\n", ch2_time_result.dc_offset);
-                printf("  V Max        : %.4f V\r\n", ch2_time_result.v_max);
-                printf("  V Min        : %.4f V\r\n", ch2_time_result.v_min);
+            //     printf("--- Channel 2 ---\r\n");
+            //     printf("  Frequency     : %.3f Hz\r\n", ch2_time_result.frequency);
+            //     printf("  Vpp (Peak-Peak) : %.4f V\r\n", ch2_time_result.vpp_peak);
+            //     printf("  AC RMS        : %.4f V\r\n", ch2_time_result.ac_rms);
+            //     printf("  DC Offset     : %.4f V\r\n", ch2_time_result.dc_offset);
+            //     printf("  V Max        : %.4f V\r\n", ch2_time_result.v_max);
+            //     printf("  V Min        : %.4f V\r\n", ch2_time_result.v_min);
 
-                printf("-------------------------------------\r\n\r\n");
-                fundamental_result_t ch1_freq_result, ch2_freq_result;
+            //     printf("-------------------------------------\r\n\r\n");
+            //     fundamental_result_t ch1_freq_result, ch2_freq_result;
 
-                // 分别计算两个通道的频谱数据并存储到独立的缓冲区中
-                my_armcfft32_apply(g_adc1_data_8bit, &ch1_freq_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
-                memcpy(g_adc1_spectrum_data, g_fft_output_buffer, (FFT_LENGTH / 2) * sizeof(float32_t));
+            //     // 分别计算两个通道的频谱数据并存储到独立的缓冲区中
+            //     my_armcfft32_apply(g_adc1_data_8bit, &ch1_freq_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
+            //     memcpy(g_adc1_spectrum_data, g_fft_output_buffer, (FFT_LENGTH / 2) * sizeof(float32_t));
 
-                my_armcfft32_apply(g_adc2_data_8bit, &ch2_freq_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
-                memcpy(g_adc2_spectrum_data, g_fft_output_buffer, (FFT_LENGTH / 2) * sizeof(float32_t));
+            //     my_armcfft32_apply(g_adc2_data_8bit, &ch2_freq_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
+            //     memcpy(g_adc2_spectrum_data, g_fft_output_buffer, (FFT_LENGTH / 2) * sizeof(float32_t));
                             
-                // 打印频谱
+            //     // 打印频谱
 
-                // 打印频谱分析结果
-                printf("=== Spectrum Analysis Results ===\n");
-                printf("ADC1 - Frequency: %lu Hz, Magnitude: %.6f V\n", ch1_freq_result.fundamental_frequency, ch1_freq_result.fundamental_vpp);
-                printf("ADC2 - Frequency: %lu Hz, Magnitude: %.6f V\n", ch2_freq_result.fundamental_frequency, ch2_freq_result.fundamental_vpp);
-            }
+            //     // 打印频谱分析结果
+            //     printf("=== Spectrum Analysis Results ===\n");
+            //     printf("ADC1 - Frequency: %lu Hz, Magnitude: %.6f V\n", ch1_freq_result.fundamental_frequency, ch1_freq_result.fundamental_vpp);
+            //     printf("ADC2 - Frequency: %lu Hz, Magnitude: %.6f V\n", ch2_freq_result.fundamental_frequency, ch2_freq_result.fundamental_vpp);
+            // }
 
-            switch (g_desired_function_state) {
-                case SPECTRUM_STATE:
-                    printf("=== Spectrum Results ===\n");
-                        for (uint32_t i = 0; i < (FFT_LENGTH / 2); i++) {
-                            printf("  Frequency Bin %lu: %.6f V\n", i, g_adc1_spectrum_data[i]);
-                        }
-                        for (uint32_t i = 0; i < (FFT_LENGTH / 2); i++) {
-                            printf("  Frequency Bin %lu: %.6f V\n", i, g_adc2_spectrum_data[i]);
-                        }
-                    break;
-                case TIME_STATE:
-                    printf("=== Time Domain Analysis Results ===\n");
+            // switch (g_desired_function_state) {
+            //     case SPECTRUM_STATE:
+            //         printf("=== Spectrum Results ===\n");
+            //             for (uint32_t i = 0; i < (FFT_LENGTH / 2); i++) {
+            //                 printf("  Frequency Bin %lu: %.6f V\n", i, g_adc1_spectrum_data[i]);
+            //             }
+            //             for (uint32_t i = 0; i < (FFT_LENGTH / 2); i++) {
+            //                 printf("  Frequency Bin %lu: %.6f V\n", i, g_adc2_spectrum_data[i]);
+            //             }
+            //         break;
+            //     case TIME_STATE:
+            //         printf("=== Time Domain Analysis Results ===\n");
                     
-                    // 打印ADC1和ADC2的时域数据
-                    for (uint32_t i = 0; i < ADC_SAMPLE_SIZE; i++) { 
-                        printf("raw ADC1/2 :%.6f,%.6f\n", g_adc1_data_8bit[i], g_adc2_data_8bit[i]);
+            //         // 打印ADC1和ADC2的时域数据
+            //         for (uint32_t i = 0; i < ADC_SAMPLE_SIZE; i++) { 
+            //             printf("raw ADC1/2 :%.6f,%.6f\n", g_adc1_data_8bit[i], g_adc2_data_8bit[i]);
 
-                    }
-                    break;
-            }
+            //         }
+            //         break;
+            // }
         }
        osDelay(100); // 延时100毫秒
     }

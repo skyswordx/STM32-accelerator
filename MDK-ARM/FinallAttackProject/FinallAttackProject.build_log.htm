@@ -27,7 +27,60 @@ Project File Date:  08/02/2025
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\KEIL\ARM\ARMCC\Bin'
 Build target 'FinallAttackProject'
-"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 0 Warning(s).
+compiling my_adc_task.c...
+../Module/ADC/my_adc_task.h(26): warning:  #1-D: last line of file ends without a newline
+  #endif /* MT_MY_ADC_TASK_H */
+../Module/Frequency/my_freq_config.h(87): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_ZLCR_TASK_H
+..\Module\ADC\my_adc_task.h(26): warning:  #1-D: last line of file ends without a newline
+  #endif /* MT_MY_ADC_TASK_H */
+../Module/UART/my_uart_task.h(50): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_UART_TASK_H */
+../Module/Param/my_parameter_config.h(53): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_PARAMETER_CONFIG_H
+../Module/DAC/my_dds.h(87): warning:  #1-D: last line of file ends without a newline
+  #endif // DDS_WAVE_GENERATOR_H
+../Module/Parser/filter_identification.h(38): warning:  #1-D: last line of file ends without a newline
+  #endif /* INC_FILTER_IDENTIFICATION_H_ */
+..\Module\ADC\my_adc_task.c(268): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                  if (ch1_res.fundamental_vpp < 1e-6) { // 防止除以�?
+..\Module\ADC\my_adc_task.c(163): warning:  #550-D: variable "time_config"  was set but never used
+      time_domain_config_t time_config;
+..\Module\ADC\my_adc_task.c: 10 warnings, 0 errors
+compiling my_uart_task.c...
+..\Module\UART\my_uart_task.h(50): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_UART_TASK_H */
+../Module/Frequency/my_freq_config.h(87): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_FREQ_CONFIG_H */
+../Module/Param/my_parameter_config.h(53): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_PARAMETER_CONFIG_H
+../Module/ZLCR/my_zlcr_config.h(74): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_ZLCR_TASK_H
+../Module/Parser/my_parser.h(30): warning:  #1-D: last line of file ends without a newline
+  #endif // MY_PARSER_H
+../Module/DAC/my_dds.h(87): warning:  #1-D: last line of file ends without a newline
+  #endif // DDS_WAVE_GENERATOR_H
+../Module/DAC/my_dac_config.h(17): warning:  #1-D: last line of file ends without a newline
+  #endif /* MY_DAC_CONFIG_H */
+..\Module\UART\my_uart_task.c(214): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+              g_desired_dds_amplitude = AD9833_VOLTAGE_TO_DAC(voltage);
+..\Module\UART\my_uart_task.c(216): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+              g_desired_dds_amplitude = AD9954_VOLTAGE_TO_DAC((voltage));
+..\Module\UART\my_uart_task.c(660): warning:  #870-D: invalid multibyte character sequence
+      printf("应该在表中查找到的传输比�? %.6f, 对应的频�? %.6f Hz\n", transform_ratio, frequency);
+..\Module\UART\my_uart_task.c(660): warning:  #870-D: invalid multibyte character sequence
+      printf("应该在表中查找到的传输比�? %.6f, 对应的频�? %.6f Hz\n", transform_ratio, frequency);
+..\Module\UART\my_uart_task.c: 11 warnings, 0 errors
+linking...
+..\link.sct(16): warning: L6314W: No section matches pattern *(.DTCM).
+..\link.sct(29): warning: L6314W: No section matches pattern *(.RAM_D2).
+..\link.sct(36): warning: L6314W: No section matches pattern *(.RAM_D3).
+Program Size: Code=67480 RO-data=40480 RW-data=660 ZI-data=282684  
+Finished: 0 information, 3 warning and 0 error messages.
+FromELF: creating hex file...
+"FinallAttackProject\FinallAttackProject.axf" - 0 Error(s), 24 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -50,7 +103,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@6.1.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:01
+Build Time Elapsed:  00:00:09
 </pre>
 </body>
 </html>

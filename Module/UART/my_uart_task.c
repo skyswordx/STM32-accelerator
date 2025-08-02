@@ -40,8 +40,8 @@ static uint8_t current_lcd_page = 2;  // 默认在基础功能2页面
 
 // 串口屏设置的参数跟踪变量
 static double lcd_base2_frequency = 1000.0;    // base2 频率，默认1kHz
-static double lcd_base2_voltage = 1.0;         // base2 电压，默认1V
-static double lcd_base3_frequency = 1000.0;    // base3 频率，默认1kHz  
+static double lcd_base2_voltage = 4.0;         // base2 电压，默认4V
+static double lcd_base3_frequency = 1000.0;    // base3 频率，默认1kHz
 static double lcd_base3_voltage = 0.78;        // base3 电压，默认0.78V
 static double lcd_base4_frequency = 100.0;     // base4 频率，默认100Hz
 static double lcd_base4_voltage = 1.0;         // base4 电压，默认1V
