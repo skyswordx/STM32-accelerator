@@ -166,3 +166,6 @@ my_armcfft32_apply_old(adc_data, &result, 1, 1, INTERPOLATION_HANNING_SPECIAL);
 3. 每一次触发的流程逻辑是每一次触发都要经过 ADC 采样一次数据，根据幅相特性算出float的g_reconstructed_waveform，并且这个float的类型还要转换成uint16并且归一化到4095，最终更新 g_reconstructed_waveform_uint16
 4. 由于一旦进入上一次触发后，DAC的DMA就会不断地搬运 g_reconstructed_waveform_uint16 的数据到DAC输出，所以每次触发都要重新计算 g_reconstructed_waveform 和 g_reconstructed_waveform_uint16以便更新数据，但是，为了避免在每次更新时，由于更新数据导致DAC输出的波形出现突变，我们可以设置一个类似 pingpongs 双缓冲的机制，使用两个缓冲区交替更新数据。
 5. 具体的timer6中断函数在main函数中已经有了，注意不要重复定义，开启定时器6的中断使用 `HAL_TIM_Base_Start_IT(&htim6);`，关闭定时器6的中断使用 `HAL_TIM_Base_Stop_IT(&htim6);`
+
+
+帮我设计合理的标志位，补充这个/* 帮我在uart6接收到 "S6" 时调用 */的实现，在void parse_serial_lcd_command(char* cmd)进行实现

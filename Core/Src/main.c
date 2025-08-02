@@ -1032,9 +1032,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
+  // 引用外部变量
+  extern uint8_t g_signal_reconstruction_trigger;
+  extern uint8_t g_signal_reconstruction_active;
+  extern uint8_t g_timer6_enabled;
 
   if (htim->Instance == TIM6) {
-    printf("TIM6 Period Elapsed\r\n");
+    // 只有当信号重建模式激活且Timer6使能时才触发
+    if (g_signal_reconstruction_active && g_timer6_enabled) {
+      g_signal_reconstruction_trigger = 1;  // 设置触发标志�?
+    }
   }
   /* USER CODE END Callback 1 */
 }

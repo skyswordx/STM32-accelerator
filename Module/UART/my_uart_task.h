@@ -6,6 +6,9 @@
 #include "stdio.h"
 #include "string.h"
 
+// 外部Timer句柄声明
+extern TIM_HandleTypeDef htim6;
+
 #define RX_BUFFER_SIZE  256     //最大接收字节数
 
 extern char rx_buffer[RX_BUFFER_SIZE];   //接收数据
@@ -15,6 +18,9 @@ extern uint8_t g_uart1_ex_flag; // UART1接收标志
 
 // S6信号重建功能触发标志位声明
 extern uint8_t g_signal_reconstruction_trigger;  // S6命令触发信号重建标志位
+extern uint8_t g_signal_reconstruction_active;   // 信号重建模式激活标志位（用于Timer6中断判断）
+extern uint8_t g_timer6_enabled;                 // Timer6中断使能标志位
+extern uint8_t g_current_buffer_index;           // 当前使用的缓冲区索引（0或1）
 
 // 函数声明
 void StartUARTProcessingTask(void const * argument);

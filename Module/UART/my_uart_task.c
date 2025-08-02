@@ -48,6 +48,11 @@ static double lcd_base4_voltage = 1.0;         // base4 电压，默认1V
 
 // S6信号重建功能触发标志位
 uint8_t g_signal_reconstruction_trigger = 0;  // S6命令触发信号重建标志位
+uint8_t g_signal_reconstruction_active = 0;   // 信号重建模式激活标志位（用于Timer6中断判断）
+uint8_t g_timer6_enabled = 0;                 // Timer6中断使能标志位
+
+// 双缓冲区相关变量（用于避免DAC输出突变）
+uint8_t g_current_buffer_index = 0;           // 当前使用的缓冲区索引（0或1）
 
 // base2_function模式下的幅度跟踪变量
 extern uint8_t base2_ad9833_amplitude;  // AD9833幅度初始值
@@ -542,6 +547,19 @@ void parse_serial_lcd_command(char* cmd)
         printf("Received S6 command, triggering signal reconstruction\n");
         g_signal_reconstruction_trigger = 1;  // 设置信号重建触发标志位
         current_function_mode = FUNCTION_MODE_IMPROVE2;  // 设置为improve2模式
+    }
+    else if (strcmp(cmd, "STOP6") == 0) {
+        // 串口屏发送"STOP6"命令，表示停止improve2波形重建功能
+        printf("Received STOP6 command, stopping signal reconstruction\n");
+        g_signal_reconstruction_active = 0;   // 停用信号重建模式
+        g_timer6_enabled = 0;                 // 禁用Timer6标志位
+        
+        // 停止Timer6定时中断
+        extern TIM_HandleTypeDef htim6;
+        HAL_TIM_Base_Stop_IT(&htim6);
+        
+        current_function_mode = FUNCTION_MODE_NONE;  // 重置为无模式
+        printf("Signal reconstruction stopped and Timer6 disabled\n");
     }
     else if (strcmp(cmd, "I2") == 0) {
         // 串口屏发送"I2"命令，表示进入基础功能2页面

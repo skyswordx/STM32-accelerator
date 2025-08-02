@@ -20,6 +20,7 @@ extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
 extern UART_HandleTypeDef huart1;
 extern TIM_HandleTypeDef htim3;  /* 实际使用TIM3作为ADC触发源和时间戳基准 */
+extern TIM_HandleTypeDef htim6;  /* Timer6用于定时触发信号重建 */
 
 #define ADC_SAMPLE_SIZE (4096)
 #define ADC_DMA_TRANSFER_COMPLETED 1
@@ -98,6 +99,12 @@ extern float DAC_ACTUAL_SPAN;
 static harmonic_component_t g_final_harmonics[MAX_HARMONICS];
 static int32_t g_num_final_harmonics = 0;
 static float32_t g_reconstructed_waveform[WAVEFORM_RECONSTRUCTION_POINTS];
+
+// --- 双缓冲区机制：避免DAC输出突变 ---
+static uint16_t g_reconstructed_waveform_uint16_buffer0[WAVEFORM_RECONSTRUCTION_POINTS];  // 缓冲区0
+static uint16_t g_reconstructed_waveform_uint16_buffer1[WAVEFORM_RECONSTRUCTION_POINTS];  // 缓冲区1
+static uint16_t* g_active_buffer = g_reconstructed_waveform_uint16_buffer0;              // 当前激活的缓冲区指针
+static uint16_t* g_update_buffer = g_reconstructed_waveform_uint16_buffer1;              // 当前更新的缓冲区指针
 // --- 数学合成法使能开关 (1 = 使能, 0 = 禁用) ---
 // 您可以通过串口命令、按键等方式在运行时修改此变量的值
 static volatile uint8_t g_enable_math_synthesis = 1; 
@@ -186,6 +193,15 @@ void StartADCProcessingTask(void *argument) {
             printf("Mathematical Synthesis is currently %s.\r\n", g_enable_math_synthesis ? "ENABLED" : "DISABLED");
             g_adc_mode = ADC_MODE_RECONSTRUCT;
             g_signal_reconstruction_trigger = 0; // 清除标志位，防止重复触发
+            
+            // 首次触发时启动Timer6定时中断，用于后续的定时触发
+            if (!g_signal_reconstruction_active) {
+                g_signal_reconstruction_active = 1;  // 激活信号重建模式
+                g_timer6_enabled = 1;                // 启用Timer6标志位
+                HAL_TIM_Base_Start_IT(&htim6);       // 启动Timer6定时中断
+                printf("Timer6 interrupt enabled for periodic reconstruction.\r\n");
+            }
+            
             HAL_TIM_Base_Start(&htim3);
         }
     
@@ -300,7 +316,7 @@ void StartADCProcessingTask(void *argument) {
                     g_enable_math_synthesis // 传入数学合成法使能开关
                 );
 
-                 if (method_used != METHOD_FAILED) {
+                if (method_used != METHOD_FAILED) {
                     // 2. 使用分析得到的谐波分量，进行波形重建
                     reconstruct_output_waveform(
                         g_reconstructed_waveform,
@@ -313,11 +329,8 @@ void StartADCProcessingTask(void *argument) {
                     );
 
                     printf("Waveform reconstruction complete.\r\n");
-                    // 3. 在此，`g_reconstructed_waveform` 数组已包含最终结果
-                    // 您可以将其通过串口打印出来，或设置DMA+DAC进行输出
-                    // Create a uint16_t array for the reconstructed waveform
-                    uint16_t g_reconstructed_waveform_uint16[WAVEFORM_RECONSTRUCTION_POINTS];
                     
+                    // 3. 将float类型的波形转换为uint16并归一化到4095（使用更新缓冲区）
                     const float32_t dac_center_voltage = DAC_ACTUAL_V_ZERO + (DAC_ACTUAL_SPAN / 2.0f);
                     const uint16_t DAC_DIGITAL_MAX = 4095;
 
@@ -335,35 +348,53 @@ void StartADCProcessingTask(void *argument) {
                             desired_voltage = DAC_ACTUAL_V_ZERO;
                         }
                         
-                        // d. 根据固定的电压-数值关系进行线性转换
+                        // d. 根据固定的电压-数值关系进行线性转换，写入更新缓冲区
                         if (DAC_ACTUAL_SPAN > 0.001f) {
                             float32_t mapped_value = ((desired_voltage - DAC_ACTUAL_V_ZERO) / DAC_ACTUAL_SPAN) * DAC_DIGITAL_MAX;
-                            g_reconstructed_waveform_uint16[i] = (uint16_t)(mapped_value + 0.5f); // +0.5f 用于四舍五入
+                            g_update_buffer[i] = (uint16_t)(mapped_value + 0.5f); // +0.5f 用于四舍五入
                         } else {
-                            g_reconstructed_waveform_uint16[i] = DAC_DIGITAL_MAX / 2;
+                            g_update_buffer[i] = DAC_DIGITAL_MAX / 2;
                         }
                     }
-                    printf("Waveform mapped to fixed DAC voltage range: %.2fV - %.2fV\r\n", DAC_ACTUAL_V_ZERO, DAC_ACTUAL_V_FULL);
+                    
+                    // 4. 双缓冲区切换：切换激活缓冲区和更新缓冲区
+                    uint16_t* temp = g_active_buffer;
+                    g_active_buffer = g_update_buffer;
+                    g_update_buffer = temp;
+                    
+                    // 5. 更新缓冲区索引
+                    g_current_buffer_index = 1 - g_current_buffer_index;
+                    
+                    printf("Buffer switched to index %d\r\n", g_current_buffer_index);
+                    
+                    // 6. 如果是首次触发，初始化并启动DDS
+                    static uint8_t dds_initialized = 0;
+                    if (!dds_initialized) {
+                        printf("Initializing DDS generator...\r\n");
+                        DAC_ACTUAL_SPAN = DAC_ACTUAL_V_FULL - DAC_ACTUAL_V_ZERO; // 计算实际的电压跨度
 
-                
-                    printf("Initializing DDS generator...\r\n");
-                    DAC_ACTUAL_SPAN = DAC_ACTUAL_V_FULL - DAC_ACTUAL_V_ZERO; // 计算实际的电压跨度
+                        // 初始化DDS產生器
+                        DDS_Init(&g_dds_generator, &hdac1, DAC_CHANNEL_1, &htim4, DDS_UPDATE_FREQUENCY);
 
-                    // 1. 初始化DDS產生器
-                    DDS_Init(&g_dds_generator, &hdac1, DAC_CHANNEL_1, &htim4, DDS_UPDATE_FREQUENCY);
+                        printf("Setting waveform...\r\n");
+                        // 設定要使用的波形（使用当前激活的缓冲区）
+                        DDS_SetWaveform(&g_dds_generator, g_active_buffer, WAVEFORM_RECONSTRUCTION_POINTS);
 
-                    printf("Setting waveform...\r\n");
-                    // 2. 設定要使用的波形
-                    DDS_SetWaveform(&g_dds_generator, g_reconstructed_waveform_uint16, WAVE_TABLE_SIZE);
+                        printf("Setting frequency...\r\n");
+                        // 設定初始輸出頻率
+                        DDS_SetFrequency(&g_dds_generator, g_final_harmonics[0].frequency);
 
-                    printf("Setting frequency...\r\n");
-                    // 3. 設定初始輸出頻率，例如 1000.0 Hz
-                    DDS_SetFrequency(&g_dds_generator, g_final_harmonics[0].frequency);
-
-                    printf("Starting DDS...\r\n");
-                    // 4. 啟動DDS引擎（這會自動啟動定時器和DMA）
-                    DDS_Start(&g_dds_generator);
-                    printf("DDS started.\r\n");
+                        printf("Starting DDS...\r\n");
+                        // 啟動DDS引擎（這會自動啟動定时器和DMA）
+                        DDS_Start(&g_dds_generator);
+                        printf("DDS started.\r\n");
+                        dds_initialized = 1;
+                    } else {
+                        // 非首次触发，只更新波形数据（使用新的激活缓冲区）
+                        printf("Updating DDS waveform...\r\n");
+                        DDS_SetWaveform(&g_dds_generator, g_active_buffer, WAVEFORM_RECONSTRUCTION_POINTS);
+                        printf("DDS waveform updated.\r\n");
+                    }
                 } else {
                     printf("Error: Signal analysis failed.\r\n");
                 }
