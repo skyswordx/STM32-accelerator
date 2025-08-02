@@ -15,7 +15,9 @@
 typedef enum {
     ADC_MODE_IDLE = 0, 
     ADC_MODE_NORMAL = 1,     // 正常模式
-    ADC_MODE_SWEEP = 2       // 扫频模式
+    ADC_MODE_SWEEP = 2,      // 扫频模式
+    ADC_MODE_RECONSTRUCT_A = 3, // 新增：分析输入信号
+    ADC_MODE_RECONSTRUCT_B = 4 // 新增：重建输出波形
 } adc_mode_t;
 
 extern uint32_t g_ADC_SAMPLE_RATE_Hz;

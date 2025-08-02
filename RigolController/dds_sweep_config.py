@@ -18,7 +18,7 @@ FREQ_END = 3000        # 结束频率 (Hz)
 FREQ_STEPS = 30        # 频率测试点数 (建议20-100)
 
 # === 测量参数配置 ===
-MEASUREMENT_AVERAGES = 5    # 每个点测量次数 (建议3-5次)
+MEASUREMENT_AVERAGES = 10    # 每个点测量次数 (建议3-5次)
 STABILIZATION_TIME = 0.5    # 信号稳定等待时间 (秒)
 AUTO_SCALE_TIMEOUT = 2      # Auto Scale等待时间 (秒)
 

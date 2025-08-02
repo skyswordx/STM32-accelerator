@@ -14,6 +14,7 @@
 // --- 新增: 包含滤波器辨识模块和数学库 ---
 #include "filter_identification.h"
 #include "arm_math.h" // 确保arm_math.h已包含
+//#include "my_signal_processing.h"
 
 extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
