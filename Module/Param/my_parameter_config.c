@@ -20,6 +20,9 @@ uint8_t g_desired_switch2which_relay = 0;       // 默认继电器0
 // 功能状态参数
 function_state_t g_desired_function_state = LCR_STATE; // 默认LCR状态
 
+// DAC输出模式（新增）
+dac_output_mode_t g_dac_output_mode = DAC_OUTPUT_STATIC; // 默认静态输出
+
 // 频谱数据缓冲区
 float32_t g_adc1_spectrum_data[FFT_LENGTH / 2] = {0};
 float32_t g_adc2_spectrum_data[FFT_LENGTH / 2] = {0};
