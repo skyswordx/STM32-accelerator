@@ -78,4 +78,10 @@ void my_armcfft32_apply(float32_t* adc_input, fundamental_result_t* result, uint
 
 float32_t caculate_DCcomponent(float32_t* data, uint32_t length);
 
+arm_status perform_spectral_interpolation(
+    float32_t* magnitude_spectrum,
+    uint16_t peak_index,
+    spectral_interpolation_mode_t mode,
+    interpolated_peak_t* result_out
+);
 #endif /* MY_FREQ_CONFIG_H */

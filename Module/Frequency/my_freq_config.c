@@ -9,12 +9,7 @@
 extern uint32_t g_ADC_SAMPLE_RATE_Hz; // 2MHz采样率
 
 // 前向声明辅助函数
-static arm_status perform_spectral_interpolation(
-    float32_t* magnitude_spectrum,
-    uint16_t peak_index,
-    spectral_interpolation_mode_t mode,
-    interpolated_peak_t* result_out
-);
+
 
 /**
  * @brief 执行频谱插值以查找更精确的峰值
@@ -24,7 +19,7 @@ static arm_status perform_spectral_interpolation(
  * @param result_out 指向插值结果的结构体指针
  * @retval arm_status ARM_MATH_SUCCESS 如果成功, ARM_MATH_ARGUMENT_ERROR 如果无法插值
  */
-static arm_status perform_spectral_interpolation(
+arm_status perform_spectral_interpolation(
     float32_t* magnitude_spectrum,
     uint16_t peak_index,
     spectral_interpolation_mode_t mode,

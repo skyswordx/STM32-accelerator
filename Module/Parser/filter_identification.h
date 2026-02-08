@@ -6,8 +6,11 @@
 #include "arm_math.h" // 必须包含的核心库
 
 // 定义仿真参数，最终这些值应由你的测量程序动态填充
-#define NUM_FREQ_POINTS  ((50000 - 1000) / 100 + 1) // (f_stop-f_start)/f_step + 1
-
+#define NUM_FREQ_POINTS  491
+// 扫频参数 (必须与 filter_identification.h 中 NUM_FREQ_POINTS 的计算方式保持一致)
+#define SWEEP_F_START_HZ 100.0f
+#define SWEEP_F_STOP_HZ  50000.0f
+#define SWEEP_F_STEP_HZ  100.0f
 // 定义滤波器类型枚举
 typedef enum {
     FILTER_TYPE_LPF,

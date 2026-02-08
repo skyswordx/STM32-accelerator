@@ -1,365 +1,137 @@
+<div align="center">
+
+**简体中文** | [English](README.en.md)
+
+<img src="assets-of-README/wave-reconstruction.gif" alt="波形重建演示" width="920" />
+<!-- ![Waveform Reconstruction Demo](assets-of-README/image-demo.jpg) -->
+演示说明：学习建模完成后，根据频响映射进行时域波形重建并输出。
+
 # STM32-accelerator
 
-[FPGA_MCU_SPI_COM: 基于 SPI 的 FPGA 与 MCU 简易通讯，以 EP4CE15 与 STM32F407 为例 (gitee.com)](https://gitee.com/themql/FPGA_MCU_SPI_COM)
+2025 电赛信号类 G 题：基于 STM32H750 的黑箱电路学习、频域辨识与实时波形重建系统
 
-[STM32H7 ADC 交替采样实现 8M 采样率(14bit) 与高速 USB（VCP）传输 - STM32/STM8 单片机论坛 - ST MCU 意法半导体官方技术支持论坛 (21ic.com)](https://bbs.21ic.com/icview-3409296-1-1.html)
+[![Platform](https://img.shields.io/badge/Platform-STM32H750-blue?style=flat-square&logo=stmicroelectronics)](https://www.st.com/en/microcontrollers-microprocessors/stm32h750vb.html)
+[![RTOS](https://img.shields.io/badge/RTOS-FreeRTOS-0A7B83?style=flat-square)](https://www.freertos.org/)
+[![DSP](https://img.shields.io/badge/DSP-CMSIS--DSP-6C63FF?style=flat-square)](https://arm-software.github.io/CMSIS-DSP/main/)
+[![ADC](https://img.shields.io/badge/ADC-Dual%20Sync%2014bit-orange?style=flat-square)](./Core)
+[![Signal%20Path](https://img.shields.io/badge/Signal%20Path-AD9954%20%2B%20DAC-green?style=flat-square)](./Module)
+[![Toolchain](https://img.shields.io/badge/Toolchain-CubeMX%20%2B%20MDK--ARM-red?style=flat-square)](./MDK-ARM)
 
-DOne:
+---
 
-- 信号失真度测量
-- DA 输出
-  - [x] DAC 输出波形
-  - [没做] DAC 输出波形的频率可调
-  - [x] DDS 驱动（AD9833、AD9954 等）
-- 频域测量（基波、谐波的幅度、相位等）
-  - [x] FFT 得到幅度谱和相位谱
-  - [x] 打表幅度拟合
-  - [x] 相位测量
-  - [x] 频谱插值
-  - [待验证] DILA
-  - [待验证] Quinn
-  - [待验证] CZT
-- 阻抗测量
-  - [x] LCR 计算、ESR、D、Q 值
-  - [待验证] 驱动 DDS 扫频
-- 时域测量
-  - [] 正弦波过零检测
-  - [] 正弦波峰值检测
+</div>
 
-Todo:
+## 项目简介
 
-- 上电通过基准源校准
-- 校准温漂
+本项目面向 2025 电赛信号类 G 题（电路模型探究装置），实现了“学习-辨识-重建”的完整闭环：
 
-请你阅读一下 Drivers\AD5933\zhengdian-AD5933 的工程，这个是使用 stm32 标准库的 iic-ad5933 驱动，请你结合 stm32 hal 库的 api ，把其中的标准库 iic-api 都替换成 hal 的，以便我在 hal 工程中使用
+- 学习阶段：使用 `AD9954` 扫频激励未知电路，双 `ADC` 同步采样输入/输出
+- 辨识阶段：通过 `FFT` 与复数频响计算，提取 `H(jω)` 并进行滤波器类型判别
+- 重建阶段：分析输入信号谐波，叠加幅相映射后在 `DAC` 端实时输出重建波形
 
-我现在需要在一个对简单信号输入 ADC 采样得到的数组，对他进行时域上的操作，根据：Reference\时域参考\index.md 中的指引检测输入信号，注意其中提到的，计算有效值时，待测波形的位置必须关于时间轴对称，所以在计算前要把所有波平移到关于时间轴对称的位置。所以需要你滤除直流分量，待测波形的离散点必须形成整数个完整的周期，也就是说，需要从 ADC 采集的点中取出一个或整数个完整周期的点，并且我还在 my_adc_task.c 做好了如何使用这个模块的示例，设计好了一部分接口，之后你按照我的规范工作流：模块实现的流程规范，第一遍是根据我的需求，查阅系统相关接口，明确一个设计文档（文档包括模块的基本原理、拟定设定的数据结构和函数接口，怎么从目前系统中获取数据、数据处理的流动）第二遍是生成完上述步骤之后，实现具体的模块代码，等待用户编译检测通过之后，第三遍是阅读系统中该模块需要的数据是怎么获得的，根据系统中的数据流动，设计一个兼容原先数据流动的条件分支，来在这个分支进行模块测试，如果模块效果不理想，可以在代码中通过简单的标志位弃用模块，同时不改变系统中原有的数据流动和所有功能。
+核心链路：
 
-dds
+`激励输出（AD9954/片内DAC） -> 双ADC同步采样 -> 频域分析与辨识 -> 传函映射 -> 谐波重建 -> DAC/DDS输出`
 
-正弦波的峰峰值以及正弦波的边沿（上升沿+下降沿），我调研了主流方案：Reference\正弦波时域峰值+边沿检测\test.md，以及时域处理的基本方法：Reference\正弦波时域峰值+边沿检测\时域参考，请你在我的模块文件夹 Module\TimeDetect\my_time_detect.h 实现，
 
-我在测试中发现串口输出显示是：Time Detect Module Initialized
-Time domain detection failed! 我觉得就是 if (my_time_detect_start(g_adc1_data_8bit, &result) == 0) 失败了
+## 主要特性
 
-我想要在工程中，使用 uint32_t g_dds_frequency = 1000; // 默认 DDS 频率为 1kHz
-uint32_t g_desired_dds_frequency = 1000; // 用户期望设置的 DDS 频率（相关变量在 Module/Button/my_button_task.c 中定义），然后在 my_uart_task.c 中实现一个解析功能，能够通过串口接收用户输入的字符串，解析出是设置 ADC 采样率还是 DDS 频率，并且设置对应的变量。
+- 双 ADC 同步采样：`ADC_DUALMODE_REGSIMULT` + DMA，强调相位一致性
+- 高频域分析：`FFT_LENGTH=4096`，支持窗函数与频谱插值
+- 双模式运行：`ADC_MODE_SWEEP`（扫频学习）与 `ADC_MODE_RECONSTRUCT`（重建输出）
+- 软件 DDS 输出：支持重建波形缓存更新与实时输出
+- 工程化验证：包含 `RigolController` 自动化测量脚本与统计资产
 
-这两个变量来通过串口接收用户想要设置的 DDS 频率，并且进行配置，类似于我已经有的 g_desired_ADC_sample_rate_Hz，但是在系统中，我已经有了 ADC 设置频率的功能，为了不把用户频率设定的是 ADC 还是 DDS 搞混淆，我想要到可以让用户发送 A100000 来表示设置 ADC 采样率为 100000Hz，发送 D100000 来表示设置 DDS 频率为 100000Hz，这样就可以通过串口接收用户的输入，解析出是设置 ADC 还是 DDS 的频率，并且设置对应的变量。请你在 my_uart_task.c 中实现这个解析功能。
+## 项目结构
 
-先用 FFT 算一个输入信号的频率
-然后根据这个频率动态调整一下采样率
-调整完之后再精细测量
-
-请你结合一下目前的系统，优化输出一下我的系统架构设计需求文档
-
-目前系统主要的 ADC 数据流是在 my_adc_task.c 中，见其详细注释，请你认识当前系统的数据流，所有获取 ADC 数据的数据流要严格遵守：【ADC 数据流】所有的 ADC 数据处理都得等待 DMA 传输完成标志位（DMA 传输完成的中断会停止 ADC 并设置标志位）
-
-我现在想要在 my_uart_task 实现一个利用上位机按照指定协议发送数据给 MCU，然后 MCU 解析对应数据并调整程序中参数的一套解析系统，我现在需要控制系统中如下的全局变量（有一些全局变量还未创建）：
-
-- g_desired_dds_frequency：设置 DDS 的期望频率
-- g_desired_ADC_sample_rate_Hz ：设置 ADC 的期望采样率
-- g_desired_dds_type：设置 DDS 的期望类型（例如 AD9833、AD9954 等）
-- g_desired_dds_phase：设置 DDS 的期望相位
-- g_desired_dds_amplitude：设置 DDS 的期望幅度
-- g_desired_DAC_output_waveform：设置 DAC 输出的期望波形（例如正弦波、方波、三角波等）
-- g_desired_DAC_output_frequency：设置 DAC 输出的期望频率
-- g_desired_DAC_single_output_amplitude：设置 DAC 输出的期望值
-- g_desired_switch2which_relay：设置目前的按键切换到控制哪个继电器
-- g_desired_function_state (该值为 LCR_state )
-  - LCR_state -> 此时 ADC_mode 为 Normal （Sweep 模式还在测试中，不考虑使用串口使能）是目前系统中的 LCR 表测量功能
-  - Spectrum_state -> 此时 ADC_mode 为 Normal，不过串口打印各个 ADC 通道的频谱，目前系统迭代成 LCR 表测量，但是该部分的功能实现在 my_frequency_config 中的 my_armcfft32_apply 中有相应功能注释，不过当时为了节约资源，没有把中间的缓冲数组单独保存，所以 ADC1 的数据算完，ADC2 的会覆盖 ADC1 的频谱数据，需要你重新开几个对应全局变量，保存每个通道的频谱数据
-  - Time_state -> 此时 ADC_mode 为 Normal，不过串口打印各个 ADC 通道的时域数据，目前系统中的状态好像有对应通道的全局数组，不过加窗和经过 FIR 的处理也是在 my_frequency_config 中的 my_armcfft32_apply 中实现的，注意该部分的功能实现在 my_frequency_config 中的 my_armcfft32_apply 中有相应功能注释，不过当时为了节约资源，没有把中间的缓冲数组单独保存
-  - diy_state -> 此时 ADC_mode 为 Normal，测试开发中的其他功能（保留和其他功能的一致性，在功能开发测试完成后，用户只用把该值从 diy_state 改为新功能即可，再自行开辟一个 diy_state）
-
-长按逻辑
-
-下面是我们目前的按键映射表和按键检测变量
-
-```
-// 按键映射表
-static const uint8_t key_map[KEYPAD_NUM_ROWS][KEYPAD_NUM_COLS] = {
-    {3, 2(所有DDS幅度增加), 1},
-    {6(所有DDS频率增加), 5, 4(所有DDS频率减小)},
-    {9, 8(所有DDS幅度减小), 7}
-};
-
-// 按键检测变量
-uint8_t g_short_pressed_key = NO_KEY_PRESSED;
-uint8_t g_long_pressed_key = NO_KEY_PRESSED;
+```text
+STM32-accelerator/
+├── Core/                      # CubeMX 生成的核心启动/中断/RTOS入口
+├── Drivers/                   # HAL/CMSIS 与外设驱动
+├── Module/                    # 业务模块（ADC / DAC / Frequency / Parser / UART / Timer）
+├── MDK-ARM/                   # Keil 工程与工程配置
+├── RigolController/           # 上位机自动测量脚本（频率/幅值扫描）
+├── Document/                  # 设计与优化文档
+├── assets-of-README/          # README 资源
+├── wave_construct.md          # 波形重建相关记录
+└── 项目总档案-2025电赛G题.md  # 上级项目归档（位于上级目录）
 ```
 
-为了应对测评中，不能使用电脑和串口助手的情况下，我想要首先利用矩阵键盘进行仪器的操作
+## 技术栈
 
-要求第一次按下按键 1，就进入 base2_function 处理 base2_function 的逻辑
-第一次按下按键 2，就进入 base3_function 处理 base3_function 的逻辑
-第一次按下按键 3，就进入 base4_function 处理 base4_function 的逻辑
+| 类别 | 方案 |
+|---|---|
+| 主控 | `STM32H750VBT6` |
+| 采样链路 | 双 `ADC` 同步采样 + DMA + `TIM3` 触发 |
+| 输出链路 | `AD9954`（激励）+ 片内 `DAC`（重建输出） |
+| 频域算法 | `CMSIS-DSP` FFT、窗函数、频谱插值 |
+| 实时调度 | `FreeRTOS` |
+| 开发工具 | `STM32CubeMX` + `Keil MDK-ARM` |
+| 验证工具 | Python + Rigol 自动化测量脚本 |
 
-第二次按下的意义则根据进入不同的函数会有不一样的逻辑，请你在 my_parser 实现这个框架
+## 性能快照（含实验条件）
 
-Done
+### 关键实验配置
 
-- PC1 按键触发定时器驱动 ADC
-- 运行时修改 ADC 采样率
-  - 我现在想要每次按下按键之后切换 ADC 采样率，ADC 是使用定时器触发的，简而言之就是要修改 htim3 的各种参数，我觉得可以通过 htim3 的句柄实现，但是这种运行时修改是否需要重新 init timer 还是什么，请你查阅工程中的 hal timer api 进行解答
+| 项目 | 配置 |
+|---|---|
+| ADC 模式 | `TIM3` 触发 + `ADC_DUALMODE_REGSIMULT` |
+| ADC 分辨率 | `14bit` |
+| 采样率 | `Fs ≈ 409.84 kHz` |
+| FFT 点数 | `4096` |
+| 扫频范围 | `100 Hz ~ 50 kHz`，步进 `100 Hz` |
+| 频率分辨率 | `Δf ≈ 100.06 Hz` |
+| 分析窗口长度 | `T_window ≈ 10 ms` |
+| 输出触发 | `TIM4`（DAC），`TIM6`（重建周期触发） |
 
-定时器修改 DAC 输出波形的频率
+### 代表性结果（归档数据）
 
-复现通过串口发送数据让 MCU 解析的功能
-我是这么设想的：
+| 指标 | 观测值 | 来源 |
+|---|---|---|
+| 已知模型输出控制误差 | `3.20% ~ 5.68%` | 电赛报告（PDF） |
+| 频率输出误差（100Hz~1MHz） | `0.1% ~ 2.4%` | 电赛报告（PDF） |
+| 频率误差均值 | `0.0295%` | `RigolController/STM32H7_DDS_Frequency_Sweep_Test_20250730_215545.xlsx` |
+| 频率误差最大绝对值 | `1.1941%` | 同上 |
+| 幅度误差均值 | `-4.0379%` | 同上 |
+| 幅度误差最大绝对值 | `13.7%` | 同上 |
 
-- 第一次按下前的编号，就代表了串口解析格式`xx:yy:cc`中的 xx 字段（cmd_type），
-  - 例如第一次按下的 1 键值代表设置参数命令，就是类似于发送串口解析中的 SET 字段，
-  - 例如第一次按下的 2 键值代表读取参数命令，就是类似于发送串口解析中的 GET 字段，
-  - 1~9 键都是合法的（不过等待后续自己 diy，全部归类到 switch 的 default 中）
-- 第二次按下前的编号，就代表了串口解析格式`xx:yy:cc`中的 yy 字段（param），
-  - 例如第二次按下的 1 键值代表设置 ADC 采样率，就是类似于发送串口解析中的 ADC_RATE 字段，
-  - 例如第二次按下的 2 键值代表设置 DDS 频率，就是类似于发送串口解析中的 DDS_FREQ 字段，
-  - 1~9 键都是合法的（不过剩余的参数等待后续自己 diy，全部归类到 switch 的 default 中）
-- 第三次按下前的值，就代表了串口解析格式`xx:yy:cc`中的 cc 字段（value）
-  - 例如第三次按下的 1 ~ 9 可以对应程序解析中的对应 value 字段
-  - 涉及到要为程序中变量赋值数字时，此时按需要长按按键 1，识别成功长按后，后续的按键输入被视为数字，并且按照用户输入的逻辑解析数字大小
-    - 例如长按 1 键后，后续先后按下 2、3、4 键，被视为数字 234，再次长按 1 键进行确认输入结束
-- 这一套过程如果有任何按键错误，可以选择通过长按按键 9 进程取消输入，重新开始检测第一次按下
+> 注：幅值误差受输出链路标定、频段、负载与探头配置影响，后续可继续做分频段补偿。
 
-请你参考 my_uart_task.c 中的串口解析函数修改 my_button_task 按键解析系统，这个串口解析经过修改可以应对 get:all 命令整个命令只有两个字段的情形，而按键部分却没办法应对，请你修改并完善一下按键处理 get:all 等两个字段长度的命令
+## 快速开始
 
-串口屏上电之后，默认在基础功能 2 页面，按下屏幕上的开始测试之后，串口屏会发送“S2”命令，表示开始测试，MCU 接收到该命令后会进入 base2_function 模式
+### 1) 打开固件工程
 
-在点击下一页之后，串口屏进入基础功能 3 页面，此时会发送“I3”，按下屏幕上的开始测试之后，串口屏会发送“S3”命令，表示开始测试，MCU 接收到该命令后会进入 base3_function 模式
+- Keil 工程：`MDK-ARM/FinallAttackProject.uvprojx`
+- 关键模式：扫频学习（`S5`）与信号重建（`S6`）
 
-在点击下一页之后，串口屏进入基础功能 4 页面，此时会发送“I4”，按下屏幕上的开始测试之后，串口屏会发送“S4”命令，表示开始测试，MCU 接收到该命令后会进入 base4_function 模式
+### 2) 构建与烧录
 
-从基础功能 4 页面点击上一页，串口屏会进入基础功能 3 页面，此时会发送“I3”，按下屏幕上的开始测试之后，串口屏会发送“S3”命令，表示开始测试，MCU 接收到该命令后会进入 base3_function 模式
+1. 在 Keil 中选择目标并编译
+2. 下载到 `STM32H750` 开发板
+3. 打开串口观察日志与状态切换
 
-请你在 my_uart_task.c 中的 void parse_serial_lcd_command(char\* cmd)实现这个串口屏的命令解析功能，能够根据串口屏发送的命令进入对应的 base2_function、base3_function 或 base4_function 模式
+### 3) 上位机自动化测量（可选）
 
-我在 cubemx 中设置了一个合适的 timer4 触发频率，我只需要在代码中使用 `HAL_TIM_Base_Start(&htim4);` 就可以启动定时器
-
-如果我需要使用 DMA 去把一共数组搬运到 DAC 让 DAC 输出波形，我需要使用 `HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, (uint32_t*)g_dac_out_array, length_of_array, DAC_ALIGN_12B_R);` 来启动 DMA 传输
-
-如果我想要停止定时器触发和 DAC 的 DMA 搬运，我需要使用 `HAL_TIM_Base_Stop(&htim4);` 来停止定时器，然后使用 `HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);` 来停止 DAC 的 DMA 传输
-
-再次启动定时器和 DAC 的 DMA 传输，我只需要再次调用 `HAL_TIM_Base_Start(&htim4);` 和 `HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, (uint32_t*)g_dac_out_array, length_of_array, DAC_ALIGN_12B_R);` 即可。
-
-这是我目前 stm32h750 系统中使用到 DAC 任务的接口
-
-```c
-void StartDACProcessingTask(void *argument) {
-    // 启动定时器
-    HAL_TIM_Base_Start(&htim4);
-
-    // 首次生成波形数据
-    update_dac_waveform_by_parameters();
-
-    // 启动DAC DMA传输
-    HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, (uint32_t*)g_dac_square_64, 50, DAC_ALIGN_12B_R);
-
-    // 设置DAC通道2的固定电压输出
-    HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_2, DAC_ALIGN_12B_R, VOLTAGE_TO_DAC_VALUE(g_desired_DAC_single_output_amplitude));
-    HAL_DAC_Start(&hdac1, DAC_CHANNEL_2); // 启动DAC通道2
-
-    for(;;)
-    {
-
-        osDelay(100); // 延时100毫秒
-    }
-}
+```bash
+cd RigolController
+python simple_test.py
 ```
 
-我在 cubemx 中设置了一个合适的 timer3 触发频率，默认以 2MHz 的频率去触发双 ADC 同步采样（ADC1、ADC2），我只需要在代码中使用 `HAL_TIM_Base_Start(&htim3);` 就可以启动定时器
+用于快速评估频率/幅度误差并导出测试结果。
 
-在第一次使用 ADC 之前，我需要初始化 adc_dmabuffer 内存空间（由于 Dcache 存在，所以需要对齐）
+## 文档索引
 
-```c
-memset(g_adc_dma_buffer, 0, ADC_SAMPLE_SIZE * sizeof(uint16_t));
-SCB_CleanDCache_by_Addr((uint32_t*)g_adc_dma_buffer, ADC_SAMPLE_SIZE * sizeof(uint16_t));
-```
+- 总体归档：`../项目总档案-2025电赛G题.md`
+- 频域模块说明：`Module/Frequency/README.md`
+- 自动测量总结：`RigolController/PROJECT_SUMMARY.md`
+- 波形重建记录：`wave_construct.md`
+- ADC 数据流说明：`adc-dma-底层api.md`
 
-并且我还需要校准 ADC
+## 致谢
 
-```c
-    /* 【ADC 数据流】校准ADC 勿动 */
-    HAL_ADCEx_Calibration_Start(&hadc2, ADC_CALIB_FACTOR_LINEARITY_REGOFFSET, ADC_SINGLE_ENDED);
-    HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_FACTOR_LINEARITY_REGOFFSET, ADC_SINGLE_ENDED);
-```
+- FPGA/MCU SPI 通信参考：[`FPGA_MCU_SPI_COM`](https://gitee.com/themql/FPGA_MCU_SPI_COM)
+- STM32H7 高速采样讨论参考：[`21ic 论坛帖子`](https://bbs.21ic.com/icview-3409296-1-1.html)
 
-并且是双 ADC 同步采样，在第一次使用 ADC 前，我需要按照如下的接口和顺序启动 ADC
+## 许可证
 
-```c
- /* 【ADC 数据流】初始化同步采样的 ADC 模式 */
-    HAL_ADC_Start(&hadc2);
-    HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)g_adc_dma_buffer, ADC_SAMPLE_SIZE);
-
-```
-
-然后我想要获取数据时，我就用`HAL_TIM_Base_Start(&htim3);`启动定时器，触发 ADC 工作，如果 ADC DMA 传输完成，我就可以通过传输完成的中断，关闭定时器防止当前数据没处理完就被下一次数据冲刷，并且设置 `g_adc_dma_buffer` 获取采集完成的标记
-
-```c
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
-{
-  if(hadc->Instance == ADC1)
-  {
-    /* ADC DMA 传输完成之后会进入这里 */
-    HAL_TIM_Base_Stop(&htim3); // 停止定时器，停止ADC触发
-    g_adc_dma_transfer_flag = ADC_DMA_TRANSFER_COMPLETED;
-  }
-}
-
-// 【ADC 数据流】所有的 ADC 数据处理都得等待 DMA 传输完成标志位（DMA 传输完成的中断会停止 ADC 并设置标志位）
-        if (g_adc_dma_transfer_flag == ADC_DMA_TRANSFER_COMPLETED) {
-            g_adc_dma_transfer_flag = ADC_DMA_TRANSFER_NOT_COMPLETED; // 重置标志
-
-            /* Dcache 缓存一致性处理 */
-            SCB_InvalidateDCache_by_Addr((uint32_t*)g_adc_dma_buffer, ADC_SAMPLE_SIZE * sizeof(uint16_t));
-
-            /* 提取 ADC 数据 */
-            for (uint32_t i = 0; i < ADC_SAMPLE_SIZE; i++) {
-                // debug1[i] = (uint16_t)(g_adc_dma_buffer[i] & g_and_mask); // ADC1数据
-                // debug2[i] = (uint16_t)((g_adc_dma_buffer[i] >> g_right_shift) & g_and_mask); // ADC2数据
-
-                g_adc1_data_8bit[i] = (float32_t)((g_adc_dma_buffer[i] & g_and_mask) * ADC_REF_VOLTAGE / ADC_RESOLUTION_FACTOR); // ADC1数据
-                g_adc2_data_8bit[i] = (float32_t)(((g_adc_dma_buffer[i] >> g_right_shift) & g_and_mask) * ADC_REF_VOLTAGE / ADC_RESOLUTION_FACTOR); // ADC2数据
-                // printf("ADC1/2:%.3f, %.3f, %lu\n", g_adc1_data_8bit[i], g_adc2_data_8bit[i], g_ADC_SAMPLE_RATE_Hz);
-            }
-```
-
-如果我想要停止定时器触发和 DAC 的 DMA 搬运，我需要使用 `HAL_TIM_Base_Stop(&htim4);` 来停止定时器，然后使用 `HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);` 来停止 DAC 的 DMA 传输
-
-再次启动定时器和 DAC 的 DMA 传输，我只需要再次调用 `HAL_TIM_Base_Start(&htim4);` 和 `HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, (uint32_t*)g_dac_out_array, length_of_array, DAC_ALIGN_12B_R);` 即可。
-
-这是我目前 stm32h750 系统中使用到 ADC 任务的接口
-
-```c
-void StartADCProcessingTask(void *argument) {
-
-
-    for(;;)
-    {
-
-        osDelay(100); // 延时100毫秒
-    }
-}
-
-
-发挥2流程整理：
-1. 探究装置的输出接入未知模型电路的输入，未知模型输出接探究装置输入，按下“一键学习”后，开始学习建模。以下为学习建模流程：
-1.1 继电器切换到AD9833/AD9954，输出偏置为0，向未知模型电路输出不同频率，固定幅度的正弦波激励，ADC1对激励信号（探究装置输出）进行采样，同时ADC2对响应信号（探究装置输入）进行同步采样，计算并记录两个信号的幅相关系。
-1.2 切换激励频率，重复上述步骤，记录各个频率下位置模型电路的幅、相特性表。
-1.3 通过得到的特性表拟合二阶电路的传递函数。至此，学习建模完成。
-
-2. 建模完成后，切换至推理生成模式，继电器切换至片内DAC输出。向探究装置输入正弦波、矩形波（占空比 10%~50%、步长 5%）和其他周期信号，探究装置能够输出与此前记录的传递函数对应的响应信号。
-2.1 有两种可能方案：
-方案一：系统先确认激励信号的周期，确认DDS缓冲区的相关配置，每隔一段时间重新开启ADC采样，并通过激励与传递函数计算单个周期的响应并刷新缓冲区，需要保证刷新缓冲区的信号相位一致。（软件DDS）
-方案二：采用与传递函数等价的差分方程实时进行计算与输出，ADC需要实时进行采样（每输出一个DAC数据，ADC至少需要采样一次）。
-2.2 DAC输出削去了全部直流量，需要通过输出偏置进行补偿。
-
-
-我现在要测试一下
-
-目前我想要实现一个功能，这可能需要你再给 ADC mode 再配置一个学习成功后模仿输出状态
-1. 第一次按下用户按钮（PC1）后，系统启动学习模式，使用DDS对未知滤波器模块进行扫频，然后使用ADC同步采样，收集滤波器模块的输入输出信号，然后识别学习建模其传递函数，学习成功后，成果就在void identify_filter(
-    ContinuousTransferFunction* result,
-    const float32_t* w_rad,           // 角频率数组 (rad/s)
-    const float32_t* H_measured_cmplx // 测量的复数响应 (交错格式 [R,I,R,I...])
-);里面
-
-2. 在输出模式下，系统会收到一个信号源输入的周期信号，每隔 20ms 启动一次ADC进行采样，对采样得到的信号进行FFT计算，得到频域的幅度谱和相位谱，之后通过与之前学习到的传递函数进行计算，得到输出信号的幅度谱和相位谱，然后逆解算FFT得到输出信号的时域波形，最后通过软件DDS引擎输出到DAC。
-（注意，每隔20ms的定时中断让我自己用cubemx进行配置定时器，不需要你修改cubemx生成的代码）
-
-## 📋 实现状态：已完成 ✅
-
-### 🔧 已实现的功能
-
-#### 1. ADC模式扩展
-- ✅ 添加了 `ADC_MODE_IMITATE` 模式（模仿输出模式）
-- ✅ 扩展了ADC任务的状态机逻辑
-- ✅ 支持学习模式和模仿模式的无缝切换
-
-#### 2. 学习模式 (ADC_MODE_SWEEP)
-- ✅ DDS自动扫频（1kHz-50kHz，步长100Hz）
-- ✅ 双ADC同步采样输入和输出信号
-- ✅ FFT分析计算每个频率点的传递函数
-- ✅ 自动滤波器类型识别（LPF/HPF/BPF/BSF）
-- ✅ 传递函数参数辨识和存储
-
-#### 3. 模仿输出模式 (ADC_MODE_IMITATE)
-- ✅ 周期性ADC采样（支持20ms定时触发）
-- ✅ 输入信号FFT频域分析
-- ✅ 传递函数频域计算
-- ✅ IFFT逆变换生成时域输出
-- ✅ 软件DDS引擎DAC输出
-
-#### 4. 新增模块和文件
-
-##### ADC任务增强 (`Module/ADC/my_adc_task.c/h`)
-- ✅ 添加模仿模式处理逻辑
-- ✅ 20ms定时器触发支持
-- ✅ 按钮控制状态切换
-
-##### DAC任务创建 (`Module/DAC/my_dac_task.c/h`)
-- ✅ 软件DDS波形生成
-- ✅ 多种输出模式支持（静态/波形/模仿）
-- ✅ 动态波形缓冲区管理
-
-##### 滤波器模仿模块 (`Module/Parser/filter_imitate.c/h`)
-- ✅ 传递函数存储和管理
-- ✅ 频域传递函数计算
-- ✅ FFT/IFFT信号处理链路
-
-##### 参数配置扩展 (`Module/Param/my_parameter_config.c/h`)
-- ✅ DAC输出模式枚举
-- ✅ 全局状态变量管理
-
-#### 5. 系统集成
-- ✅ RTOS任务创建和调度
-- ✅ 任务间通信和状态同步
-- ✅ 内存对齐和缓存一致性处理
-- ✅ 完整的错误处理和调试输出
-
-### 🎮 使用方法
-
-1. **硬件连接**：
-   - DDS输出 → 滤波器输入 → ADC2
-   - DDS输出 → ADC1（参考信号）
-
-2. **学习模式**：
-   - 按下PC1按钮启动扫频学习
-   - 自动完成传递函数辨识
-
-3. **模仿模式**：
-   - 信号源 → ADC1，DAC1 → 目标设备
-   - 再次按PC1启动模仿输出
-   - 系统每20ms自动处理并输出
-
-4. **停止**：
-   - 再次按PC1返回空闲状态
-
-### 📁 文件结构
-```
-
-Module/
-├── ADC/my_adc_task.c/h # ADC 任务（学习+模仿）
-├── DAC/my_dac_task.c/h # DAC 任务（软件 DDS）  
-├── Parser/filter_imitate.c/h # 滤波器模仿算法
-├── Parser/filter_identification.c/h # 滤波器识别算法（已有）
-└── Param/my_parameter_config.c/h # 参数配置（已扩展）
-
-```
-
-### ⚙️ 技术参数
-- **扫频范围**：1-50kHz（可配置）
-- **FFT长度**：4096点
-- **采样模式**：双ADC同步
-- **更新周期**：20ms（模仿模式）
-- **支持滤波器**：2阶LPF/HPF/BPF/BSF
-
-### 📋 CubeMX配置要求
-- ✅ TIM3：ADC触发定时器（已配置）
-- ✅ TIM4：DAC输出定时器（已配置）
-- ⚠️ TIM6：20ms周期定时器（需要用户在CubeMX中配置为20ms周期中断）
-
-### 📖 详细说明
-请参阅：`滤波器学习与模仿功能说明.md`
-
-```
+当前目录未单独附带许可证文件，默认遵循仓库根目录的许可与使用约定。

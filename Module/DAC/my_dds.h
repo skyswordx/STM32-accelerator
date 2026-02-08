@@ -8,6 +8,8 @@
 
 #define DDS_DMA_BUFFER_SIZE 128
 #define WAVE_TABLE_SIZE 64
+#define DDS_UPDATE_FREQUENCY 995062
+
 
 typedef struct {
     // --- DDS 狀態 ---

@@ -13,21 +13,23 @@
 
 // --- 新增: 包含滤波器辨识模块和数学库 ---
 #include "filter_identification.h"
-#include "filter_imitate.h"      // 新增：滤波器模仿模块
-#include "my_dac_task.h"         // 新增：DAC任务头文件
 #include "arm_math.h" // 确保arm_math.h已包含
+#include "my_signal_reconstruction.h"
 
 extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
 extern UART_HandleTypeDef huart1;
 extern TIM_HandleTypeDef htim3;  /* 实际使用TIM3作为ADC触发源和时间戳基准 */
-extern TIM_HandleTypeDef htim6;  /* 用于20ms定时触发模仿模式 */
+extern TIM_HandleTypeDef htim6;  /* Timer6用于定时触发信号重建 */
 
 #define ADC_SAMPLE_SIZE (4096)
 #define ADC_DMA_TRANSFER_COMPLETED 1
 #define ADC_DMA_TRANSFER_NOT_COMPLETED 0
 extern uint32_t g_desired_ADC_sample_rate_Hz;
-uint32_t g_ADC_SAMPLE_RATE_Hz = 400000; // 默认采样率 400kHz
+uint32_t g_ADC_SAMPLE_RATE_Hz = 409840; // 默认采样率 409.84kHz
+
+extern UART_HandleTypeDef huart6; // 串口屏
+
 // uint32_t g_ADC_SAMPLE_RATE_Hz = 995062*2; // 2MHz采样率
 // uint32_t g_ADC_SAMPLE_RATE_Hz = 2000000; // 2MHz采样率
 
@@ -38,10 +40,7 @@ uint32_t g_ADC_SAMPLE_RATE_Hz = 400000; // 默认采样率 400kHz
 #define ADC_RESOLUTION_14BIT 16384.0f // 2^14=16384
 #define ADC_RESOLUTION_16BIT 65536.0f // 2^16=65536
 
-// 扫频参数 (必须与 filter_identification.h 中 NUM_FREQ_POINTS 的计算方式保持一致)
-#define SWEEP_F_START_HZ 1000.0f
-#define SWEEP_F_STOP_HZ  50000.0f
-#define SWEEP_F_STEP_HZ  100.0f
+
 
 /**
  * 1. 在 cubemx 中同时更改 2 个 ADC 的分辨率
@@ -93,7 +92,25 @@ uint8_t g_time_detect_enabled = 0; // 默认禁用
 
 
 extern DDS_Generator_t g_dds_generator; // 引用全局DDS生成器实例
-extern dac_output_mode_t g_dac_output_mode; // 引用DAC输出模式
+extern TIM_HandleTypeDef htim4;
+extern DAC_HandleTypeDef hdac1;
+extern float DAC_ACTUAL_V_ZERO;
+extern float DAC_ACTUAL_V_FULL;
+extern float DAC_ACTUAL_SPAN;
+
+// --- 用于信号重建的全局变量 ---
+static harmonic_component_t g_final_harmonics[MAX_HARMONICS];
+static int32_t g_num_final_harmonics = 0;
+static float32_t g_reconstructed_waveform[WAVEFORM_RECONSTRUCTION_POINTS];
+
+// --- 双缓冲区机制：避免DAC输出突变 ---
+static uint16_t g_reconstructed_waveform_uint16_buffer0[WAVEFORM_RECONSTRUCTION_POINTS];  // 缓冲区0
+static uint16_t g_reconstructed_waveform_uint16_buffer1[WAVEFORM_RECONSTRUCTION_POINTS];  // 缓冲区1
+static uint16_t* g_active_buffer = g_reconstructed_waveform_uint16_buffer0;              // 当前激活的缓冲区指针
+static uint16_t* g_update_buffer = g_reconstructed_waveform_uint16_buffer1;              // 当前更新的缓冲区指针
+// --- 数学合成法使能开关 (1 = 使能, 0 = 禁用) ---
+// 您可以通过串口命令、按键等方式在运行时修改此变量的值
+static volatile uint8_t g_enable_math_synthesis = 0; 
 
 // 用于存储扫频数据的静态数组，防止堆栈溢出
 static float32_t g_sweep_w_rad[NUM_FREQ_POINTS];             // 角频率 (rad/s)
@@ -103,6 +120,9 @@ static uint32_t g_sweep_step = 0;                          // 当前扫频步数
 
 extern fundamental_result_t g_ch1_fundamental; // ADC1 通道 基波结果结构
 extern fundamental_result_t g_ch2_fundamental; // ADC2 通道 基波结果结构
+
+// 外部标志位声明
+extern uint8_t g_sweep_reconstruction_trigger;  // S5命令触发扫频重建标志位
 
 extern arm_cfft_radix4_instance_f32 fft_instance_radix4; // FFT实例
 
@@ -122,20 +142,6 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 
 // ADC 工作模式，默认为空闲
 static adc_mode_t g_adc_mode = ADC_MODE_IDLE;
-
-// --- 新增：模仿输出相关变量 ---
-static uint8_t g_imitate_trigger_flag = 0;  // 20ms定时器触发标志
-static float32_t g_imitate_output_buffer[FFT_LENGTH]; // 模仿输出缓冲区
-
-// 20ms定时器中断回调函数（需要在main.c中调用）
-void HAL_TIM_PeriodElapsedCallback_TIM6(TIM_HandleTypeDef *htim)
-{
-    if (htim->Instance == TIM6) {
-        if (g_adc_mode == ADC_MODE_IMITATE) {
-            g_imitate_trigger_flag = 1; // 设置触发标志
-        }
-    }
-}
 
 
 
@@ -159,25 +165,10 @@ void StartADCProcessingTask(void *argument) {
     time_config.filter_alpha = 0.05f;      // 设置IIR滤波器系数
     time_config.hysteresis_v = 0.05f;      // 设置50mV的迟滞电压窗口
 
-    // --- 新增：初始化滤波器模仿模块 ---
-    filter_imitate_init();
-
     printf("System Initialized. Press User Button (PC1) to start Filter Identification Sweep.\r\n");
-    printf("After learning, press User Button again to enter Imitate Mode.\r\n");
 
 
     for (;;) {
-        
-        // --- 新增：处理20ms定时器触发的模仿模式ADC采样 ---
-        if (g_imitate_trigger_flag) {
-            g_imitate_trigger_flag = 0; // 清除标志
-            
-            if (g_adc_mode == ADC_MODE_IMITATE) {
-                // 启动ADC采样
-                printf("20ms Timer triggered - Starting ADC sampling for imitate mode\r\n");
-                HAL_TIM_Base_Start(&htim3);
-            }
-        }
 
         /* 【ADC 数据流】 利用 GPIO 按键触发启动定时器 */
         if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_RESET){
@@ -186,49 +177,56 @@ void StartADCProcessingTask(void *argument) {
                 HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13); // 切换 LED 状态
                 while (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_RESET);
                 
-                // 根据当前状态和滤波器模仿模块状态决定下一步操作
-                if (g_adc_mode == ADC_MODE_IDLE) {
-                    // 启动学习模式
-                    printf("\r\n--- Starting Filter Identification Sweep ---\r\n");
-                    g_adc_mode = ADC_MODE_SWEEP;
-                    g_sweep_step = 0;
+                printf("\r\n--- Starting Filter Identification Sweep ---\r\n");
+                g_adc_mode = ADC_MODE_SWEEP;
+                g_sweep_step = 0;
 
-                    // 设置DDS到起始频率
-                    float32_t current_freq_hz = SWEEP_F_START_HZ + g_sweep_step * SWEEP_F_STEP_HZ;
-                    AD9954_Set_Fre(current_freq_hz); // 假设使用AD9954
-                    // DDS_SetFrequency(&g_dds_generator, current_freq_hz); // 使用 DAC + 软件 DDS
+                // 设置DDS到起始频率
+                float32_t current_freq_hz = SWEEP_F_START_HZ + g_sweep_step * SWEEP_F_STEP_HZ;
+                AD9954_Set_Fre(current_freq_hz); // 假设使用AD9954
+                // DDS_SetFrequency(&g_dds_generator, current_freq_hz); // 使用 DAC + 软件 DDS
 
-                    printf("Step %lu/%d: Freq = %.1f Hz\r\n", g_sweep_step + 1, NUM_FREQ_POINTS, current_freq_hz);
-                    
-                    // 启动ADC采样
-                    HAL_TIM_Base_Start(&htim3);
-                    
-                } else if (g_adc_mode == ADC_MODE_IDLE && filter_imitate_get_state() == IMITATE_STATE_READY) {
-                    // 启动模仿模式
-                    printf("\r\n--- Starting Imitate Output Mode ---\r\n");
-                    g_adc_mode = ADC_MODE_IMITATE;
-                    
-                    // 启动20ms定时器（假设TIM6已配置为20ms周期）
-                    // HAL_TIM_Base_Start_IT(&htim6); // 需要在CubeMX中配置TIM6
-                    
-                    // 切换DAC到模仿模式
-                    g_dac_output_mode = DAC_OUTPUT_IMITATE;
-                    
-                    printf("Imitate mode activated. System will sample every 20ms and generate output.\r\n");
-                    
-                } else {
-                    // 停止当前模式，回到空闲
-                    printf("\r\n--- Stopping current mode, returning to IDLE ---\r\n");
-                    g_adc_mode = ADC_MODE_IDLE;
-                    
-                    // 停止所有定时器
-                    HAL_TIM_Base_Stop(&htim3);
-                    HAL_TIM_Base_Stop_IT(&htim6); // 停止TIM6中断
-                    
-                    // 切换DAC到静态模式
-                    g_dac_output_mode = DAC_OUTPUT_STATIC;
-                }
+                printf("Step %lu/%d: Freq = %.1f Hz\r\n", g_sweep_step + 1, NUM_FREQ_POINTS, current_freq_hz);
+                
+                // 启动ADC采样
+                // switch_timer_sampleRate_Auto(&htim3, g_desired_ADC_sample_rate_Hz, g_desired_ADC_sample_rate_Hz / 100);
+                HAL_TIM_Base_Start(&htim3);
             }
+        }
+
+        /* 【串口屏 S5 命令】检测S5扫频重建触发标志位 */
+        if (g_sweep_reconstruction_trigger == 1){
+            printf("\r\n--- Triggering Sweep Reconstruction via S5 Command ---\r\n");
+            g_adc_mode = ADC_MODE_SWEEP;
+            g_sweep_step = 0;
+            g_sweep_reconstruction_trigger = 0; // 清除标志位，防止重复触发
+
+            // 设置DDS到起始频率
+            float32_t current_freq_hz = SWEEP_F_START_HZ + g_sweep_step * SWEEP_F_STEP_HZ;
+            AD9954_Set_Fre(current_freq_hz); // 假设使用AD9954
+            // DDS_SetFrequency(&g_dds_generator, current_freq_hz); // 使用 DAC + 软件 DDS
+
+            printf("Step %lu/%d: Freq = %.1f Hz\r\n", g_sweep_step + 1, NUM_FREQ_POINTS, current_freq_hz);
+            
+            // 启动ADC采样
+            HAL_TIM_Base_Start(&htim3);
+        }
+
+        if (g_signal_reconstruction_trigger == 1){
+            printf("\r\n--- Triggering Signal Reconstruction ---\r\n");
+            printf("Mathematical Synthesis is currently %s.\r\n", g_enable_math_synthesis ? "ENABLED" : "DISABLED");
+            g_adc_mode = ADC_MODE_RECONSTRUCT;
+            g_signal_reconstruction_trigger = 0; // 清除标志位，防止重复触发
+            
+            // 首次触发时启动Timer6定时中断，用于后续的定时触发
+            if (!g_signal_reconstruction_active) {
+                g_signal_reconstruction_active = 1;  // 激活信号重建模式
+                g_timer6_enabled = 1;                // 启用Timer6标志位
+                HAL_TIM_Base_Start_IT(&htim6);       // 启动Timer6定时中断
+                printf("Timer6 interrupt enabled for periodic reconstruction.\r\n");
+            }
+            
+            HAL_TIM_Base_Start(&htim3);
         }
     
 
@@ -310,110 +308,214 @@ void StartADCProcessingTask(void *argument) {
                     // 打印辨识结果
                     if (isnan(g_identified_tf.b0)) {
                         printf("-> ERROR: Identification failed. Matrix solution might have failed.\r\n");
+
+                        g_identified_tf.identified_type = FILTER_TYPE_UNKNOWN; // 设置为未知类型
+                        // 发送错误信息到串口屏
+                        char display_buffer[64];
+                        int len = sprintf(display_buffer, "t0.txt=\"%s\"", "Unknown");
+                        display_buffer[len] = 0xFF;
+                        display_buffer[len+1] = 0xFF;
+                        display_buffer[len+2] = 0xFF;
+                        HAL_UART_Transmit(&huart6, (uint8_t*)display_buffer, len+3, 100);
                     } else {
                         const char* type_str[] = {"LPF", "HPF", "BPF", "BSF", "Unknown"};
-                        printf("-> Identified Filter Type: %s\r\n", type_str[g_identified_tf.identified_type]);
-                        printf("-> H(s) = (b2*s^2 + b1*s + b0) / (s^2 + a1*s + a0)\r\n");
-                        printf("-> Identified Coefficients:\r\n");
-                        printf("   b2 = %e\r\n", g_identified_tf.b2);
-                        printf("   b1 = %e\r\n", g_identified_tf.b1);
-                        printf("   b0 = %e\r\n", g_identified_tf.b0);
-                        printf("   a1 = %e\r\n", g_identified_tf.a1);
-                        printf("   a0 = %e\r\n", g_identified_tf.a0);
-                        
-                        // --- 新增：将辨识结果传递给模仿模块 ---
-                        filter_imitate_set_transfer_function(&g_identified_tf);
-                        printf("-> Transfer function loaded into imitate module.\r\n");
-                        printf("-> Press User Button again to start Imitate Mode.\r\n");
+                        // Create a buffer for the formatted string
+                        char display_buffer[64]; // Buffer size should be enough for the command
+
+                        // Format the filter type into the buffer
+                        int len = sprintf(display_buffer, "t0.txt=\"%s\"", type_str[g_identified_tf.identified_type]);
+
+                        // Manually append the three 0xFF bytes
+                        display_buffer[len] = 0xFF;
+                        display_buffer[len+1] = 0xFF;
+                        display_buffer[len+2] = 0xFF;
+
+                        // Send the command to the display via UART6
+                        HAL_UART_Transmit(&huart6, (uint8_t*)display_buffer, len+3, 100);
+
+                        // Also print to UART1 for debugging
+                        printf("-> Filter type identified: %s\r\n", type_str[g_identified_tf.identified_type]);
+                        // printf("-> H(s) = (b2*s^2 + b1*s + b0) / (s^2 + a1*s + a0)\r\n");
+                        // printf("-> Identified Coefficients:\r\n");
+                        // printf("   b2 = %e\r\n", g_identified_tf.b2);
+                        // printf("   b1 = %e\r\n", g_identified_tf.b1);
+                        // printf("   b0 = %e\r\n", g_identified_tf.b0);
+                        // printf("   a1 = %e\r\n", g_identified_tf.a1);
+                        // printf("   a0 = %e\r\n", g_identified_tf.a0);
+                  
                     }
                     
                     printf("\r\nIdentification complete. System is now idle.\r\n");
+                    // // 直接打印 H complex 和 w_rad
+                    // // printf("========== H complex  + w_rad ========== ");
+                    // printf("左1是H实部，左2是H虚部，右边是w_rad\r\n");
+                    // for (int i = 0; i < NUM_FREQ_POINTS; i++) {
+                    //     printf("%.4f,%.4f,%.4f\n", g_sweep_H_cmplx[i * 2], g_sweep_H_cmplx[i * 2 + 1], g_sweep_w_rad[i]);
+                    // }
                     g_adc_mode = ADC_MODE_IDLE; // 返回空闲模式
-                }
-            }
 
-            // --- 新增：模仿模式数据处理 ---
-            if (g_adc_mode == ADC_MODE_IMITATE) {
-                printf("=== Imitate Mode: Processing input signal ===\r\n");
-                
-                // 使用输入信号进行滤波器模仿计算
-                int result = filter_imitate_process_signal(g_adc1_data_8bit, g_imitate_output_buffer, g_ADC_SAMPLE_RATE_Hz);
-                
-                if (result == 0) {
-                    // 成功生成输出信号，发送到DAC
-                    set_dac_imitate_mode(g_imitate_output_buffer, FFT_LENGTH);
-                    printf("Output signal generated and sent to DAC.\r\n");
-                } else {
-                    printf("ERROR: Failed to process imitate signal.\r\n");
-                }
-            }
-
-            if (g_time_detect_enabled) {
-                time_domain_result_t ch1_time_result, ch2_time_result;
-
-                // --- 调用优化的时域分析函数 ---
-                my_time_domain_analysis_optimized(g_adc1_data_8bit, g_adc1_temp_buffer, ADC_SAMPLE_SIZE, g_ADC_SAMPLE_RATE_Hz, &time_config, &ch1_time_result);
-                my_time_domain_analysis_optimized(g_adc2_data_8bit, g_adc2_temp_buffer, ADC_SAMPLE_SIZE, g_ADC_SAMPLE_RATE_Hz, &time_config, &ch2_time_result);
-
-                // --- 打印优化后的分析结果 ---
-                printf("\r\n--- Optimized Time Domain Analysis ---\r\n");
-                printf("--- Channel 1 ---\r\n");
-                printf("  Frequency     : %.3f Hz\r\n", ch1_time_result.frequency);
-                printf("  Vpp (Peak-Peak) : %.4f V\r\n", ch1_time_result.vpp_peak);
-                printf("  AC RMS        : %.4f V\r\n", ch1_time_result.ac_rms);
-                printf("  DC Offset     : %.4f V\r\n", ch1_time_result.dc_offset);
-                printf("  V Max        : %.4f V\r\n", ch1_time_result.v_max);
-                printf("  V Min        : %.4f V\r\n", ch1_time_result.v_min);
-                
-                printf("--- Channel 2 ---\r\n");
-                printf("  Frequency     : %.3f Hz\r\n", ch2_time_result.frequency);
-                printf("  Vpp (Peak-Peak) : %.4f V\r\n", ch2_time_result.vpp_peak);
-                printf("  AC RMS        : %.4f V\r\n", ch2_time_result.ac_rms);
-                printf("  DC Offset     : %.4f V\r\n", ch2_time_result.dc_offset);
-                printf("  V Max        : %.4f V\r\n", ch2_time_result.v_max);
-                printf("  V Min        : %.4f V\r\n", ch2_time_result.v_min);
-
-                printf("-------------------------------------\r\n\r\n");
-                fundamental_result_t ch1_freq_result, ch2_freq_result;
-
-                // 分别计算两个通道的频谱数据并存储到独立的缓冲区中
-                my_armcfft32_apply(g_adc1_data_8bit, &ch1_freq_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
-                memcpy(g_adc1_spectrum_data, g_fft_output_buffer, (FFT_LENGTH / 2) * sizeof(float32_t));
-
-                my_armcfft32_apply(g_adc2_data_8bit, &ch2_freq_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
-                memcpy(g_adc2_spectrum_data, g_fft_output_buffer, (FFT_LENGTH / 2) * sizeof(float32_t));
-                            
-                // 打印频谱
-
-                // 打印频谱分析结果
-                printf("=== Spectrum Analysis Results ===\n");
-                printf("ADC1 - Frequency: %lu Hz, Magnitude: %.6f V\n", ch1_freq_result.fundamental_frequency, ch1_freq_result.fundamental_vpp);
-                printf("ADC2 - Frequency: %lu Hz, Magnitude: %.6f V\n", ch2_freq_result.fundamental_frequency, ch2_freq_result.fundamental_vpp);
-            }
-
-            
-
-            switch (g_desired_function_state) {
-                case SPECTRUM_STATE:
-                    printf("=== Spectrum Results ===\n");
-                        for (uint32_t i = 0; i < (FFT_LENGTH / 2); i++) {
-                            printf("  Frequency Bin %lu: %.6f V\n", i, g_adc1_spectrum_data[i]);
-                        }
-                        for (uint32_t i = 0; i < (FFT_LENGTH / 2); i++) {
-                            printf("  Frequency Bin %lu: %.6f V\n", i, g_adc2_spectrum_data[i]);
-                        }
-                    break;
-                case TIME_STATE:
-                    printf("=== Time Domain Analysis Results ===\n");
                     
-                    // 打印ADC1和ADC2的时域数据
-                    for (uint32_t i = 0; i < ADC_SAMPLE_SIZE; i++) { 
-                        printf("raw ADC1/2 :%.6f,%.6f\n", g_adc1_data_8bit[i], g_adc2_data_8bit[i]);
+                }
+            } else if (g_adc_mode == ADC_MODE_RECONSTRUCT) {
+                // 1. 调用顶层分析函数，传入使能开关的状态
+                analysis_method_t method_used = analyze_and_select_best_method(
+                    g_final_harmonics,
+                    &g_num_final_harmonics,
+                    g_adc2_data_8bit, // 使用 CH1 (输入) 数据进行分析
+                    g_enable_math_synthesis // 传入数学合成法使能开关
+                );
 
+                if (method_used != METHOD_FAILED) {
+                    // 2. 使用分析得到的谐波分量，进行波形重建
+                    reconstruct_output_waveform(
+                        g_reconstructed_waveform,
+                        WAVEFORM_RECONSTRUCTION_POINTS,
+                        g_final_harmonics,
+                        g_num_final_harmonics,
+                        g_sweep_w_rad,
+                        g_sweep_H_cmplx,
+                        NUM_FREQ_POINTS
+                    );
+
+                    printf("Waveform reconstruction complete.\r\n");
+                    
+                    // 3. 将float类型的波形转换为uint16并归一化到4095（使用更新缓冲区）
+                    const float32_t dac_center_voltage = DAC_ACTUAL_V_ZERO + (DAC_ACTUAL_SPAN / 2.0f);
+                    const uint16_t DAC_DIGITAL_MAX = 4095;
+
+                    for(int i = 0; i < WAVEFORM_RECONSTRUCTION_POINTS; i++) {
+                        // a. 获取计算出的交流电压值
+                        float32_t ac_voltage = g_reconstructed_waveform[i];
+                        
+                        // b. 加上直流偏置，使波形中心对齐到DAC的中心电压
+                        float32_t desired_voltage = ac_voltage + dac_center_voltage;
+                        
+                        // c. 检查并处理削波 (Clamping)，防止电压超出DAC物理范围
+                        if (desired_voltage > DAC_ACTUAL_V_FULL) {
+                            desired_voltage = DAC_ACTUAL_V_FULL;
+                        } else if (desired_voltage < DAC_ACTUAL_V_ZERO) {
+                            desired_voltage = DAC_ACTUAL_V_ZERO;
+                        }
+                        
+                        // d. 根据固定的电压-数值关系进行线性转换，写入更新缓冲区
+                        if (DAC_ACTUAL_SPAN > 0.001f) {
+                            float32_t mapped_value = ((desired_voltage - DAC_ACTUAL_V_ZERO) / DAC_ACTUAL_SPAN) * DAC_DIGITAL_MAX;
+                            g_update_buffer[i] = (uint16_t)(mapped_value + 0.5f); // +0.5f 用于四舍五入
+                        } else {
+                            g_update_buffer[i] = DAC_DIGITAL_MAX / 2;
+                        }
                     }
-                    break;
+                    
+                    // 4. 双缓冲区切换：切换激活缓冲区和更新缓冲区
+                    uint16_t* temp = g_active_buffer;
+                    g_active_buffer = g_update_buffer;
+                    g_update_buffer = temp;
+                    
+                    // 5. 更新缓冲区索引
+                    g_current_buffer_index = 1 - g_current_buffer_index;
+                    
+                    printf("Buffer switched to index %d\r\n", g_current_buffer_index);
+                    
+                    // 6. 如果是首次触发，初始化并启动DDS
+                    static uint8_t dds_initialized = 0;
+                    if (!dds_initialized) {
+                        printf("Initializing DDS generator...\r\n");
+                        DAC_ACTUAL_SPAN = DAC_ACTUAL_V_FULL - DAC_ACTUAL_V_ZERO; // 计算实际的电压跨度
+
+                        // 初始化DDS產生器
+                        DDS_Init(&g_dds_generator, &hdac1, DAC_CHANNEL_1, &htim4, DDS_UPDATE_FREQUENCY);
+
+                        printf("Setting waveform...\r\n");
+                        // 設定要使用的波形（使用当前激活的缓冲区）
+                        DDS_SetWaveform(&g_dds_generator, g_active_buffer, WAVEFORM_RECONSTRUCTION_POINTS);
+
+                        printf("Setting frequency...\r\n");
+                        // 設定初始輸出頻率
+                        DDS_SetFrequency(&g_dds_generator, g_final_harmonics[0].frequency);
+
+                        printf("Starting DDS...\r\n");
+                        // 啟動DDS引擎（這會自動啟動定时器和DMA）
+                        DDS_Start(&g_dds_generator);
+                        printf("DDS started.\r\n");
+                        dds_initialized = 1;
+                    } else {
+                        // 非首次触发，只更新波形数据（使用新的激活缓冲区）
+                        printf("Updating DDS waveform...\r\n");
+                        DDS_SetWaveform(&g_dds_generator, g_active_buffer, WAVEFORM_RECONSTRUCTION_POINTS);
+                        printf("DDS waveform updated.\r\n");
+                    }
+                } else {
+                    printf("Error: Signal analysis failed.\r\n");
+                }
+                g_adc_mode = ADC_MODE_IDLE; // 返回空闲模式
             }
+            // 下面两个是调试用到的，不去理会他们
+            // if (g_time_detect_enabled) {
+            //     time_domain_result_t ch1_time_result, ch2_time_result;
+
+            //     // --- 调用优化的时域分析函数 ---
+            //     my_time_domain_analysis_optimized(g_adc1_data_8bit, g_adc1_temp_buffer, ADC_SAMPLE_SIZE, g_ADC_SAMPLE_RATE_Hz, &time_config, &ch1_time_result);
+            //     my_time_domain_analysis_optimized(g_adc2_data_8bit, g_adc2_temp_buffer, ADC_SAMPLE_SIZE, g_ADC_SAMPLE_RATE_Hz, &time_config, &ch2_time_result);
+
+            //     // --- 打印优化后的分析结果 ---
+            //     printf("\r\n--- Optimized Time Domain Analysis ---\r\n");
+            //     printf("--- Channel 1 ---\r\n");
+            //     printf("  Frequency     : %.3f Hz\r\n", ch1_time_result.frequency);
+            //     printf("  Vpp (Peak-Peak) : %.4f V\r\n", ch1_time_result.vpp_peak);
+            //     printf("  AC RMS        : %.4f V\r\n", ch1_time_result.ac_rms);
+            //     printf("  DC Offset     : %.4f V\r\n", ch1_time_result.dc_offset);
+            //     printf("  V Max        : %.4f V\r\n", ch1_time_result.v_max);
+            //     printf("  V Min        : %.4f V\r\n", ch1_time_result.v_min);
+                
+            //     printf("--- Channel 2 ---\r\n");
+            //     printf("  Frequency     : %.3f Hz\r\n", ch2_time_result.frequency);
+            //     printf("  Vpp (Peak-Peak) : %.4f V\r\n", ch2_time_result.vpp_peak);
+            //     printf("  AC RMS        : %.4f V\r\n", ch2_time_result.ac_rms);
+            //     printf("  DC Offset     : %.4f V\r\n", ch2_time_result.dc_offset);
+            //     printf("  V Max        : %.4f V\r\n", ch2_time_result.v_max);
+            //     printf("  V Min        : %.4f V\r\n", ch2_time_result.v_min);
+
+            //     printf("-------------------------------------\r\n\r\n");
+            //     fundamental_result_t ch1_freq_result, ch2_freq_result;
+
+            //     // 分别计算两个通道的频谱数据并存储到独立的缓冲区中
+            //     my_armcfft32_apply(g_adc1_data_8bit, &ch1_freq_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
+            //     memcpy(g_adc1_spectrum_data, g_fft_output_buffer, (FFT_LENGTH / 2) * sizeof(float32_t));
+
+            //     my_armcfft32_apply(g_adc2_data_8bit, &ch2_freq_result, 0, WINDOW_HANNING, INTERPOLATION_HANNING_SPECIAL);
+            //     memcpy(g_adc2_spectrum_data, g_fft_output_buffer, (FFT_LENGTH / 2) * sizeof(float32_t));
+                            
+            //     // 打印频谱
+
+            //     // 打印频谱分析结果
+            //     printf("=== Spectrum Analysis Results ===\n");
+            //     printf("ADC1 - Frequency: %lu Hz, Magnitude: %.6f V\n", ch1_freq_result.fundamental_frequency, ch1_freq_result.fundamental_vpp);
+            //     printf("ADC2 - Frequency: %lu Hz, Magnitude: %.6f V\n", ch2_freq_result.fundamental_frequency, ch2_freq_result.fundamental_vpp);
+            // }
+
+            // switch (g_desired_function_state) {
+            //     case SPECTRUM_STATE:
+            //         printf("=== Spectrum Results ===\n");
+            //             for (uint32_t i = 0; i < (FFT_LENGTH / 2); i++) {
+            //                 printf("  Frequency Bin %lu: %.6f V\n", i, g_adc1_spectrum_data[i]);
+            //             }
+            //             for (uint32_t i = 0; i < (FFT_LENGTH / 2); i++) {
+            //                 printf("  Frequency Bin %lu: %.6f V\n", i, g_adc2_spectrum_data[i]);
+            //             }
+            //         break;
+            //     case TIME_STATE:
+            //         printf("=== Time Domain Analysis Results ===\n");
+                    
+            //         // 打印ADC1和ADC2的时域数据
+            //         for (uint32_t i = 0; i < ADC_SAMPLE_SIZE; i++) { 
+            //             printf("raw ADC1/2 :%.6f,%.6f\n", g_adc1_data_8bit[i], g_adc2_data_8bit[i]);
+
+            //         }
+            //         break;
+            // }
         }
        osDelay(100); // 延时100毫秒
     }
 }
+
+

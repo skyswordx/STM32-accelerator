@@ -12,9 +12,9 @@
 
 // 电压转换宏定义
 #define AD9833_VMAX_V 3.6
-#define AD9954_VMAX_V 5.5
+#define AD9954_VMAX_V 4.16
 #define AD9833_VOLTAGE_TO_DAC(voltage) ((uint8_t)((voltage) * 255.0 / AD9833_VMAX_V))
-// AD9954幅度设置范围是0-16383，5V峰峰值对应大约9830
+// AD9954幅度设置范围是0-16383，4.16V峰峰值对应大约9830
 #define AD9954_VOLTAGE_TO_DAC(voltage) ((uint16_t)((voltage) * 16383.0 / AD9954_VMAX_V))
 
 void myParserTask(void const * argument);
@@ -25,5 +25,6 @@ void base4_function(void);
 void improve1_function(void);
 void improve2_function(void);
 
+float calibrate_AD9954_voltage(float desired_output_v, float frequency_hz);
 
 #endif // MY_PARSER_H

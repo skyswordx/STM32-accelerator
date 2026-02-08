@@ -70,5 +70,4 @@ finallattackproject\my_adc_task.o: ../Drivers/AD9954/AD9954.h
 finallattackproject\my_adc_task.o: ../Module/Param/my_parameter_config.h
 finallattackproject\my_adc_task.o: ../Module/DAC/my_dds.h
 finallattackproject\my_adc_task.o: ../Module/Parser/filter_identification.h
-finallattackproject\my_adc_task.o: ../Module/Parser/filter_imitate.h
-finallattackproject\my_adc_task.o: ../Module/DAC/my_dac_task.h
+finallattackproject\my_adc_task.o: ../Module/Parser/my_signal_reconstruction.h

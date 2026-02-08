@@ -30,7 +30,6 @@
 #include "arm_math.h"
 #include "my_uart_task.h"
 #include "my_adc_task.h"
-#include "my_dac_task.h"        // 新增：DAC任务头文�?
 #include "my_zlcr_config.h"
 #include "my_button_task.h"
 #include "my_parser.h"
@@ -87,13 +86,6 @@ const osThreadAttr_t ADCProcessingTask_attributes = {
   .priority = (osPriority_t) osPriorityHigh,
 };
 
-osThreadId_t DACProcessingTaskHandle;
-const osThreadAttr_t DACProcessingTask_attributes = {
-  .name = "DACProcessingTask",
-  .stack_size = 128 * 8,
-  .priority = (osPriority_t) osPriorityNormal,
-};
-
 osThreadId_t UARTProcessingTaskHandle;
 const osThreadAttr_t UARTProcessingTask_attributes = {
   .name = "UARTProcessingTask",
@@ -138,7 +130,6 @@ void StartDefaultTask(void *argument);
 /* USER CODE BEGIN PFP */
 void StartADCProcessingTask(void *argument);
 void StartDACProcessingTask(void *argument);
-void HAL_TIM_PeriodElapsedCallback_TIM6(TIM_HandleTypeDef *htim); // 声明TIM6回调函数
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -240,7 +231,6 @@ int main(void)
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   ADCProcessingTaskHandle = osThreadNew(StartADCProcessingTask, NULL, &ADCProcessingTask_attributes);
-  DACProcessingTaskHandle = osThreadNew(StartDACProcessingTask, NULL, &DACProcessingTask_attributes);
 
   UARTProcessingTaskHandle = osThreadNew(StartUARTProcessingTask, NULL, &UARTProcessingTask_attributes);
   // ButtonProcessingTaskHandle = osThreadNew(StartButtonProcessingTask, NULL, &ButtonProcessingTask_attributes);
@@ -659,7 +649,7 @@ static void MX_TIM3_Init(void)
   htim3.Instance = TIM3;
   htim3.Init.Prescaler = 1-1;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 500-1;
+  htim3.Init.Period = 488-1;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
@@ -748,7 +738,7 @@ static void MX_TIM6_Init(void)
   htim6.Instance = TIM6;
   htim6.Init.Prescaler = 2000;
   htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim6.Init.Period = 2000;
+  htim6.Init.Period = 20000;
   htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
   {
@@ -1042,9 +1032,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-  // 处理TIM6�?20ms定时中断，用于滤波器模仿模式
+  // 引用外部变量
+  extern uint8_t g_signal_reconstruction_trigger;
+  extern uint8_t g_signal_reconstruction_active;
+  extern uint8_t g_timer6_enabled;
+
   if (htim->Instance == TIM6) {
-    HAL_TIM_PeriodElapsedCallback_TIM6(htim);
+    // 只有当信号重建模式激活且Timer6使能时才触发
+    if (g_signal_reconstruction_active && g_timer6_enabled) {
+      g_signal_reconstruction_trigger = 1;  // 设置触发标志�?
+    }
   }
   /* USER CODE END Callback 1 */
 }
