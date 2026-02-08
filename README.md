@@ -3,7 +3,7 @@
 **简体中文** | [English](README.en.md)
 
 <img src="assets-of-README/wave-reconstruction.gif" alt="波形重建演示" width="920" />
-<!-- ![Waveform Reconstruction Demo](assets-of-README/image-demo.jpg) -->
+![Waveform Reconstruction Demo](assets-of-README/image-demo.jpg)
 演示说明：学习建模完成后，根据频响映射进行时域波形重建并输出。
 
 # STM32-accelerator

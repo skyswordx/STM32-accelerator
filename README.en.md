@@ -3,6 +3,7 @@
 [简体中文](README.md) | **English**
 
 <img src="assets-of-README/wave-reconstruction.gif" alt="Waveform Reconstruction Demo" width="920" />
+![Waveform Reconstruction Demo](assets-of-README/image-demo.jpg)
 
 Demo note: after model learning, the waveform is reconstructed in time domain from the learned frequency response.
 
